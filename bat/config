@@ -1,0 +1,20 @@
+# bat defaults. bat finds this automatically at $XDG_CONFIG_HOME/bat/config; the
+# BAT_THEME / BAT_STYLE / BAT_PAGER environment variables in
+# ~/.config/fish/conf.d/colours.fish take precedence over it, and are what non-fish
+# callers see. this file is the fallback for anything that does not inherit that
+# environment.
+#
+# ⚠ the laramie theme lives at ~/.config/bat/themes/laramie.tmTheme and is only visible to
+# bat after `bat cache --build`. re-run that after editing the theme, or bat falls back to
+# its default silently — which is also what breaks git-delta's `syntax-theme = laramie`.
+
+--theme="laramie"
+--style="header,header-filename,rule,numbers,snip"
+
+# map extensions bat does not recognise on its own
+--map-syntax=".gitconfig:INI"
+--map-syntax="*.gitconfig:INI"
+--map-syntax="config.ghostty:INI"
+--map-syntax="*.theme:INI"
+--map-syntax="Brewfile:Ruby"
+--map-syntax="*.fish:Shell Script (Bash)"

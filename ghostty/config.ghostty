@@ -1,0 +1,64 @@
+# ghostty terminal configuration
+# see https://ghostty.org/docs/config/reference for all command references
+
+auto-update = download
+auto-update-channel = tip
+
+# shell
+command = /opt/homebrew/bin/fish --login --interactive
+shell-integration = fish
+## ssh-env/ssh-terminfo define a fish `ssh` function wrapping `ghostty +ssh`, which installs the
+## xterm-ghostty terminfo entry on a remote host via tic on first connect and forwards COLORTERM.
+## it is a shell function, so scp/rsync/git-over-ssh do not use it — those rely on ~/.config/ssh.
+shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
+
+# keybinds
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+keybind = performable:cmd+c=copy_to_clipboard
+keybind = performable:cmd+v=paste_from_clipboard
+keybind = performable:cmd+r=reload_config
+
+# font
+## enabled: ligatures, arrows, smart case, symbol spacing, alt. g. disabled smart kerning (ss05)
+font-family = "CommitMono Nerd Font Mono"
+font-feature = ss01
+font-feature = ss02
+font-feature = ss03
+font-feature = ss04
+font-feature = cv02
+font-thicken = true
+font-synthetic-style = false
+window-inherit-font-size = false
+
+# appearance
+## minimalist appearance; subtle liquid glass effect
+theme = laramie
+background-opacity = 0.85
+background-blur = 100
+alpha-blending = linear-corrected
+window-colorspace = display-p3
+macos-titlebar-style = transparent
+window-decoration = auto
+macos-titlebar-proxy-icon = hidden
+window-padding-balance = true
+window-padding-x = 16
+window-padding-y = 8
+window-save-state = never
+
+# behavior
+mouse-hide-while-typing = false
+cursor-style = bar
+cursor-click-to-move = true
+cursor-opacity = 0.8
+window-save-state = never
+## ask, not allow: OSC 52 clipboard *reads* are how a program — including one on a remote host
+## you are ssh'd into — can silently exfiltrate whatever 1password last pasted.
+clipboard-read = ask
+clipboard-write = allow
+clipboard-paste-protection = true
+clipboard-trim-trailing-spaces = true
+## enables macos secure keyboard entry when a password prompt is detected — a keylogger
+## mitigation. ⚠ heuristic, and it does not work over ssh.
+macos-auto-secure-input = true
+confirm-close-surface = false
+desktop-notifications = true

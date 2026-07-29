@@ -1,0 +1,85 @@
+#? laramie — tokyo night derived, hand-kept to match every other laramie theme on this machine.
+#? see the repo CLAUDE.md for the full list; changing a core hex means changing all of them.
+
+# main background. ⚠ deliberately EMPTY, not "#1f2335": an empty value means "terminal default",
+# which is what lets ghostty's background-opacity = 0.85 and background-blur show through btop.
+# setting it to the literal background hex would paint an opaque rectangle over the blur.
+theme[main_bg]=""
+
+# main text
+theme[main_fg]="#a9b1d6"
+
+# title colour for boxes
+theme[title]="#c0caf5"
+
+# highlight colour for keyboard shortcuts
+theme[hi_fg]="#7aa2f7"
+
+# selected item in the processes box
+theme[selected_bg]="#373d5a"
+theme[selected_fg]="#c0caf5"
+
+# inactive/disabled text
+theme[inactive_fg]="#565f89"
+
+# text drawn on top of graphs — uptime, network scaling
+theme[graph_text]="#a9b1d6"
+
+# background of the percentage meters
+theme[meter_bg]="#292e42"
+
+# misc process box text (tree lines, thread counts)
+theme[proc_misc]="#73daca"
+
+# box outlines and the divider between them. all four share the terminal-black tone so the
+# boxes recede and the data is what carries colour.
+theme[cpu_box]="#414868"
+theme[mem_box]="#414868"
+theme[net_box]="#414868"
+theme[proc_box]="#414868"
+theme[div_line]="#414868"
+
+# temperature gradient — calm to alarming
+theme[temp_start]="#9ece6a"
+theme[temp_mid]="#e0af68"
+theme[temp_end]="#f7768e"
+
+# cpu load gradient
+theme[cpu_start]="#9ece6a"
+theme[cpu_mid]="#e0af68"
+theme[cpu_end]="#f7768e"
+
+# memory: free
+theme[free_start]="#9ece6a"
+theme[free_mid]="#73daca"
+theme[free_end]="#2ac3de"
+
+# memory: cached
+theme[cached_start]="#7dcfff"
+theme[cached_mid]="#7aa2f7"
+theme[cached_end]="#bb9af7"
+
+# memory: available
+theme[available_start]="#b4f9f8"
+theme[available_mid]="#7dcfff"
+theme[available_end]="#7aa2f7"
+
+# memory: used — shares the cpu ramp, so "a lot of it" reads the same way everywhere
+theme[used_start]="#9ece6a"
+theme[used_mid]="#e0af68"
+theme[used_end]="#f7768e"
+
+# network download
+theme[download_start]="#73daca"
+theme[download_mid]="#7dcfff"
+theme[download_end]="#7aa2f7"
+
+# network upload — warm, so the two directions are distinguishable at a glance
+theme[upload_start]="#bb9af7"
+theme[upload_mid]="#ff9e64"
+theme[upload_end]="#f7768e"
+
+# process box cpu gradient
+theme[process_start]="#9ece6a"
+theme[process_mid]="#e0af68"
+theme[process_end]="#f7768e"

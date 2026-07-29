@@ -1,0 +1,51 @@
+# macchina — behaviour. appearance lives in themes/laramie.toml, which is a separate file by
+# macchina's own design: themes are portable, this is machine-specific.
+
+# resolved against ~/.config/macchina/themes/, without the .toml suffix.
+theme = "laramie"
+
+# ⚠ MUST be false on macos. `true` does not fall back — libmacchina returns "Retrieving the
+# current shell is not supported on macOS", the Shell readout fails outright, and the row
+# vanishes from the output entirely (verified with --doctor on 6.4.0).
+# the cost of `false` is that it reports the *login* shell, so this machine shows "zsh" rather
+# than the fish it actually runs interactively. that is accurate but incomplete — see the repo
+# CLAUDE.md on why the login shell was never changed. a present, partly-true row beats a
+# missing one; revisit if libmacchina ever implements this on macos.
+current_shell = false
+
+long_uptime = true
+long_shell = false
+long_kernel = false
+
+memory_percentage = true
+disk_space_percentage = true
+
+# ⚠ required, despite upstream's macchina.toml commenting that it 'Defaults to ["/"]'. with the
+# key absent the DiskSpace readout is never collected at all — it does not even appear in
+# --doctor's failure list, so it looks like the `show` entry was ignored. verified on 6.4.0.
+disks = ["/"]
+
+# ⚠ four readouts are excluded because `macchina --doctor` reports them as failing on this
+# hardware, and an omitted line reads better than an error one. re-check after a macos upgrade:
+#   LocalIP      — "Unable to get local IPv4 address"
+#   Battery      — IOKit returns no Percentage property here
+#   GPU          — not implemented by libmacchina on macos
+#   Distribution — warns; there is no distribution on macos
+show = [
+    "Host",
+    "Machine",
+    "Kernel",
+    "OperatingSystem",
+    "DesktopEnvironment",
+    "WindowManager",
+    "Resolution",
+    "Backlight",
+    "Packages",
+    "Terminal",
+    "Shell",
+    "Uptime",
+    "Processor",
+    "ProcessorLoad",
+    "Memory",
+    "DiskSpace",
+]
