@@ -1,0 +1,5 @@
+# openssh hardcodes this path — it has no XDG support. this file is a stub; the real config is
+# ~/.config/ssh/config. ⚠ first obtained value wins in ssh_config, so Includes must stay at the
+# top and the `Host *` defaults live at the bottom of the included file.
+Include ~/.ssh/1Password/config
+Include ~/.config/ssh/config

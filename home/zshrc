@@ -1,0 +1,16 @@
+export PATH="/opt/homebrew/bin:$PATH"
+
+# zsh is deliberately not configured on this machine — fish is the interactive shell and
+# Ghostty launches it directly (see ~/.config/.claude/CLAUDE.md). the only thing
+# below is state relocation, not configuration: zsh's own history file, moved out of $HOME
+# onto the XDG base dirs like every other tool here. nothing here changes how zsh behaves.
+#
+# ⚠ this file is read by INTERACTIVE zsh only. Claude Code's Bash tool is a non-interactive
+# login zsh, so it reads ~/.zprofile and never this — which is fine, because non-interactive
+# shells do not write history either.
+# ⚠ /etc/zshrc sets HISTFILE=$HOME/.zsh_history and is sourced BEFORE this file, so this
+# assignment is an override and has to stay here rather than in ~/.zprofile.
+# ⚠ the :- default is required: XDG_STATE_HOME is exported by fish's conf.d/_init.fish, so a
+# zsh launched outside a fish session would otherwise get an empty path.
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+[ -d "${HISTFILE:h}" ] || mkdir -p "${HISTFILE:h}"

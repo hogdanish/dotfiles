@@ -1,0 +1,9 @@
+
+eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+# ⚠ must be set HERE, not in ~/.zshrc. /etc/zshrc sources /etc/zshrc_$TERM_PROGRAM, which for
+# Terminal.app is a 9 KB script that writes per-session history into ~/.zsh_sessions — and
+# /etc/zshrc runs *before* ~/.zshrc. ~/.zprofile is the last file that runs before it.
+# currently dormant (TERM_PROGRAM is "ghostty", and the stale ~/.zsh_sessions was cleared), so
+# this is what stops it coming back the next time Terminal.app is opened.
+export SHELL_SESSIONS_DISABLE=1
