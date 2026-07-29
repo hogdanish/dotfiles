@@ -1,0 +1,69 @@
+# git hooks for the dotfiles repo.
+#
+# ⚠ hooks are NOT installed by cloning — `.git/hooks` is never version-controlled. run
+#   `lefthook install` once per clone; scripts/bootstrap.sh does it for you.
+#
+# why lefthook and not core.hooksPath: setting core.hooksPath disables .git/hooks entirely
+# and breaks any other tool that installs one. why not pre-commit: it needs python + a venv
+# per hook, which is a bootstrap-ordering problem in the repo whose job is to bootstrap the
+# machine.
+
+pre-commit:
+  parallel: true
+  jobs:
+    # 1. secret CONTENT in the staged diff. this is the layer that catches a token written
+    #    *into* an already-allowlisted file, which .gitignore can never help with.
+    #    --redact so a hit is reported without echoing the credential into the terminal.
+    - name: secrets
+      run: |
+        if ! command -v betterleaks >/dev/null 2>&1; then
+          echo "✗ betterleaks is not installed — commit blocked." >&2
+          echo "  brew install betterleaks   (it is declared in ./Brewfile)" >&2
+          exit 1
+        fi
+        betterleaks git --pre-commit --staged --redact --no-banner --log-level warn
+
+    # 2. force-add guard. .gitignore is an allowlist, so anything it excludes was excluded
+    #    deliberately; a staged path that matches an ignore rule can only have arrived via
+    #    `git add -f`.
+    #    ⚠ --no-index is required: without it, staged (already-indexed) paths never match.
+    #    ⚠ do NOT add --verbose here. with -v, check-ignore exits 0 when a path matches ANY
+    #      pattern *including a negation* — so `!/​.gitignore` counted as a hit and this job
+    #      failed every legitimate commit. without -v it prints only genuinely ignored paths.
+    - name: no-force-added-ignored-files
+      run: |
+        offenders=$(git diff --cached --name-only | git check-ignore --no-index --stdin || true)
+        if [ -n "$offenders" ]; then
+          echo "✗ these staged paths are excluded by .gitignore:" >&2
+          printf '%s\n' "$offenders" | sed 's/^/    /' >&2
+          echo "  this repo is an allowlist. if the file really belongs, add a '!' rule" >&2
+          echo "  to .gitignore instead of using 'git add -f'." >&2
+          exit 1
+        fi
+
+    # 3. fish must parse and be canonically formatted. mirrors .claude/hooks/fish-validate.sh
+    #    so a human commit is held to the same bar as an agent edit.
+    - name: fish-syntax
+      glob: "*.fish"
+      run: |
+        command -v fish >/dev/null 2>&1 || { echo "✗ fish not found" >&2; exit 1; }
+        fish -n {staged_files} || exit 1
+        fish_indent --check {staged_files} || {
+          echo "✗ not canonically formatted — run: fish_indent -w {staged_files}" >&2
+          exit 1
+        }
+
+    # 4. the Brewfile is ruby. a syntax error there breaks `brew bundle` on a fresh machine,
+    #    which is the one moment you cannot afford it.
+    - name: brewfile-syntax
+      glob: "Brewfile"
+      run: ruby -c {staged_files} >/dev/null
+
+pre-push:
+  jobs:
+    # full-history scan. push protection at GitHub is pattern-based and high-confidence only,
+    # so this is the last local net before anything becomes public and permanent.
+    - name: secrets-full-history
+      run: |
+        command -v betterleaks >/dev/null 2>&1 || { echo "✗ betterleaks not installed" >&2; exit 1; }
+        betterleaks git --redact --no-banner --log-level warn

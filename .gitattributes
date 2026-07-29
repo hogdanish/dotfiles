@@ -1,0 +1,12 @@
+# normalise line endings on commit. .editorconfig asks editors for LF; this enforces it
+# in the object store regardless of which editor wrote the file.
+* text=auto eol=lf
+
+# binary-ish: no eol munging, no diff noise
+*.tmTheme text eol=lf
+*.png binary
+*.icns binary
+
+# github language stats: this is a config repo, not a fish project
+*.fish linguist-language=fish
+themes/* linguist-vendored

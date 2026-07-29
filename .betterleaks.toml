@@ -1,0 +1,57 @@
+title = 'laramie dotfiles — secret scanning'
+
+# extends the 412 built-in rules rather than replacing them. upstream advises maintaining your
+# own config instead of editing theirs, so everything below is additive.
+[extend]
+useDefault = true
+
+# ── rules the default set does not cover ────────────────────────────────────────
+# verified empirically on betterleaks 1.7.2 with correctly-shaped synthetic tokens:
+# the defaults DO catch github_pat_, gho_/ghu_/ghs_, AIza, openai and xox*; they do NOT
+# catch the three below. these are the providers this machine actually holds keys for.
+#
+# ⚠ re-verify after a betterleaks upgrade — a rule added upstream would make one of these
+#   redundant, and a *removed* upstream rule would silently widen the gap.
+
+[[rules]]
+id = 'firecrawl-api-key'
+description = 'Firecrawl API key'
+regex = '''\bfc-[0-9A-Za-z]{32}\b'''
+keywords = ['fc-']
+
+[[rules]]
+id = 'context7-api-key'
+description = 'Context7 API key'
+regex = '''\bctx7sk-[0-9A-Za-z_-]{24,}'''
+keywords = ['ctx7sk-']
+
+[[rules]]
+id = 'google-oauth2-access-token'
+description = 'Google OAuth2 access token'
+regex = '''\bya29\.[0-9A-Za-z_-]{20,}'''
+keywords = ['ya29.']
+
+# ── allowlist ───────────────────────────────────────────────────────────────────
+# opaque identifiers that LOOK like credentials and provably are not. each entry is
+# justified; do not add to this list without one.
+[allowlist]
+description = 'opaque, non-credential identifiers verified safe to publish'
+regexTarget = 'match'
+regexes = [
+  # 1password environment id, read by conf.d/op.fish. an environment id names a set of
+  # secret *references*; resolving it still requires a biometrically-unlocked local
+  # 1password app. the file itself documents this.
+  '''uiba73phjvsgnivopa7bujlpbq''',
+  # `op://Development/<item-id>/credential` — a secret REFERENCE, not a secret. this is
+  # exactly the pattern the auth skill prescribes, so it must never be flagged.
+  '''op://[A-Za-z0-9 _-]+/[a-z0-9]{26}/[A-Za-z0-9_-]+''',
+  # an openpgp key FINGERPRINT in the auth skill's docs. a fingerprint is the public
+  # identifier of a key — it is what you publish so others can verify it. not a secret.
+  '''6A40D13BBB936F443084E8C9292E4F983136B860''',
+]
+paths = [
+  # ssh PUBLIC keys and the git identity. github publishes the same key at
+  # github.com/hogdanish.keys — the private half never leaves 1password.
+  '''(^|/)git/allowed_signers$''',
+  '''(^|/)git/\.gitconfig$''',
+]
