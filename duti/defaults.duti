@@ -1,0 +1,86 @@
+# default document handlers, as a reproducible record.
+#
+# ⚠⚠ THIS FILE IS NOT APPLIED. writing it changes nothing; `duti` only reads it when invoked:
+#
+#     duti ~/.config/duti/defaults.duti          # apply every line
+#     duti -x json                               # what actually handles .json right now
+#
+# it is deliberately left unapplied because file associations are a user preference, and six
+# lines below (marked ✎) differ from this machine's state as measured on 2026-07-29. read those
+# six, then apply — or edit them back to the current value first.
+#
+# format: <bundle-id>  <extension|UTI>  <role>.  duti reads an argument beginning with a dot as
+# a filename extension; role is one of all / viewer / editor / shell / none.
+#
+# bundle ids used here:
+#   com.colliderli.iina            IINA
+#   com.apple.Preview              Preview
+#   com.apple.Safari               Safari
+#   com.aone.keka                  Keka
+#   com.microsoft.VSCodeInsiders   VS Code Insiders
+#   com.mitchellh.ghostty          Ghostty
+#   org.godotengine.godot          Godot
+#   org.blenderfoundation.blender  Blender
+#   com.figma.DesktopBeta          Figma (beta channel)
+
+# ── video and audio ────────────────────────────────────────────────────────────
+com.colliderli.iina	.mp4	all
+com.colliderli.iina	.mkv	all
+com.colliderli.iina	.mov	all
+com.colliderli.iina	.webm	all
+com.colliderli.iina	.mp3	all
+com.colliderli.iina	.flac	all
+com.colliderli.iina	.wav	all
+
+# ── images and documents ───────────────────────────────────────────────────────
+com.apple.Preview	.png	all
+com.apple.Preview	.jpg	all
+com.apple.Preview	.gif	all
+com.apple.Preview	.webp	all
+com.apple.Preview	.pdf	all
+com.apple.Preview	.psd	all
+# svg stays with safari: it renders correctly and scales, where preview rasterises.
+com.apple.Safari	.svg	all
+
+# ── archives ───────────────────────────────────────────────────────────────────
+com.aone.keka	.zip	all
+com.aone.keka	.7z	all
+com.aone.keka	.rar	all
+
+# ── creative tools ─────────────────────────────────────────────────────────────
+org.godotengine.godot	.godot	all
+org.blenderfoundation.blender	.blend	all
+com.figma.DesktopBeta	.fig	all
+
+# ── code and config ────────────────────────────────────────────────────────────
+com.microsoft.VSCodeInsiders	.md	all
+com.microsoft.VSCodeInsiders	.yaml	all
+com.microsoft.VSCodeInsiders	.yml	all
+com.microsoft.VSCodeInsiders	.toml	all
+com.microsoft.VSCodeInsiders	.py	all
+
+# ✎ .json currently opens in Passepartout (com.algoritmico.ios.Passepartout), the wireguard
+#   client — it claims the extension for its profile exports and won that race. almost
+#   certainly not intended for every json on the machine.
+com.microsoft.VSCodeInsiders	.json	all
+
+# ✎ .ts currently opens in IINA, which claims it as an MPEG transport stream. correct for
+#   broadcast captures, wrong for typescript, and typescript is what is on this machine.
+com.microsoft.VSCodeInsiders	.ts	all
+
+# ✎ .fish currently has no handler at all — double-clicking one does nothing.
+com.microsoft.VSCodeInsiders	.fish	all
+
+# ✎ .sh currently opens in Ghostty, which means double-clicking a shell script in Finder
+#   RUNS it rather than showing it. editor is the safer default; run it from a shell instead.
+com.microsoft.VSCodeInsiders	.sh	all
+
+# ✎ .txt currently opens in TextEdit. harmless, but inconsistent with every other text format
+#   here going to the editor that is actually configured.
+com.microsoft.VSCodeInsiders	.txt	all
+
+# ✎ .js and .css currently open in Safari, which views but cannot edit them. .html stays with
+#   safari deliberately — opening a page to look at it is the common case.
+com.microsoft.VSCodeInsiders	.js	all
+com.microsoft.VSCodeInsiders	.css	all
+com.apple.Safari	.html	all

@@ -1,0 +1,21 @@
+# npm defaults. NPM_CONFIG_USERCONFIG in conf.d/xdg-apps.fish points here; npm's own default
+# would be ~/.npmrc, which is what this avoids.
+#
+# ⚠ npm is the fallback here, not the primary — bun is (Brewfile, and conf.d/bun.fish). npm
+# stays installed because it ships with node and some tooling shells out to it directly.
+# ⚠ NPM_CONFIG_CACHE is also exported from xdg-apps.fish and an environment variable beats this
+# file. `cache` is repeated here anyway so an npm launched without the fish environment — a
+# launchd job, a GUI app, Claude Code's zsh — still writes to the same place.
+
+cache=~/.cache/npm
+
+# the "N packages are looking for funding" block on every install
+fund=false
+
+# ⚠ `audit` is deliberately left at its default (on). it is the one piece of npm's install-time
+# output worth reading, and this is the fallback runtime — surprises here are more likely, not
+# less.
+
+# never write a lockfile-less install into a project by accident
+save-exact=false
+package-lock=true

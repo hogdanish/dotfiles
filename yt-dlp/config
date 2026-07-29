@@ -1,0 +1,33 @@
+## runtime (homebrew-managed)
+# deno is the default + recommended js runtime and is a brew dependency of yt-dlp;
+# it fetches the yt-dlp-ejs solver on demand, so no extra flags are needed.
+# update with `brew upgrade yt-dlp` — never --update-to on a brew install.
+--ffmpeg-location "/opt/homebrew/bin/ffmpeg"
+
+## output
+--paths "~/Desktop"
+-o "%(title).90s.%(ext)s"
+--no-mtime
+--restrict-filenames
+--embed-metadata --embed-chapters --embed-thumbnail
+
+## downloads
+--no-continue --no-overwrites --ignore-errors
+--min-sleep-interval 2 --max-sleep-interval 5
+--concurrent-fragments 8
+--cookies "~/.config/yt-dlp/cookies.txt"
+--progress --console-title
+
+## aliases
+
+# best video source → H.264/MP4 (for sending via discord)
+--alias mp4 "-t mp4"
+
+# best video source → ProRes 422 .mov (for editing)
+--alias prores "-f \"bv*+ba/b\" --recode-video mov --merge-output-format mov --ppa \"VideoConvertor+ffmpeg:-c:v prores_ks -profile:v 3 -pix_fmt yuv422p10le -c:a pcm_s24le -movflags +faststart\""
+
+# best non-dubbed audio source → .flac (for DAW work)
+--alias flac "-f \"(ba[format_note*='original'])/(ba[format_note~='(?i)^(?!.*\\bdub).*'])/(ba/b)\" -S abr,asr,acodec -x --audio-format flac --audio-quality 0"
+
+# best non-dubbed audio source → .wav (for DAW work)
+--alias wav "-f \"(ba[format_note*='original'])/(ba[format_note~='(?i)^(?!.*\\bdub).*'])/(ba/b)\" -S abr,asr,acodec -x --audio-format wav --audio-quality 0 --no-embed-thumbnail"

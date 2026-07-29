@@ -1,0 +1,6 @@
+{
+  "//": "xh defaults. xh finds this at $XDG_CONFIG_HOME/xh/config.json on its own; XH_CONFIG_DIR only moves it. default_options is the ONLY key xh supports here — there is no theme or colour setting, so laramie cannot be expressed and --style stays at its auto default.",
+  "//follow": "--follow is the deliberate counterpart to `location` in ~/.config/curlrc, so the two http clients on this machine agree about redirects rather than differing by which one you reached for.",
+  "//check-status": "not set: xh already exits non-zero on 4xx/5xx by default, unlike curl. it would only be needed under XH_HTTPIE_COMPAT_MODE.",
+  "default_options": ["--follow"]
+}

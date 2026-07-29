@@ -1,0 +1,28 @@
+# act defaults. act resolves this at $XDG_CONFIG_HOME/act/actrc (the binary references both
+# XDG_CONFIG_HOME and "act/actrc"), which is why ~/.config/act already existed but was empty.
+#
+# one command-line flag per line, written exactly as it would be typed.
+#
+# ⚠⚠ act CANNOT RUN ON THIS MACHINE AS OF 2026-07-29. it requires a container runtime and
+# neither docker nor podman is installed — the Brewfile declares no docker, and the user-level
+# CLAUDE.md's claim that docker is installed is wrong. this file is correct config waiting on
+# that dependency; `brew install --cask docker` (or colima) is what makes act usable.
+
+# ⚠ apple silicon. the github-hosted runner images and a large share of published actions ship
+# linux/amd64 only, so without this act dies partway through a run with exec-format errors
+# rather than at startup. runs under emulation, which is slower but is the difference between
+# working and not.
+--container-architecture linux/amd64
+
+# runner images. left unset, act interactively prompts for a size on first run and then writes
+# its answer into this file itself. medium (catthehacker, ~500 MB compressed) carries node,
+# python, go and the usual toolchain; `micro` omits almost everything and fails most real
+# workflows, and `large` is ~17 GB.
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-24.04=catthehacker/ubuntu:act-24.04
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+
+# reuse the container between runs. much faster iteration on a workflow being debugged.
+# ⚠ state persists across runs, so a workflow that passes here can still fail on a clean
+# github runner. drop this flag for the confirming run.
+--reuse

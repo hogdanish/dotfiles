@@ -1,0 +1,15 @@
+# uv defaults. uv finds this at $XDG_CONFIG_HOME/uv/uv.toml on its own.
+#
+# no directory settings here — uv is already XDG-correct on macos without help, unlike zoxide:
+# the cache is $XDG_CACHE_HOME/uv and tools land in $XDG_DATA_HOME/uv/tools. verified, both
+# exist. UV_CACHE_DIR / UV_TOOL_DIR would only restate that.
+#
+# a project's own pyproject.toml [tool.uv] section overrides this file.
+
+# ⚠ the one setting worth making explicit on this machine. python@3.14 IS installed, but only
+# as a *dependency* of dnsperf, grc, ldns, nmap, openssh, scons and yt-dlp — brew can upgrade
+# or replace it whenever one of those is bumped, and a project venv built against it breaks
+# silently when that happens. "only-managed" makes uv download and pin its own interpreters
+# instead of ever reaching for the homebrew one.
+# set to "managed" if a project ever genuinely needs the system python.
+python-preference = "only-managed"

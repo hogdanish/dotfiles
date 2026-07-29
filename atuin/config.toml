@@ -1,0 +1,22 @@
+update_check = true
+style = "full"
+show_tabs = false
+enter_accept = false
+
+# atuin records history through its own fish_preexec hook into a sqlite database and never
+# consults fish's `fish_should_add_to_history`. these patterns are the atuin-side half of
+# that filter — change both together or the secret is still on disk.
+# `secrets_filter` (default true) already catches well-known key shapes; this adds the
+# 1password subcommands and inline flag values that it does not know about.
+secrets_filter = true
+history_filter = [
+  "^\\s",
+  "^\\s*op\\s+(read|run|inject|item|document)\\b",
+  "--(token|password|passwd|secret|api[-_]?key)[= ]\\S",
+]
+
+[sync]
+records = true
+
+[theme]
+name = "laramie"

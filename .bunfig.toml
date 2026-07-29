@@ -1,0 +1,25 @@
+# bun's global config.
+#
+# ⚠ the path is unusual and not negotiable. bun reads exactly ONE global bunfig, chosen by
+# the environment: $XDG_CONFIG_HOME/.bunfig.toml when XDG_CONFIG_HOME is set, otherwise
+# $HOME/.bunfig.toml. there is no fallback between them — with XDG_CONFIG_HOME exported (it
+# is, from conf.d/_init.fish) a file at ~/.bunfig.toml is never read at all. note also the
+# leading dot and the absence of a `bun/` subdirectory: it is <config dir>/.bunfig.toml, not
+# <config dir>/bun/bunfig.toml. verified against bun 1.3.14.
+#
+# ⚠ consequence: this file only applies to a bun invoked from a shell that exported
+# XDG_CONFIG_HOME, which here means fish (or anything it launched). a bun run from a bare
+# launchd job or a GUI app with no environment falls back to bun's own defaults.
+#
+# ⚠ unknown keys are ignored silently — a typo here produces no error, so check names
+# against https://bun.com/docs/runtime/bunfig rather than trusting a clean run.
+#
+# directory locations are NOT set here. toml has no variable interpolation, so the
+# equivalent [install] keys would have to hardcode absolute paths; they live as
+# BUN_INSTALL_* env vars in ~/.config/fish/conf.d/bun.fish instead.
+#
+# a project-local ./bunfig.toml shallow-merges over this, and CLI flags win over both.
+
+# no crash-report uploads. bun's own opt-out; equivalent to DO_NOT_TRACK=1 but scoped to bun
+# and visible in config rather than buried in the environment.
+telemetry = false

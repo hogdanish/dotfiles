@@ -1,0 +1,16 @@
+# shellcheck defaults, for the repo's hook scripts and any loose sh/bash on this machine.
+#
+# ⚠ shellcheck 0.11.0 DOES read $XDG_CONFIG_HOME/shellcheckrc, even though `man shellcheck`
+# documents only a directory-local `.shellcheckrc` and `--rcfile`. verified empirically:
+# a `disable=SC2034` here suppressed the warning on a test script, and pointing
+# XDG_CONFIG_HOME elsewhere brought it straight back.
+# ⚠ a project-local .shellcheckrc REPLACES this file, it does not merge with it.
+#
+# nothing is disabled here on purpose — the default rule set is the value of the tool, and a
+# blanket `disable=` in the global config hides real findings across every project at once.
+# suppress per-line with `# shellcheck disable=SCxxxx` where the reason is visible.
+
+# the repo's hook scripts source one another, and without this every `source`/`.` of a
+# non-literal path is SC1091 "not following". shellcheck defaults this off only because it
+# began life as a web service checking untrusted input; for local development it is safe.
+external-sources=true

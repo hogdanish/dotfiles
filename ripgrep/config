@@ -1,0 +1,22 @@
+# ripgrep defaults. RIPGREP_CONFIG_PATH points here from
+# ~/.config/fish/conf.d/xdg-apps.fish.
+#
+# one option per line, no shell quoting, no comments on the same line as an option.
+
+# match case-insensitively unless the pattern contains an uppercase letter
+--smart-case
+
+# search dotfiles — the point of this machine. .gitignore is still honoured, and .git
+# itself is excluded below.
+--hidden
+--glob=!.git/
+
+# never descend into dependency or build trees
+--glob=!node_modules/
+--glob=!.venv/
+--glob=!target/
+--glob=!.DS_Store
+
+# readable output when piped into a pager
+--max-columns=250
+--max-columns-preview

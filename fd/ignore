@@ -1,0 +1,21 @@
+# global ignore file for fd. fd resolves this path itself ($XDG_CONFIG_HOME/fd/ignore) — no
+# environment variable is involved, unlike ripgrep's RIPGREP_CONFIG_PATH.
+#
+# .gitignore syntax. lowest precedence of fd's ignore sources, so a project's own .gitignore,
+# .ignore or .fdignore still wins, and `fd --no-ignore` bypasses all of them.
+#
+# ⚠ kept deliberately in step with ~/.config/ripgrep/config. rg excluded these while fd
+# descended into them, so `fd foo` and `rg foo` disagreed about what "the tree" is — the same
+# search returning results from node_modules in one tool and not the other.
+# ⚠ fd has no config file for *flags*, only this ignore list. rg's --hidden/--smart-case have
+# no equivalent here and must be passed on the command line.
+
+.git/
+
+# dependency and build trees
+node_modules/
+.venv/
+target/
+
+# macos noise
+.DS_Store
