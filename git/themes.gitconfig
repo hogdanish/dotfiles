@@ -1,0 +1,40 @@
+[delta "laramie"]
+    # author: https://github.com/hogdanish
+    # To configure terminal colors see https://github.com/kvrohit/mellow.nvim#terminals
+    dark = true
+    syntax-theme = laramie
+    line-numbers = false
+    side-by-side = false
+    file-style = "#a9b1d6" bold
+    file-decoration-style = "#737aa2" ul
+    file-added-label = 
+    file-copied-label = 󰆏
+    file-modified-label = 
+    file-removed-label = 
+    file-renamed-label = 
+    hunk-header-decoration-style = none
+    hunk-header-style = none
+    plus-style = "#73daca" "#292e42" 
+    plus-emph-style = "#292e42" "#73daca"
+    minus-style = "#f7768e" "#292e42" 
+    minus-emph-style = "#292e42" "#f7768e"
+    line-numbers = true
+    line-numbers-left-style = "#373d5a"
+    line-numbers-right-style = "#373d5a"
+    line-numbers-minus-style = "#f7768e"
+    line-numbers-plus-style = "#73daca"
+    line-numbers-zero-style = "#414868"
+    line-numbers-left-format = " {nm:>1} "
+    line-numbers-right-format = " {np:>1}│ "
+    line-numbers-minus-style = "#f7768e"
+    line-numbers-plus-style = "#73daca"
+    zero-style = syntax
+    whitespace-error-style = black bold
+    blame-code-style = syntax
+    blame-palette = "#1f2335" "#24283b" "#373d5a" "#414868"
+    merge-conflict-begin-symbol = ~
+    merge-conflict-end-symbol = ~
+    merge-conflict-ours-diff-header-style = "#e0af68" bold
+    merge-conflict-ours-diff-header-decoration-style = "#cfc9c2" box
+    merge-conflict-theirs-diff-header-style = "#e0af68" bold
+    merge-conflict-theirs-diff-header-decoration-style = "#cfc9c2" box

@@ -1,0 +1,4 @@
+# principals allowed to sign commits, for local `git log --show-signature` / `git verify-commit`.
+# format: <principal> <keytype> <key>. public keys only — safe to share or commit.
+# the private half lives in 1password ("Git SSH") and is served by op-ssh-sign.
+121070110+hogdanish@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJXQui6phz7OAWsq1PRvJrhJSuMnsYQ6u5kfCIfvU3xU

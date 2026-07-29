@@ -1,0 +1,33 @@
+# ssh client configuration.
+#
+# openssh has no XDG support — ~/.ssh/config is hardcoded — but Include accepts ~, so the body
+# lives here and ~/.ssh/config is a two-line stub. ~/.ssh itself still holds known_hosts and the
+# 1password-generated bookmark directory.
+#
+# ⚠ FIRST OBTAINED VALUE WINS in ssh_config. Host-specific blocks go ABOVE the `Host *` defaults;
+#   a setting made in `Host *` can never be overridden by a later block.
+# ⚠ Do NOT add `UseKeychain` — it is an Apple extension. `ssh` resolves to Homebrew's OpenSSH
+#   10.4p1 here, which rejects it with "Bad configuration option".
+# ⚠ Do NOT add a global `IdentitiesOnly yes` — it restricts offers to IdentityFile entries, and
+#   every key on this machine is served by the agent with no file on disk.
+
+# ---------------------------------------------------------------------------
+# host-specific blocks go here, above the defaults
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# defaults for every host — keep this last
+# ---------------------------------------------------------------------------
+Host *
+    # private keys live in 1password and never touch the disk. this covers ssh(1) and everything
+    # else that reads ssh_config; conf.d/op.fish exports SSH_AUTH_SOCK for the clients that don't.
+    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
+    # hash new known_hosts entries so the file cannot be read as a list of machines to try next.
+    # ⚠ applies to new entries only; the existing github.com lines stay in plaintext.
+    HashKnownHosts yes
+
+    # drop dead sessions instead of leaving them wedged
+    ServerAliveInterval 60
+    ServerAliveCountMax 3

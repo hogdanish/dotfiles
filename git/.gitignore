@@ -1,0 +1,29 @@
+# global gitignore — core.excludesFile. applies to every repository on this machine.
+# repo-specific patterns belong in the repo's own .gitignore, not here.
+
+# macos
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*~
+
+# credentials — belt and braces; these must never be committed anywhere
+.env
+.env.*
+!.env.example
+!.env.tpl
+*.pem
+*.key
+*.p12
+id_*
+!id_*.pub

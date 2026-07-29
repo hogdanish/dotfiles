@@ -1,0 +1,85 @@
+[alias]
+staged = "diff --staged"
+
+[commit]
+gpgsign = true
+
+[core]
+editor = code-insiders --wait
+autocrlf = input
+whitespace = trailing-space,space-before-tab
+pager = "delta --features=interactive"
+excludesFile = ~/.config/git/.gitignore
+
+[credential]
+	helper = osxkeychain
+
+[delta]
+navigate = true
+features = laramie
+true-color = always
+hyperlinks = true
+diff-so-fancy = true
+detect-dark-light = always
+hyperlinks-file-link-format = "vscode-insiders://file/{path}:{line}"
+
+[diff]
+colorMoved = zebra
+algorithm = histogram
+
+[fetch]
+prune = true
+
+[filter "lfs"]
+clean = git-lfs clean -- %f
+smudge = git-lfs smudge -- %f
+process = git-lfs filter-process
+required = true
+
+[gpg]
+format = ssh
+
+[gpg "ssh"]
+program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+allowedSignersFile = ~/.config/git/allowed_signers
+
+[help]
+autocorrect = 10
+
+[include]
+; git expands ~/ here but NOT environment variables — $XDG_CONFIG_HOME silently never resolved
+path = ~/.config/git/themes.gitconfig
+
+[init]
+defaultBranch = main
+
+[interactive]
+diffFilter = "delta --features=interactive"
+
+[merge]
+conflictStyle = diff3
+
+[push]
+autoSetupRemote = true
+followTags = true
+
+[pull]
+rebase = true
+
+[stash]
+showPatch = true
+
+[tag]
+gpgsign = true
+
+[transfer]
+fsckObjects = true
+
+[url "git@github.com:"]
+insteadOf = "https://github.com/"
+insteadOf = "gh:"
+
+[user]
+	email = 121070110+hogdanish@users.noreply.github.com
+	name = hogdanish
+signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJXQui6phz7OAWsq1PRvJrhJSuMnsYQ6u5kfCIfvU3xU
