@@ -1,0 +1,59 @@
+# name: 'laramie'
+# preferred_background: 1f2335
+#
+# GENERATED — do not hand-edit. the source of truth is themes/laramie.fish,
+# applied by conf.d/colours.fish. regenerate with:
+#   .claude/skills/fish/scripts/gen-fish-theme.fish
+#
+# ⚠ values are BARE hex, no leading '#'. a .theme file is parsed with fish tokenizer
+# rules, so '#a9b1d6' is read as a comment and the variable is set to nothing —
+# silently, because the line still passes fish name whitelist.
+
+fish_color_autosuggestion 737aa2
+fish_color_cancel -r
+fish_color_command 7aa2f7
+fish_color_comment 565f89
+fish_color_cwd 7dcfff
+fish_color_cwd_root f7768e
+fish_color_end a9b1d6
+fish_color_error f7768e
+fish_color_escape 73daca
+fish_color_history_current --bold
+fish_color_host 73daca
+fish_color_host_remote e0af68
+fish_color_keyword bb9af7
+fish_color_normal a9b1d6
+fish_color_operator 2ac3de
+fish_color_option 7dcfff
+fish_color_param c0caf5
+fish_color_quote 9ece6a
+fish_color_redirection ff9e64
+fish_color_search_match b4f9f8 --background=373d5a
+fish_color_selection c0caf5 --background=373d5a
+fish_color_status f7768e
+fish_color_user b4f9f8
+fish_color_valid_path --underline
+fish_pager_color_completion 7dcfff
+fish_pager_color_description a9b1d6
+fish_pager_color_prefix a9b1d6
+fish_pager_color_progress a9b1d6
+fish_pager_color_secondary_background --background=24283b
+fish_pager_color_secondary_completion 7dcfff
+fish_pager_color_secondary_description 7dcfff
+fish_pager_color_secondary_prefix f7768e
+fish_pager_color_selected_background --background=373d5a
+fish_pager_color_selected_completion 73daca --background=373d5a
+fish_pager_color_selected_description f7768e
+fish_pager_color_selected_prefix 9ece6a
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
+pager_
