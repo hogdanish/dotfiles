@@ -263,16 +263,13 @@ Ghostty reloads with `cmd+r`; fish with the `refresh` abbreviation (`exec fish`)
 
 ## Known gaps
 
-1. **The repo is local-only.** `~/.config` is under git with a full history, but there is no remote
-   yet and nothing has been pushed. A disk failure still loses everything — publishing is the
-   remaining step.
-2. Touch ID for `sudo` is still not configured (`auth` skill). ⚠ `pam-reattach` is installed
+1. Touch ID for `sudo` is still not configured (`auth` skill). ⚠ `pam-reattach` is installed
    *specifically* for this and currently does nothing; `/etc/pam.d/sudo_local` does not exist.
-3. **`act` cannot run** — it needs a container runtime and neither docker nor podman is installed.
+2. **`act` cannot run** — it needs a container runtime and neither docker nor podman is installed.
    `~/.config/act/actrc` is written and correct, waiting on that dependency.
-4. **fzf has no preview.** `FZF_DEFAULT_OPTS` is themed, but `FZF_CTRL_T_OPTS`/`FZF_ALT_C_OPTS` are
+3. **fzf has no preview.** `FZF_DEFAULT_OPTS` is themed, but `FZF_CTRL_T_OPTS`/`FZF_ALT_C_OPTS` are
    unset, so `ctrl-t` and `alt-c` show bare filenames while `bat` and `eza` sit installed and themed.
-5. No completions for `macchina`, `claude`, `code-insiders`, `ffmpeg`, `fswatch`, `scons`, `woff2` —
+4. No completions for `macchina`, `claude`, `code-insiders`, `ffmpeg`, `fswatch`, `scons`, `woff2` —
    none of them ship one and none has a manpage for `fish_update_completions` to derive one from.
    Everything else is covered; re-run `fish_update_completions` after installing a new tool.
 
@@ -287,6 +284,13 @@ consumed — ⚠ the old note that `GLAMOUR_STYLE` is "a dead end" was **wrong**
 unthemed · btop/macchina/fd/curl/npm/uv/xh/shellcheck/act unconfigured · `LESSKEY` pointing at a
 source-format path · stale `~/.npm`, `~/.cache/.bun`, `~/.local/share/lesshst`, `~/.zsh_sessions` ·
 zsh history in `$HOME` · `fish_update_completions` covering only system man pages (804 → 1371).
+
+**Closed 2026-07-29** by publishing — do not re-report "the repo is local-only". `origin` is
+**github.com/hogdanish/dotfiles**, public, `main` tracking `origin/main`. ⚠ The remote was added as
+the HTTPS URL but `git remote -v` shows `git@github.com:` — that is the `url.git@github.com:.insteadof`
+rewrite in `git/.gitconfig`, not a mistake; pushes authenticate over SSH through the 1Password agent.
+Being public is what makes GitHub push protection apply, so it is a guardrail layer, not just a
+default — see `README.md`.
 
 ⚠ Traps that would undo earlier fixes: **never** reintroduce a bare `fish_add_path` (it writes a
 universal `fish_user_paths`); **never** put an environment variable in a git `include.path`; **never**
