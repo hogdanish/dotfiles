@@ -120,28 +120,107 @@ fi
 # app store apps are detected by their _MASReceipt, not by name: macos renames
 # them ("Keynote" is shipped as "Keynote Creator Studio.app").
 # note the spaces in `.app? // empty` — jq lexes `?//` as one operator.
-section "unmanaged /Applications"
+section "unmanaged applications"
 jq -r '.casks[]? | (.artifacts[]? | .app? // empty | .[]? | select(type=="string"))' \
   <"$TMP/info.json" | sort -u >"$TMP/cask-artifacts"
-found=0
+found=0; ios=0
 # a glob, not `ls | grep`: `ls` output is unparseable for names containing a
 # newline, and this needs no subshell. (spaces were already safe via `read -r`.)
-# top level only, matching the previous behaviour.
-for path in /Applications/*.app; do
+# ~/Applications is scanned too: casks land in /Applications, but steam, itch and
+# any per-user installer write there, and that is exactly where an unmanaged app
+# hides. one level deep only — /Applications/Utilities is apple's.
+for path in /Applications/*.app "$HOME"/Applications/*.app; do
   [[ -e "$path" ]] || continue                                 # no matches -> literal glob
   app="${path##*/}"
   grep -qxF "$app" "$TMP/cask-artifacts" && continue
   [[ -e "$path/Contents/_MASReceipt/receipt" ]] && continue
   [[ "$app" == "Safari.app" ]] && continue                     # bundled with macos
-  printf '  \033[33m? %s\033[0m  — installed outside brew/mas\n' "$app"; found=1
+  # an iphone/ipad app on apple silicon is a WRAPPED bundle: no Contents/ at all,
+  # so the _MASReceipt probe above cannot see it and it reads as unmanaged
+  # forever. it IS app store software, but `mas` cannot list or install it and no
+  # cask exists — so it is a note, never an action.
+  if [[ -e "$path/Wrapper" && -e "$path/WrappedBundle" ]]; then
+    printf '  \033[2m~ %s\033[0m  — ios app from the app store; not brew- or mas-manageable\n' "$app"
+    ios=1; continue
+  fi
+  # a steam "add to dock" shortcut is a 4-line bundle wrapping `open steam://run/<id>`
+  # — no payload, nothing to install, and it multiplies with every game. the real
+  # software is steam's, and steam is already a cask.
+  if grep -qs 'steam://run/' "$path/Contents/MacOS/"* 2>/dev/null; then
+    printf '  \033[2m~ %s\033[0m  — steam shortcut, not an install\n' "$app"
+    ios=1; continue
+  fi
+  printf '  \033[33m? %s\033[0m  — installed outside brew/mas (%s)\n' "$app" "${path%/*}"; found=1
 done
-[[ $found -eq 0 ]] && printf '  none\n'
+[[ $found -eq 0 && $ios -eq 0 ]] && printf '  none\n'
+[[ $found -eq 0 && $ios -eq 1 ]] && printf '  no actionable unmanaged apps\n'
+
+# ------------------------------------------------- claude toolbox digest
+# claude-code/rules/toolbox.md is the always-in-context summary of this file: a
+# user-level claude rule, loaded into every session in every project. it is
+# hand-written on purpose — the usage guidance is the whole point, and no
+# generator produces it — so it is made *self-verifying* instead. an html comment
+# at the top carries the two name lists checked here; block comments are stripped
+# before the file reaches claude's context, so carrying them is free.
+#
+# the invariant this enforces, in both directions:
+#   every name it claims is present resolves, every name it claims is absent does
+#   not, and every declared formula is mentioned somewhere in it.
+# that is what makes it a verified view of the Brewfile rather than the kind of
+# hand-kept duplicate that drifted before.
+section "claude toolbox digest"
+TOOLBOX="$(dirname "$BREWFILE")/claude-code/rules/toolbox.md"
+if [[ ! -f "$TOOLBOX" ]]; then
+  printf '  \033[33m~ no toolbox.md at %s\033[0m — skipping\n' "$TOOLBOX"
+else
+  # a `verify-*:` key plus its two-space-indented continuation lines. awk, not
+  # sed: BSD sed has no portable multi-line range with this shape.
+  manifest() {
+    awk -v k="$1:" '$1==k {f=1; $1=""; print; next} f && /^  / {print; next} f {exit}' "$TOOLBOX" \
+      | tr -s '[:space:]' '\n' | grep -v '^$'
+  }
+  n=0
+  # present: `command -v` first, then `brew list` for formulae that put no
+  # same-named binary on $PATH (pam-reattach ships only a PAM module).
+  while read -r c; do
+    [[ -z "$c" ]] && continue
+    command -v "$c" >/dev/null 2>&1 && continue
+    brew list --versions "$c" >/dev/null 2>&1 && continue
+    printf '  \033[31m- %s\033[0m  (toolbox.md claims it is present; it does not resolve)\n' "$c"
+    n=$((n + 1))
+  done < <(manifest verify-present)
+  # absent: the negative claims are load-bearing too — they stop an agent
+  # proposing a tool that is now installed, or avoiding one that is.
+  while read -r c; do
+    [[ -z "$c" ]] && continue
+    command -v "$c" >/dev/null 2>&1 || continue
+    printf '  \033[32m+ %s\033[0m  (toolbox.md claims it is absent; it is installed)\n' "$c"
+    n=$((n + 1))
+  done < <(manifest verify-absent)
+  # coverage: a formula nobody documented is a tool claude will not reach for.
+  while read -r f; do
+    [[ -z "$f" ]] && continue
+    grep -qwF -- "${f##*/}" "$TOOLBOX" && continue
+    printf '  \033[33m~ %s\033[0m — declared, but unmentioned in toolbox.md\n' "${f##*/}"
+    n=$((n + 1))
+  done <"$TMP/want-brew"
+  [[ $n -eq 0 ]] && printf '  in sync\n'
+fi
 
 # ------------------------------------------------------------ validation
 section "validation"
 if brew bundle check --file="$BREWFILE" >/dev/null 2>&1; then
   printf '  brew bundle check: satisfied\n'
 else
-  printf '  \033[31mbrew bundle check: unsatisfied\033[0m — run with --verbose for detail\n'
+  # `check` says "needs to be installed OR UPDATED" for a merely outdated package,
+  # so on its own it reads as drift on a perfectly correct file. the per-type diffs
+  # above are the authority on what is actually missing — if none of them found a
+  # stale entry, everything `check` flagged is just an available upgrade.
+  n=$(brew bundle check --file="$BREWFILE" --verbose 2>&1 | grep -c 'needs to be')
+  if [[ -s "$TMP/stale-brew" || -s "$TMP/stale-cask" || -s "$TMP/stale-mas" ]]; then
+    printf '  \033[31mbrew bundle check: unsatisfied\033[0m — %s entry(ies); see the diffs above\n' "$n"
+  else
+    printf '  brew bundle check: %s entry(ies) outdated, none missing — not drift\n' "$n"
+  fi
 fi
 echo

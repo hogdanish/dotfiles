@@ -23,7 +23,7 @@
 - Use any tools at your disposal without asking permission when they are clearly appropriate and low-risk.
 - Preferred tool selection:
   - **GitHub**: GitHub MCP server first, then `gh` CLI or manual action as fallback.
-  - **Godot**: consider the `godot` skill for Godot/GDScript/scene/shader work unless direct filesystem edits/other methods are more appropriate/faster
+  - **Godot**: load the `godot` skill for Godot/GDScript/scene/shader work. Two MCP servers back it — `godot-mcp` (editor + running-game control, deterministic playtesting, runtime state) and `godot-lsp` (static GDScript diagnostics + the game console). Neither authors content: writing `.gd`/`.tscn`/`.tres` is normal filesystem work.
   - **Docs / API lookup**: Context7 first, then built-in search/fetch, then Firecrawl.
   - **JS-heavy / multi-page web extraction**: Firecrawl.
   - **Local / execution work**: terminal commands and filesystem tools.
@@ -89,34 +89,20 @@
 - Fish shell for local interactive use; bash when more appropriate; zsh as last resort
 - Global installs: `brew` → `mas` → `bun`/`uv`/language-specific → manual. Avoid `pip` for global Python packages.
 - Local credentials: use `op://` references with `op run` — never hardcode secrets
-- Preferred CLI alternatives (use when appropriate):
-  - `trash` → `rm` · `bat` → `cat` · `fd` → `find` · `eza` → `ls` · `ripgrep` → `grep`
-  - `zoxide` → `cd` · `delta` → `git diff` · `xh` → `curl` · `doge` → `dig`
-  - `bun` → `node`/`npm` · `uv` → `pip`
+- Preferred CLI alternatives: the full table is in the always-loaded toolbox digest below
 
 ### Resources
 
-**Installed system tools** — ⚠ do not maintain a list here. `~/.config/Brewfile` is the
-machine's inventory: every entry carries a one-line comment saying *why* it is installed, and it is
-the only copy that gets updated when something is added. Read it before recommending, configuring or
-diagnosing any tool. A hand-kept duplicate in this file drifted badly enough that config was written
-against tools that were never installed — corrected 2026-07-29.
+**Installed system tools** — two files, and deliberately no third copy:
 
-⚠ Verify before depending on a binary, because the Brewfile records *declared intent*:
-`type -q <cmd>` in fish, `command -v <cmd>` in bash/zsh, `brew list --versions <formula>` for
-formulae that ship no same-named binary (`pam-reattach`, keg-only `curl`, `make` → `gmake`).
-
-Not from Homebrew, and easy to mistake for it: `jq` (`/usr/bin/jq`, `jq-1.7.1-apple`) and `trash`
-(`/usr/bin/trash`) are **macOS 27 system binaries**. `java` is the `/usr/bin/java` stub dispatching
-to the `temurin@25` cask; `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`.
-
-**Not installed** despite once being listed here — do not write config or examples against them:
-`tre`, `yq`, `docker`, `docker-compose`, `rustup`/`cargo`, `maven`, `gradle`, `shfmt`, `prettier`,
-`eslint`, `atomicparsley`, `chafa`, `macos-defaults`. ⚠ `act` is installed but **cannot run**: it
-needs a container runtime, and neither docker nor podman is present.
-
+- `~/.config/claude-code/rules/toolbox.md` — the **digest**, loaded into every session in every
+  project as a user-level rule, so it is already in context. It names the tools worth reaching for,
+  what each replaces, the macOS/BSD traps, and what is deliberately *not* installed. **Act on it
+  directly: do not re-verify a command it names, and do not offer to install one.**
+- `~/.config/Brewfile` — the full inventory including GUI apps, one line of *why* per entry. Read it
+  when you need something the digest does not cover, or before recommending a new tool.
 - Use `gum` for interactive prompts in shell scripts
-- `code-insiders .` opens VS Code Insiders
+- `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`
 
 **Notable system paths:**
 - `/Users/ethan/.config/`: system dotfiles — **and the dotfiles git repo itself**, tracked in place

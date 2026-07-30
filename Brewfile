@@ -3,6 +3,8 @@
 #
 # comments describe *why* something is installed, not what it is.
 # tools that replace, extend, or serve another are written '<original>: <purpose>'.
+# a commented-out entry is wanted but deliberately not installed yet — the comment
+# says what it is waiting on. leave it; it is not drift.
 #
 # audit with: .claude/skills/brewfile/scripts/brewfile-audit.sh Brewfile
 #
@@ -110,6 +112,8 @@ cask "1password-cli@beta"  # 1password: cli and shell plugins
 cask "raycast"             # spotlight: launcher
 cask "alt-tab"             # macos app switcher: windows-style switching
 cask "stats"               # activity monitor: menu bar system monitor
+cask "betterdisplay"       # macos display settings: hidpi, virtual displays and brightness
+# cask "thaw"              # ice: menu bar manager — held until stable on macos 27 golden gate
 cask "cleanshot"           # macos screenshots: capture and annotate
 cask "appcleaner"          # uninstaller that clears leftover files
 cask "keka"                # archive utility: file archiver
@@ -118,9 +122,8 @@ cask "obsidian"            # markdown knowledge base
 cask "claude"              # ai assistant desktop app
 
 ## media
-cask "iina"            # quicktime: media player
-cask "transmission"    # bittorrent client
-cask "blackhole-2ch"   # virtual audio driver for routing between apps
+cask "iina"          # quicktime: media player
+cask "transmission"  # bittorrent client
 
 ## communication & network
 cask "discord"    # voice and text chat

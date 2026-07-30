@@ -12,6 +12,12 @@ Store apps, grouped by category, each with a one-line comment saying *why* it is
 hand-maintained. The repo root is `~/.config`, so the file is `~/.config/Brewfile`. Reading it is
 cheap and it is almost always the fastest way to understand what you are working with.
 
+**First check what you already have.** `claude-code/rules/toolbox.md` is a user-level rule, so its
+digest of the CLI toolbox — what to reach for, what each tool replaces, the macOS traps, what is
+*not* installed — is already in your context in every session. For a capability question, or before
+running or scripting a command, that is the answer; open the Brewfile for GUI apps, for the *why*
+behind an entry, or for anything the digest does not name.
+
 ## Read it before you
 
 - Configure or improve anything under `~/.config` — you cannot sensibly write a `conf.d/<tool>.fish`
@@ -53,12 +59,12 @@ passes on an incomplete file.
 
 ## Two more things
 
-- **Prefer what is present.** The declared CLI preferences (`bat`, `eza`, `fd`, `ripgrep`, `zoxide`,
-  `git-delta`, `xh`, `doge`, `trash`, `uv`, `bun`, `gum`) are the house tools — use them in scripts and
-  examples rather than the coreutils defaults they replace. The `<original>: <purpose>` comment on each
-  entry tells you what it displaces.
+- **Prefer what is present.** Use the house tools in scripts and examples rather than the defaults they
+  replace — `toolbox.md` has the table, and the `<original>: <purpose>` comment on each Brewfile entry
+  tells you what it displaces.
 - **Absence is not evidence for untracked types.** `vscode` extensions and `cargo`/`uv`/`npm`/`go`
   globals are deliberately out of scope, so the Brewfile says nothing about them either way.
 
 If you install something while working, add it to the Brewfile in the same change — that is the
-`brewfile` skill.
+`brewfile` skill — and, if it is a CLI worth reaching for, add it to `claude-code/rules/toolbox.md`
+too. `brewfile-audit.sh` checks that digest in both directions and names any formula it omits.
