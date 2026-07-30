@@ -43,7 +43,7 @@ dumping for comparison, suppress them: `--no-vscode --no-go --no-cargo --no-uv -
 
    It reports, per type, what is installed but undeclared (`+`), declared but uninstalled (`-`), and
    notes (`~`) for things needing a human decision. It also lists `/Applications` entries that came from
-   neither brew nor the App Store, and finishes with `brew bundle check`.
+   neither brew nor the App Store, checks the toolbox digest (below), and finishes with `brew bundle check`.
 
 2. **Classify** each result against [auditing.md](references/auditing.md) §7. The defaults:
    *untracked* → add it; *stale* → **ask before removing**; *unmanaged app* → report and ask.
@@ -54,6 +54,22 @@ dumping for comparison, suppress them: `--no-vscode --no-go --no-cargo --no-uv -
 
 4. **Validate.** `ruby -c Brewfile && brew bundle list --file=Brewfile >/dev/null && brew bundle check --file=Brewfile`.
    The `PostToolUse` hook runs the first two automatically on every write.
+
+## The downstream digest
+
+`claude-code/rules/toolbox.md` is a **user-level Claude rule**, so it loads into every session in every
+project: it is how an agent knows this machine's toolbox without reading anything. It summarises the CLI
+half of the Brewfile — what to reach for, what each tool replaces, the macOS/BSD traps, and what is
+deliberately absent — and it is written by hand, because the usage guidance is the point and no generator
+produces it.
+
+**Adding or removing a CLI formula means updating it in the same change.** It is allowed to duplicate
+the Brewfile only because it is verified rather than trusted: a stripped HTML comment at its top carries
+`verify-present:` and `verify-absent:` lists, and the audit's *claude toolbox digest* section fails when
+a name it claims resolves does not, when something it calls absent is installed, or when a declared
+formula goes unmentioned. Keep those two lists in step with the prose, then re-run the audit.
+⚠ Do not restate the inventory anywhere else — a third hand-kept copy in the user-level CLAUDE.md is
+what drifted into writing config against tools that were never installed (corrected 2026-07-29).
 
 5. **Report** what changed, and surface anything you did not act on unilaterally.
 

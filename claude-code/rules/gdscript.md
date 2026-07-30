@@ -13,7 +13,7 @@ paths:
 - Prefer `%UniqueName as TypeName` over `get_node(...)` chains.
 - Load resources with `preload()` / `@onready` — **never** load inside `_process` / `_physics_process` or other hot paths.
 - Avoid bare `print()` — log via the **CLog addon** if available.
-- **How this is checked**: GDScript warnings live in the editor **Debugger** tab, *not* the Output log — a clean run doesn't mean clean warnings. Pull them via the filesystem or MCP error tool that reads the Debugger tab (`get_editor_errors`) depending on which is more appropriate/faster, or, where the project sets `treat_warnings_as_errors=true`, they become hard errors that block the run outright. Either way, treat a warning as a defect to fix, not ignore.
+- **How this is checked**: a clean run does *not* mean clean warnings — GDScript warnings never reach the game's Output log. Pull them statically from Godot's LSP (`godot-lsp` `get_diagnostics` on the touched file; `scan_workspace_diagnostics` after a broad refactor), which reports errors and warnings with full project context. The editor-process channel (`godot-mcp` `godot_editor_read get_log_messages severity="warning"`) covers `@tool`/import/addon failures. Where a project raises warnings to level 2, they become hard errors that block the run outright. Either way, treat a warning as a defect to fix, not ignore.
 
 ## 2. Reach for modern idioms and synactic sugar.
 

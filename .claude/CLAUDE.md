@@ -32,6 +32,11 @@ directory; `~/.config/claude` is only a compatibility symlink. ⚠ If Claude Cod
 `settings.json` (via `/config`) it can replace that symlink with a real file and silently detach it
 from version control — `scripts/audit-config.fish` checks for exactly this.
 
+`claude-code/rules/` holds the **user-level** rules, which load in every project on this machine, not
+just here: `gdscript.md` (scoped to `**/*.gd`) and `toolbox.md` (unscoped — the always-in-context
+digest of this machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it).
+⚠ Adding or removing a CLI formula means updating `toolbox.md` in the same change.
+
 `scripts/` holds `bootstrap.sh` (POSIX sh — fish and gum may not exist when it runs),
 `link-home.fish`, and `audit-config.fish`. **Run the audit after anything installs a new tool**; it
 names every top-level entry that is neither tracked nor known junk.

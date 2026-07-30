@@ -104,6 +104,20 @@ Guidelines:
 - **Align trailing comments within a subsection**, not across the whole file. Realign the subsection when
   its longest entry changes.
 
+### 4.0 Held entries — wanted, deliberately not installed
+
+Software chosen but knowingly deferred is kept as a **commented-out entry** in its normal subsection,
+aligned like a live one, with the comment saying *what it is waiting on*:
+
+```ruby
+# cask "thaw"              # ice: menu bar manager — held until stable on macos 27 golden gate
+```
+
+This survives every check — ruby ignores it, `brew bundle` never sees it, and the audit's mas-id regex
+is anchored `^[^#]*` so a commented line cannot match. ⚠ **A commented entry is not drift; never
+"clean it up".** The file header says so, which is what stops the next audit deleting it. Drop the `#`
+to install; delete the line only when the decision is reversed.
+
 ### 4.1 The replacement convention
 
 > A tool that replaces, augments, or depends on another is written `<original>: <purpose>`.
@@ -204,7 +218,9 @@ mas "Wipr", id: 1662217862      # safari: content blocker
 - **Ruby conditionals.** This machine is the only target. Conditionals break `brew bundle list`, make
   `check` slow, and are destroyed by any `dump`. If a conditional ever becomes necessary, note it in the
   file's header comment so the next audit does not regenerate it away.
-- **Secrets or `op://` references.** Nothing in a Brewfile is secret; if it feels like it should be, it
-  belongs in `~/.config/fish/conf.d/secrets.fish` instead.
+- **Secrets or `op://` references.** Nothing in a Brewfile is secret. If something here feels like it
+  should be, it belongs in the `Claude Code` 1Password Environment, fetched at point of use with
+  `op run` — see the `auth` skill. ⚠ **Not** `~/.config/fish/conf.d/secrets.fish`: that file was retired
+  on 2026-07-28 and must never be recreated (`.claude/rules/security.md`).
 - **`cask_args appdir:`.** The default `/Applications` is correct here, and setting it globally changes
   where *every* cask lands.

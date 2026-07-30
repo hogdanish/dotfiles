@@ -49,6 +49,9 @@ check_out=$(brew bundle check --verbose --file="$file_path" 2>&1) || true
 [[ "$check_out" != *"needs to be"* ]] && exit 0
 
 bad="" ; pending="" ; outdated=""
+# one `mas list` for the whole loop; empty when mas is absent, which makes every
+# App entry fall through to "not installed" — the safe direction.
+mas_have=$(command -v mas >/dev/null 2>&1 && mas list 2>/dev/null)
 while read -r kind name; do
   [[ -z "$name" ]] && continue
   case "$kind" in
@@ -59,13 +62,25 @@ while read -r kind name; do
              brew list --cask    --versions "$name" >/dev/null 2>&1 \
                && { outdated+="  - cask \"$name\" — installed, upgrade available\n"; continue; } ;;
     Tap)     pending+="  - tap \"$name\" — not tapped\n"; continue ;;
-    App)     pending+="  - mas \"$name\" — not installed\n"; continue ;;
+    # an app store app is resolved by its numeric id, never its name: `check`
+    # prints the Brewfile's label, and apple renames apps out from under it.
+    # without this an app that is merely *outdated* reads as missing.
+    App)     id=$(grep -oE "mas \"$name\", id: [0-9]+" "$file_path" | grep -oE '[0-9]+$' | head -1)
+             if [[ -n "$id" ]] && grep -qE "^[[:space:]]*${id}[[:space:]]" <<<"$mas_have"; then
+               outdated+="  - mas \"$name\" — installed, upgrade available\n"
+             else
+               pending+="  - mas \"$name\" — not installed\n"
+             fi
+             continue ;;
   esac
   # `tr`, not ${kind,,} — macos ships bash 3.2, which lacks case expansion.
   kw=$(printf '%s' "$kind" | tr '[:upper:]' '[:lower:]')
   [[ "$kw" == "formula" ]] && kw="brew"
   pending+="  - $kw \"$name\" — declared but not installed\n"
-done < <(grep -oE '^→ (Formula|Cask|Tap|App) [^ ]+' <<<"$check_out" | sed 's/^→ //')
+  # `.+ needs to be`, not `[^ ]+` — app store names contain spaces ("1Password
+  # for Safari"), and truncating one at the first space loses the id lookup.
+done < <(grep -oE '^→ (Formula|Cask|Tap|App) .+ needs to be' <<<"$check_out" \
+           | sed -E 's/^→ //; s/ needs to be$//')
 
 [[ -n "$bad" ]] && fail "unresolvable entries (likely typos):\n${bad}"
 
