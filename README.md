@@ -15,7 +15,7 @@ macOS 27 · Apple Silicon · fish 4.8 · Ghostty · Homebrew · 1Password for ev
 .betterleaks.toml   secret-scanner rules and allowlist
 lefthook.yml        pre-commit / pre-push gates
 Brewfile            hand-maintained package manifest AND software inventory
-scripts/            bootstrap.sh · link-home.fish · audit-config.fish
+scripts/            bootstrap.sh · link-home.fish · link-claude.fish · audit-config.fish
 home/               files that cannot live under ~/.config, symlinked into $HOME
 .claude/            agent context for this repo (rules, skills, hooks)
 claude-code/        authored Claude Code config — $CLAUDE_CONFIG_DIR symlinks back to it
@@ -25,9 +25,23 @@ fish/ ghostty/ …    the actual configs
 ⚠ `$CLAUDE_CONFIG_DIR` is `$XDG_STATE_HOME/claude`, **not** `~/.config/claude`. Transcripts, prompt
 history and vendored plugins are ~48 MB of state, not config, and they have held plaintext
 credentials that were read into a session — so they are kept out of this repo's working tree
-entirely. Only `CLAUDE.md`, `settings.json` and `rules/` are authored, and they live in
-`claude-code/` with symlinks pointing back from the state directory.
-`~/.config/claude` remains as an ignored compatibility symlink to that state directory.
+entirely. Only `CLAUDE.md`, `settings.json`, `rules/` and `skills/` are authored, and they live in
+`claude-code/` with symlinks pointing back from the state directory, created by
+`scripts/link-claude.fish`. `~/.config/claude` remains as an ignored compatibility symlink to that
+state directory.
+
+`claude-code/skills/` holds the **user-level** skills — the ones that load in every project on this
+machine, as opposed to `.claude/skills/`, which loads only inside this repo. They are linked in
+**one directory at a time**, deliberately: `$CLAUDE_CONFIG_DIR/skills/` is a shared namespace that
+any tool may write into, and linking the whole directory would either drag installer output into the
+repo or bury it. Adding a global skill is: write it under `claude-code/skills/<name>/`, run
+`scripts/link-claude.fish`, done — the `.gitignore` already re-includes `claude-code/` whole.
+
+⚠ Only **hand-authored** skills live there. A third party's skills come in as a *plugin*: the payload
+lands in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) and only the enable flag lands in
+`claude-code/settings.json`, which `claude plugin install` writes straight through the symlink. So
+`enabledPlugins` is the tracked manifest of vendor tooling, and `claude-code/skills/` stays a clean
+list of things written here.
 
 ## Bootstrap a new machine
 
@@ -47,7 +61,13 @@ the working tree untouched, then shows you exactly what differs *before* overwri
 Manual steps it cannot do for you:
 
 - `op signin`, then `op plugin init gh` — `~/.config/op/` is machine state and is not tracked
-- `~/.agents/skills/` — the firecrawl/godot skill bundles are installed separately
+- `npm i -g firecrawl-cli` — the Firecrawl CLI is an npm global, so the Brewfile does not carry it.
+  The Claude Code side is the official `firecrawl` plugin, already declared in
+  `claude-code/settings.json`, so it re-installs itself; the CLI it drives does not. ⚠ Do **not** run
+  `firecrawl init`, `firecrawl setup skills` or `firecrawl login` afterwards — they write 31 skill
+  bundles into `~/.agents/`, linked with a relative path that assumes `~/.claude/skills` so every one
+  dangles, copy themselves into every other agent and IDE they detect, and open a second credential
+  store. That directory was deleted on 2026-07-30
 
 Two things the script *offers* but that live outside this repo, so a fresh clone does not carry them:
 `/etc/pam.d/sudo_local` (Touch ID for `sudo`) and `~/Library/LaunchAgents/…homebrew-autoupdate.plist`.

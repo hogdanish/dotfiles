@@ -25,7 +25,18 @@
   - **GitHub**: GitHub MCP server first, then `gh` CLI or manual action as fallback.
   - **Godot**: load the `godot` skill for Godot/GDScript/scene/shader work. Two MCP servers back it — `godot-mcp` (editor + running-game control, deterministic playtesting, runtime state) and `godot-lsp` (static GDScript diagnostics + the game console). Neither authors content: writing `.gd`/`.tscn`/`.tres` is normal filesystem work.
   - **Docs / API lookup**: Context7 first, then built-in search/fetch, then Firecrawl.
-  - **JS-heavy / multi-page web extraction**: Firecrawl.
+  - **JS-heavy / multi-page web extraction**: Firecrawl, via the official **`firecrawl` plugin**
+    (`firecrawl@claude-plugins-official`) — 11 `firecrawl:*` skills driving the `firecrawl` CLI.
+    ⚠ The plugin ships **no MCP server** (`claude plugin details` confirms 0), and none is wanted:
+    the CLI does the same work with nothing to keep alive. ⚠ `FIRECRAWL_API_KEY` is already on the
+    process environment when `claude` is launched from fish, and Bash tool calls inherit it — so a
+    bare `firecrawl …` is authenticated. Do not wrap it in `op run` and do not pass `--api-key`.
+    ⚠ **Never run `firecrawl init`, `firecrawl setup skills|workflows`, or `firecrawl login`,** even
+    though the plugin's own `install.md` recommends all three: on this machine they write 31 bundles
+    to `~/.agents/` linked with a prefix that only resolves under `~/.claude/skills` (so every link
+    dangles), spray copies into every other agent/IDE they detect, and open a second credential store
+    under `~/Library/Application Support/firecrawl-cli`. The CLI is installed and authenticated;
+    `firecrawl --status` is the check.
   - **Local / execution work**: terminal commands and filesystem tools.
 
 ## Coding Guidelines
@@ -112,16 +123,25 @@
 - `/Users/ethan/.config/home/`: files that cannot live under `~/.config` because their consumer
   hardcodes a `$HOME` path — `zshrc`, `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf`. They are
   symlinked into `$HOME`, so ⚠ edit them here, not at the `$HOME` path.
-- `/Users/ethan/.agents/skills/`: firecrawl + godot skill bundles, symlinked into
-  `$CLAUDE_CONFIG_DIR/skills/`. Installed separately and **not** part of the dotfiles repo.
+- `/Users/ethan/.config/claude-code/skills/`: the **hand-authored, version-controlled** user-level
+  skills — currently just `godot` — symlinked one by one into `$CLAUDE_CONFIG_DIR/skills/`. Adding a
+  global skill means writing it here and re-running `~/.config/scripts/link-claude.fish`.
+  ⚠ **Vendor skills do not go here.** They arrive as *plugins*, whose payload lives in
+  `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) while only the enable flag lands in the tracked
+  `claude-code/settings.json`. That is what keeps this directory a clean list of things Ethan wrote.
+  ⚠ `~/.agents/` is **gone** (deleted 2026-07-30) and must not come back.
 - `/Users/ethan/.config/fish/conf.d/`: shell config — 15 snippets, one concern each, in load order:
   `_init` · `_shell` · `abbrs` · `brew` · `bun` · `colours` · `fzf` · `ghostty` · `git` · `gum` ·
   `java` · `keybindings` · `op` · `tools` · `xdg-apps`. ⚠ No `fisher.fish` (no plugin manager) and
   no `theme.fish` (renamed to `colours.fish`); `secrets.fish` was retired and must never return.
-- `/Users/ethan/.config/fish/functions/`: custom shell functions. ⚠ The subdirectory is `grc/`
-  (one wrapper per grc-colourised command), not `alias/`. There is exactly **one** 1Password
-  shell-plugin wrapper, `gh.fish` (`op plugin run -- gh $argv`); ⚠ the matching `brew.fish` was
-  **removed 2026-07-30** and must not come back — plain `brew` is not wrapped. `brewup.fish` is the
-  full update command (homebrew + mac app store); Homebrew also updates itself on a 12 h launchd
-  timer via `brew autoupdate`.
+- `/Users/ethan/.config/fish/functions/`: custom shell functions, filed **by caller** since
+  2026-07-30. The top level holds only commands a human types (`brewup` `cls` `extract` `fishprof`
+  `funcfresh` `mcpkill` `reload` `up`); ⚠ the three subdirectories are `wrappers/` (shadow a real
+  binary — `claude` `firecrawl` `gh`), `internal/` (only conf.d/fish/another function calls it —
+  `cachecmd` `fish_should_add_to_history` `__abbr_last_history_item`) and `grc/` (one colouriser per
+  command). There is no `alias/`. There is exactly **one** 1Password shell-plugin wrapper,
+  `wrappers/gh.fish` (`op plugin run -- gh $argv`); ⚠ the matching `brew.fish` was **removed
+  2026-07-30** and must not come back — plain `brew` is not wrapped. `brewup.fish` is the full update
+  command (homebrew + mac app store); Homebrew also updates itself on a 12 h launchd timer via
+  `brew autoupdate`.
 - `/Users/ethan/Projects/`: git repositories

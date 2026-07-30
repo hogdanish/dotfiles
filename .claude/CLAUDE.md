@@ -27,19 +27,38 @@ and `claude/`. `README.md` explains each.
 
 ⚠ **`$CLAUDE_CONFIG_DIR` is `$XDG_STATE_HOME/claude`, not `~/.config/claude`.** Transcripts, prompt
 history and vendored plugins are state, not config, and are deliberately outside this repo's working
-tree. The three authored files live in `claude-code/` and are symlinked back from the state
-directory; `~/.config/claude` is only a compatibility symlink. ⚠ If Claude Code ever *rewrites*
-`settings.json` (via `/config`) it can replace that symlink with a real file and silently detach it
-from version control — `scripts/audit-config.fish` checks for exactly this.
+tree. The authored config lives in `claude-code/` and is symlinked back from the state directory by
+`scripts/link-claude.fish`; `~/.config/claude` is only a compatibility symlink. ⚠ If Claude Code ever
+*rewrites* `settings.json` (via `/config`) it can replace that symlink with a real file and silently
+detach it from version control — `scripts/audit-config.fish` checks for exactly this.
 
 `claude-code/rules/` holds the **user-level** rules, which load in every project on this machine, not
 just here: `gdscript.md` (scoped to `**/*.gd`) and `toolbox.md` (unscoped — the always-in-context
 digest of this machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it).
 ⚠ Adding or removing a CLI formula means updating `toolbox.md` in the same change.
 
+`claude-code/skills/` holds the **user-level** skills, added 2026-07-30 — currently just `godot`.
+⚠ Do not confuse them with `.claude/skills/`, which loads only inside this repo; these load
+everywhere on this machine. They are symlinked in **one directory at a time**, because
+`$CLAUDE_CONFIG_DIR/skills/` is a namespace any installer may write into and linking it wholesale
+would either drag that output into a public repo or bury it. ⚠ Symlinked skills **do** load — that
+was verified against Claude Code 2.1.220 with a probe skill pointed at `/tmp`, so if one fails to
+appear the link is broken, not unsupported. `audit-config.fish` fails on a dangling skill link.
+
+⚠ **Vendor skills belong in a plugin, not here.** The rule that fell out of the Firecrawl work: a
+third party's skills are *its* to version, so take them through the plugin system, where the payload
+sits in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked, outside this repo) and only the one-line
+enable flag lands in the tracked `claude-code/settings.json`. `claude plugin install` writes that
+flag **through the symlink** into the repo, so the declaration version-controls itself and a fresh
+clone re-fetches the plugin. Hand-authoring a copy of a vendor's skill — which is what
+`claude-code/skills/firecrawl/` briefly was — buys nothing and goes stale. ⚠ The one thing a plugin
+cannot carry is machine-specific contradiction of its own docs: Firecrawl's bundled `install.md`
+tells the agent to run `firecrawl init` / `setup skills` / `login`, all three of which are wrong
+here, so that override lives in `claude-code/CLAUDE.md` instead.
+
 `scripts/` holds `bootstrap.sh` (POSIX sh — fish and gum may not exist when it runs),
-`link-home.fish`, and `audit-config.fish`. **Run the audit after anything installs a new tool**; it
-names every top-level entry that is neither tracked nor known junk.
+`link-home.fish`, `link-claude.fish`, and `audit-config.fish`. **Run the audit after anything
+installs a new tool**; it names every top-level entry that is neither tracked nor known junk.
 
 `home/` holds the files that cannot live under `~/.config` because their consumer hardcodes a
 `$HOME` path — `zshrc`, `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf` — symlinked into place.
@@ -145,7 +164,7 @@ snippets, one concern each, in load order:
 atuin last inside `tools.fish`. ⚠ **One concern per
 file** — a bare `return` ends the whole file. ⚠ **Startup cost is maintained, not accidental**:
 **10.0 ms** interactive and 3.7 ms non-interactive (was 63.1 → 16.4 → 10.0), every tool init cached by
-`functions/cachecmd.fish`. Measure with `fishprof` before and after any `conf.d` change — ⚠ it reports
+`functions/internal/cachecmd.fish`. Measure with `fishprof` before and after any `conf.d` change — ⚠ it reports
 a *single* run, and startups vary by a few ms with occasional 3× outliers, so compare medians.
 ⚠ `java.fish` hardcodes the JDK path rather than calling `/usr/libexec/java_home` — that fork alone
 measured **5.7 ms**. ⚠ `tools.fish` seeds `ATUIN_SESSION` with builtins to preempt the `atuin uuid`
@@ -154,6 +173,16 @@ that is safe and what to re-check after an atuin upgrade. The largest line left 
 `fish_config theme choose`, which has no opt-out.
 
 New tool config goes in its own `conf.d/<tool>.fish`, not into `config.fish`.
+
+`functions/` is filed **by caller**, reorganised 2026-07-30. The top level is reserved for commands a
+human types (`brewup` `cls` `extract` `fishprof` `funcfresh` `mcpkill` `reload` `up`); everything else
+goes to `wrappers/` (shadows a real binary — `claude` `firecrawl` `gh`), `internal/` (only `conf.d`,
+fish itself or another function calls it — `cachecmd` `fish_should_add_to_history`
+`__abbr_last_history_item`), or `grc/`. ⚠ There is no `alias/` and there should not be: `alias` means
+a specific banned thing in fish. ⚠ All four subdirectories are *prepended* to `$fish_function_path`,
+so each shadows the top level **and** the others — a basename may appear in exactly one. ⚠ A new
+subdirectory is invisible until `exec fish`, because `_init.fish`'s `functions/*/` glob runs once at
+startup. The decision table is in the fish skill's `config-layout.md` §7.
 
 ## The terminal (Ghostty)
 
@@ -218,7 +247,7 @@ than trusting paths.
 
 Configured: the SSH agent (`IdentityAgent` + `SSH_AUTH_SOCK` from `conf.d/op.fish`), `agent.toml`
 scoped to `Development`, `op-ssh-sign` signing with a working `allowedSignersFile`, the `gh`
-shell plugin as `functions/gh.fish`, `functions/{claude,firecrawl}.fish` for `op run`, and
+shell plugin as `functions/wrappers/gh.fish`, `functions/wrappers/{claude,firecrawl}.fish` for `op run`, and
 `gpg-agent.conf` → `pinentry-touchid`.
 
 ⚠ **There is no `functions/brew.fish` any more** (removed 2026-07-30) and it should not come back.
@@ -239,6 +268,25 @@ drops to `--print` mode and errors. `op run -- /usr/bin/tty` will not reveal thi
 ⚠ **Never source `~/.config/op/plugins.sh` from fish** — it is POSIX shell and fails `fish -n`.
 ⚠ **`GNUPGHOME` deliberately stays at `~/.gnupg`**, not XDG: only fish would export it, so launchd,
 GUI apps, cron and Claude Code's zsh would each create a second, empty homedir.
+
+## Git: two layers, on purpose
+
+`git/.gitconfig` carries **aliases** (`lg` `lga` `ll` `branches` `staged` `unstage` `amend` `undo`
+`last` `root` `aliases`) and `conf.d/abbrs.fish` carries ~40 **abbreviations**. They overlap, and the
+split is deliberate: an alias works from zsh, from a script and from a Bash tool call, while an abbr
+only ever expands in fish's line editor. So the abbrs expand to *raw git* — the buffer and the history
+end up holding something portable — and only reach for an alias where the payload is a format string
+that has nowhere shorter to live (`glg` → `git lg`).
+
+⚠ Three traps, all hit while writing this: **git word-splits an alias body with shell rules**, so a
+`--format=…` containing spaces needs inner single quotes or it arrives as five arguments;
+**`%(color:auto)` is a `log` placeholder and is rejected by `for-each-ref`** formats like
+`branch --format`, which need a real colour name; and the `[pretty] lg` format uses **ANSI colour
+names, not laramie hexes**, precisely so it inherits the terminal palette instead of becoming a
+fifteenth place the theme has to be hand-duplicated.
+
+⚠ `gs` and `gcp` are deliberately **not** abbreviations — they are ghostscript and GNU coreutils' `cp`,
+both installed, and an abbr at command position would shadow them in the buffer.
 
 ## Two non-obvious environment overrides
 
@@ -298,6 +346,7 @@ python3 -m json.tool ~/.config/xh/config.json             # ...so is xh's
 macchina --doctor                                         # every declared readout still resolves
 brew bundle check --file=Brewfile                         # everything declared is installed
 .claude/skills/brewfile/scripts/brewfile-audit.sh         # ...and everything installed is declared
+scripts/link-claude.fish --dry-run                        # authored claude config is linked in
 brew config | rg HOMEBREW_                                # ⚠ what brew ACTUALLY has set, not the file
 env -u XDG_CONFIG_HOME brew trust                         # taps resolve outside fish (launchd, cron)
 brew autoupdate status                                    # the unattended-update agent is running
