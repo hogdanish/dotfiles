@@ -176,14 +176,17 @@ $fish_function_path                          $fish_complete_path
                                              /Users/ethan/.cache/fish/generated_completions
 ```
 
-`←§` marks entries that exist **only because of this config**. As of 2026-07-29 the functions glob
-expands to exactly one directory, `~/.config/fish/functions/grc/`, so `$fish_function_path[1]` is
-that and `$fish_function_path[2]` is `~/.config/fish/functions`. The completions glob still expands
-to nothing.
+`←§` marks entries that exist **only because of this config**. As of 2026-07-30 the functions glob
+expands to **three** directories, in glob order — `functions/grc/`, `functions/internal/`,
+`functions/wrappers/` — so those are `$fish_function_path[1..3]` and `~/.config/fish/functions` is
+`[4]`. The completions glob still expands to nothing. The three-way split is deliberate and §7
+explains the rule; the top level is reserved for commands a **human** types.
 
 ⚠ Because the subdirectory entries are **prepended**, `functions/grc/ls.fish` would shadow a
 top-level `functions/ls.fish`. Never duplicate a basename across a subdirectory and the top level —
-this is why `ls` and `cat` are excluded from the grc set rather than wrapped.
+this is why `ls` and `cat` are excluded from the grc set rather than wrapped. With three
+subdirectories the same rule now also runs *between* them: `grc/` beats `internal/` beats
+`wrappers/`, silently, so a name may appear in at most one.
 
 ⚠ Subdirectories under `functions/` and
 `completions/` are **not** searched by default. These two lines in `conf.d/_init.fish` are what make
@@ -285,7 +288,7 @@ already been read."*
 | Path | Role | State here |
 | --- | --- | --- |
 | `~/.config/fish/conf.d/` | sourced snippets, step 5 | 15 files — see §7 |
-| `~/.config/fish/functions/` | autoloaded functions | **14** top-level + 14 in `grc/` (verified 2026-07-30 with `fd -e fish --max-depth 1`; the "13" here was an off-by-one — its own table below always listed 14). ⚠ `functions/grc/` is *prepended* to `$fish_function_path`, so it shadows the top level |
+| `~/.config/fish/functions/` | autoloaded functions | **8** top-level + 14 `grc/` + 3 `internal/` + 3 `wrappers/` = 28 (reorganised 2026-07-30; count with `fd -e fish . fish/functions`). ⚠ all three subdirectories are *prepended* to `$fish_function_path`, so each shadows the top level and, between themselves, glob order decides |
 | `~/.config/fish/completions/` | autoloaded completions | 6 files: `op`, `up`, `extract`, `funcfresh`, `cachecmd`, `fishprof` |
 | `~/.config/fish/themes/` | `*.theme` files for `fish_config theme` | `laramie.fish` (the `$theme_*` palette, sourced by `conf.d/colours.fish`, hex **with** `#`) and the generated `laramie.theme` (hex **without** `#`). The starship and glamour configs that used to sit here moved to `~/.config/starship.toml` and `~/.config/glamour/` |
 | `~/.config/fish/fish_variables` | universal-variable store, fish-managed | present, header comments only — **zero universals**, which is the intended steady state |
@@ -353,22 +356,36 @@ Design rules the layout now enforces:
 
 ### `functions/`
 
+Reorganised **2026-07-30** into one rule: **the top level is what a human types.** Everything else
+is filed by *who calls it*, in a subdirectory that `_init.fish`'s `functions/*/` glob picks up.
+
+| Where | Holds | Test for "does it belong here?" |
+| --- | --- | --- |
+| top level | commands you run | you would type it at a prompt |
+| `wrappers/` | functions that **shadow a real binary** of the same name | the body contains `command <own-name>`, `op run --` or `op plugin run --` |
+| `internal/` | functions only `conf.d/`, another function, or fish itself calls | nothing a human types; renaming it would break a config file, not a habit |
+| `grc/` | one `isatty`-guarded grc colouriser per command | it exists solely to add colour to an external tool |
+
+⚠ Do not add a fifth directory casually — every one is another prepended `$fish_function_path` entry
+and another shadowing edge (see §4). ⚠ A new subdirectory is invisible until `exec fish`, because
+the glob runs once at startup.
+
 | File | Purpose |
 | --- | --- |
-| `cachecmd.fish` | The load-bearing one. Caches a command's output under `$XDG_CACHE_HOME/fish/cachecmd/`; `--source` to source it, `--depends` for extra invalidation inputs, `--clear` to discard. Invalidates when any input is newer than the cache, writes atomically, and **refuses to cache a failure** while keeping the previous cache if regeneration fails. ⚠ `argparse --stop-nonopt` is what lets `cachecmd --source fzf --fish` work |
+| `brewup.fish` | The full update command: `brew update`/`upgrade`, then `sudo mas upgrade` **only if `mas outdated` is non-empty**, then `brew cleanup`. Replaced the `brewup` abbreviation — an abbr cannot hold that conditional. ⚠ `mas update` requires root (`mas help update`), which is exactly why the `brew autoupdate` launchd agent does not do it and this does. Ships a private `__brewup_log` that degrades from `gum log` to `printf` |
 | `cls.fish` | `clear` plus `\e[3J`, i.e. scrollback too |
-| `up.fish` | `up 3` → `cd ../../..`, with validation |
 | `extract.fish` | `switch`-based archive extractor |
 | `fishprof.fish` | `--profile-startup` plus a sorted slow-line report; `--bench` also times repeated startups |
 | `funcfresh.fish` | Re-source a function from its defining file (`functions --details`); `--cache` clears the cachecmd store |
-| `fish_should_add_to_history.fish` | Keeps `op read`/`op run`, inline `--token=`/`--password=` values, and literal credential shapes out of the history file. ⚠ Defining it takes over **all** filtering, so it reimplements the leading-space rule; ⚠ it does not affect atuin, whose own `history_filter` in `~/.config/atuin/config.toml` is the other half |
-| `__abbr_last_history_item.fish` | Backs the `!!` abbreviation |
-| `grc/*.fish` (14) | One autoloaded wrapper per grc-colourised command — `df du ping ps mount netstat ifconfig traceroute lsof uptime last nmap sysctl whois`. Zero startup cost. Each checks `isatty 1` so pipes and command substitutions stay clean. ⚠ `grc <cmd>`, not `grc command <cmd>` |
-| `gh.fish` | `op plugin run -- gh $argv`. ⚠ The matching `brew.fish` was **removed 2026-07-30** — `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt per session on the most-used command here. Do not restore it without also making `conf.d/brew.fish` use `command brew` |
-| `brewup.fish` | The full update command: `brew update`/`upgrade`, then `sudo mas upgrade` **only if `mas outdated` is non-empty**, then `brew cleanup`. Replaced the `brewup` abbreviation — an abbr cannot hold that conditional. ⚠ `mas update` requires root (`mas help update`), which is exactly why the `brew autoupdate` launchd agent does not do it and this does. Ships a private `__brewup_log` that degrades from `gum log` to `printf` |
-| `claude.fish`, `firecrawl.fish` | `op run` wrappers; see the `auth` skill |
 | `mcpkill.fish` | Kill stray Godot MCP servers |
 | `reload.fish` | Open a fresh terminal window at `$PWD` and close this one. `gum` is guarded; ⚠ `exit` is deliberate |
+| `up.fish` | `up 3` → `cd ../../..`, with validation |
+| `internal/cachecmd.fish` | The load-bearing one. Caches a command's output under `$XDG_CACHE_HOME/fish/cachecmd/`; `--source` to source it, `--depends` for extra invalidation inputs, `--clear` to discard. Invalidates when any input is newer than the cache, writes atomically, and **refuses to cache a failure** while keeping the previous cache if regeneration fails. ⚠ `argparse --stop-nonopt` is what lets `cachecmd --source fzf --fish` work. ⚠ Internal despite shipping a completion: its callers are `conf.d/tools.fish` and `funcfresh`, and the human-facing spelling of "clear the cache" is `funcfresh --cache` |
+| `internal/fish_should_add_to_history.fish` | Keeps `op read`/`op run`, inline `--token=`/`--password=` values, and literal credential shapes out of the history file. ⚠ **fish** is the caller — it looks the name up by autoload like any other function, which is why filing it in a subdirectory is safe (verified 2026-07-30: leading-space returns 1, an ordinary command 0). ⚠ Defining it takes over **all** filtering, so it reimplements the leading-space rule; ⚠ it does not affect atuin, whose own `history_filter` in `~/.config/atuin/config.toml` is the other half |
+| `internal/__abbr_last_history_item.fish` | Backs the `!!` abbreviation, called by `abbr --function` at expansion time |
+| `wrappers/gh.fish` | `op plugin run -- gh $argv`. ⚠ The matching `brew.fish` was **removed 2026-07-30** — `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt per session on the most-used command here. Do not restore it without also making `conf.d/brew.fish` use `command brew` |
+| `wrappers/claude.fish`, `wrappers/firecrawl.fish` | `op run` wrappers; see the `auth` skill |
+| `grc/*.fish` (14) | One autoloaded wrapper per grc-colourised command — `df du ping ps mount netstat ifconfig traceroute lsof uptime last nmap sysctl whois`. Zero startup cost. Each checks `isatty 1` so pipes and command substitutions stay clean. ⚠ `grc <cmd>`, not `grc command <cmd>` |
 
 ### `completions/`, `themes/`, and state
 

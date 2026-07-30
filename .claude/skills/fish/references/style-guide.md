@@ -138,8 +138,11 @@ exit and is preferred over wrapping the whole body in `if status is-interactive 
 - **`--description` is mandatory** on every function. It is what `complete`, `alias` listing and
   `functions` show.
 - Subdirectories under `functions/` are supported **only because** `_init.fish` extends
-  `$fish_function_path` with `functions/*/`. Group by domain (`functions/git/`, `functions/macos/`)
-  once a domain has ≳3 functions. Same for `completions/`.
+  `$fish_function_path` with `functions/*/`. ⚠ Group by **caller, not by topic**: the top level is
+  reserved for commands a human types, and everything else goes to `wrappers/` (shadows a real
+  binary), `internal/` (only `conf.d`, another function or fish itself calls it) or `grc/`. The
+  decision table is in [config-layout.md](config-layout.md) §7. Same idea for `completions/`, which
+  currently has no subdirectories.
 - Arguments: `argparse` for anything with flags; `-a`/`--argument-names` for a fixed positional
   signature; raw `$argv` only for pure pass-through.
   ```fish

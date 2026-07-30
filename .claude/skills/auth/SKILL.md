@@ -61,7 +61,7 @@ Three independent chains, in descending order of how much of the machine they ca
 | 1Password app | `1password@beta` cask; one account, `my.1password.com` |
 | `op` | 2.38.1-beta.01, `/opt/homebrew/bin/op`; config at `~/.config/op` |
 | `op` sign-in | ✅ working interactively. ⚠ `op whoami` **always fails from a Claude Code Bash call** — see below; that is not a misconfiguration |
-| Shell plugins | `gh` only, as `functions/gh.fish` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
+| Shell plugins | `gh` only, as `functions/wrappers/gh.fish` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
 | SSH agent | on; `~/.ssh/config` sets `IdentityAgent`, and `conf.d/op.fish` exports `SSH_AUTH_SOCK` |
 | Keys served | **five** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant. ⚠ one below `MaxAuthTries 6` |
 | `agent.toml` | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only |
@@ -87,7 +87,7 @@ process itself must carry the values.
 The mechanism is a **1Password Environment** resolved at launch by a fish wrapper:
 
 ```fish
-# ~/.config/fish/functions/claude.fish
+# ~/.config/fish/functions/wrappers/claude.fish
 op run --environment $__op_claude_env -- claude $argv
 ```
 
