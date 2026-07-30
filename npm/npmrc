@@ -4,8 +4,12 @@
 # ⚠ npm is the fallback here, not the primary — bun is (Brewfile, and conf.d/bun.fish). npm
 # stays installed because it ships with node and some tooling shells out to it directly.
 # ⚠ NPM_CONFIG_CACHE is also exported from xdg-apps.fish and an environment variable beats this
-# file. `cache` is repeated here anyway so an npm launched without the fish environment — a
-# launchd job, a GUI app, Claude Code's zsh — still writes to the same place.
+# file, so `cache` below is redundant in a fish shell and kept as documentation.
+# ⚠ It does NOT cover an npm launched without the fish environment — a launchd job, a GUI app,
+# Claude Code's zsh. Such an npm never reads this file at all: NPM_CONFIG_USERCONFIG is the only
+# thing that says where to look, so it falls back to ~/.npmrc, finds nothing, and caches into
+# ~/.npm. The floor for that case is the global config at /opt/homebrew/etc/npmrc, which npm reads
+# unconditionally; scripts/bootstrap.sh writes it.
 
 cache=~/.cache/npm
 

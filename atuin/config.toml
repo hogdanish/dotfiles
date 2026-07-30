@@ -20,3 +20,9 @@ records = true
 
 [theme]
 name = "laramie"
+
+# ⚠ atuin hardcodes its log directory to ~/.atuin/logs (`atuin_common::utils::logs_dir`) and does
+# not consult XDG at all — `dir` is the only lever, and it takes no `~` expansion. these are logs,
+# so they belong in state, not data. `retention` (default 30 days) prunes them.
+[logs]
+dir = "/Users/ethan/.local/state/atuin/logs"

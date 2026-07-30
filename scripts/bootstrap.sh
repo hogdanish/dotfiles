@@ -122,6 +122,22 @@ else
     die "no Brewfile at $CONFIG/Brewfile"
 fi
 
+# npm arrives with node, above. Same problem brew.env solves in step 2: the real npm config is at
+# ~/.config/npm/npmrc, but npm only finds it through NPM_CONFIG_USERCONFIG, which only fish
+# exports — so an npm run from launchd, a GUI app or Claude Code's zsh fell back to ~/.npmrc and
+# wrote a cache into ~/.npm. The global npmrc is read regardless of launch context.
+# ⚠ Global loses to env, project and user config, so this can only ever be the fallback.
+NPMRC="$BREW_PREFIX/etc/npmrc"
+if [ -f "$NPMRC" ] && grep -q '^cache=' "$NPMRC"; then
+    say info 'npmrc already pins the cache'
+else
+    mkdir -p "${NPMRC%/*}"
+    printf '%s\n' \
+        '# managed by ~/.config/scripts/bootstrap.sh — see the repo CLAUDE.md' \
+        "cache=${XDG_CACHE_HOME:-$HOME/.cache}/npm" >>"$NPMRC"
+    say info 'pinned the npm cache out of ~/.npm'
+fi
+
 # ── 5. git hooks ────────────────────────────────────────────────────────────────
 # ⚠ .git/hooks is never version-controlled and never arrives via clone. This is required
 #   once per clone or the secret gate silently does not exist.
