@@ -74,6 +74,25 @@ while read -r f; do [[ -n "$f" ]] &&
   printf '  \033[33m~ %s\033[0m — listed unqualified as "%s"; use the full tap path\n' "$f" "${f##*/}"
 done <"$TMP/note-brew"
 
+# ------------------------------------------------------------ uv tools
+# homebrew 6 installs these via `uv tool install`. they are real declared software, so they get the
+# same both-directions diff as formulae. `uv tool list` prints "name vX.Y.Z" then an indented line
+# per shim, so the version line is the only one to match.
+# ⚠ the shims land in ~/.local/bin, which reaches $PATH only through fish/conf.d/uv.fish — a shell
+# that did not inherit fish's environment sees none of them. that is why the digest check below
+# probes that directory directly rather than trusting `command -v`.
+section "uv tools"
+if command -v uv >/dev/null; then
+  uv tool list 2>/dev/null | awk '/^[^ ]+ v/{print $1}' | sort >"$TMP/have-uv"
+  brew bundle list --uv --file="$BREWFILE" 2>/dev/null | sort >"$TMP/want-uv"
+  comm -23 "$TMP/have-uv" "$TMP/want-uv" >"$TMP/miss-uv"
+  comm -13 "$TMP/have-uv" "$TMP/want-uv" >"$TMP/stale-uv"
+  report uv "$TMP/miss-uv" "$TMP/stale-uv"
+else
+  echo "  uv not installed — skipping"
+  : >"$TMP/want-uv"
+fi
+
 # --------------------------------------------------------------- casks
 # casks have no installed_on_request flag; exclude only those another
 # installed cask declares via depends_on.cask.
@@ -181,11 +200,19 @@ else
   }
   n=0
   # present: `command -v` first, then `brew list` for formulae that put no
-  # same-named binary on $PATH (pam-reattach ships only a PAM module).
+  # same-named binary on $PATH (pam-reattach ships only a PAM module), then the
+  # uv shim directory.
+  # ⚠ the uv probe is not redundant with `command -v`: ~/.local/bin reaches $PATH
+  # only via fish/conf.d/uv.fish, so gdformat/gdlint resolve from a fish-launched
+  # shell and not from launchd, cron, or a Claude Code Bash call. without this the
+  # audit's verdict would depend on how it was invoked — the same failure class as
+  # the brew.env and npmrc fixes.
+  UV_BIN="$(uv tool dir --bin 2>/dev/null || echo "$HOME/.local/bin")"
   while read -r c; do
     [[ -z "$c" ]] && continue
     command -v "$c" >/dev/null 2>&1 && continue
     brew list --versions "$c" >/dev/null 2>&1 && continue
+    [[ -x "$UV_BIN/$c" ]] && continue
     printf '  \033[31m- %s\033[0m  (toolbox.md claims it is present; it does not resolve)\n' "$c"
     n=$((n + 1))
   done < <(manifest verify-present)
@@ -197,13 +224,14 @@ else
     printf '  \033[32m+ %s\033[0m  (toolbox.md claims it is absent; it is installed)\n' "$c"
     n=$((n + 1))
   done < <(manifest verify-absent)
-  # coverage: a formula nobody documented is a tool claude will not reach for.
+  # coverage: a declared package nobody documented is a tool claude will not reach
+  # for. uv tools count — gdtoolkit is declared software like any formula.
   while read -r f; do
     [[ -z "$f" ]] && continue
     grep -qwF -- "${f##*/}" "$TOOLBOX" && continue
     printf '  \033[33m~ %s\033[0m — declared, but unmentioned in toolbox.md\n' "${f##*/}"
     n=$((n + 1))
-  done <"$TMP/want-brew"
+  done < <(cat "$TMP/want-brew" "$TMP/want-uv")
   [[ $n -eq 0 ]] && printf '  in sync\n'
 fi
 

@@ -1,10 +1,15 @@
 function claude --wraps claude --description 'claude code, with secrets from a 1password environment'
     # why the whole process is wrapped rather than each mcp server:
     # the github plugin ships an HTTP mcp server whose config interpolates
-    # `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *claude process environment*,
-    # and context7's stdio server reads CONTEXT7_API_KEY the same way. neither config is ours to
-    # rewrite, so the values have to be present on this process. one prompt per session, nothing
-    # on disk. the environment id is an opaque identifier, not a secret — see conf.d/op.fish.
+    # `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *claude process environment*.
+    # that config is not ours to rewrite, so the value has to be present on this process. one prompt
+    # per session, nothing on disk. the environment id is an opaque identifier, not a secret — see
+    # conf.d/op.fish.
+    #
+    # ⚠ context7 needs nothing here since 2026-07-30. it used to be a plugin spawning
+    # `npx -y @upstash/context7-mcp`, a local stdio server reading CONTEXT7_API_KEY off this
+    # environment; it is now a claude.ai connector, authenticated server-side and account-level.
+    # do not reintroduce that plugin — see claude-code/CLAUDE.md.
     #
     # claude code's bash tool inherits this environment, which is what makes gh/brew/firecrawl work
     # inside a session; fish functions and `op plugin` aliases never reach it (non-interactive zsh).

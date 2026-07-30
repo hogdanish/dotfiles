@@ -162,14 +162,14 @@ reference was wrong. Rediscovering a caveat is a documentation defect, not bad l
 fish 4.8.1 first — never correct a reference from memory.
 
 `~/.config/fish/config.fish` is intentionally empty (documentation only). Everything lives in
-`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Fifteen
+`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Sixteen
 snippets, one concern each, in load order:
 
 `_init` · `_shell` · `abbrs` · `brew` · `bun` · `colours` · `fzf` · `ghostty` · `git` · `gum` ·
-`java` · `keybindings` · `op` · `tools` · `xdg-apps`
+`java` · `keybindings` · `op` · `tools` · `uv` · `xdg-apps`
 
-⚠ Five orderings are **load-bearing** and the skill explains each: `brew` first to touch `$PATH` ·
-`bun` after `brew` (which resets `fish_user_paths`) · `colours` before `fzf` · `fzf` before `tools` ·
+⚠ Six orderings are **load-bearing** and the skill explains each: `brew` first to touch `$PATH` ·
+`bun` and `uv` after `brew` (which resets `fish_user_paths`) · `colours` before `fzf` · `fzf` before `tools` ·
 atuin last inside `tools.fish`. ⚠ **One concern per
 file** — a bare `return` ends the whole file. ⚠ **Startup cost is maintained, not accidental**:
 **10.0 ms** interactive and 3.7 ms non-interactive (was 63.1 → 16.4 → 10.0), every tool init cached by

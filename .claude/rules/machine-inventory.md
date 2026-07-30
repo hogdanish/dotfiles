@@ -1,70 +1,35 @@
 <!--
   Deliberately UNSCOPED. This governs work on ~/.config/** (outside the working directory) and on
   plain questions like "what should I use for X", neither of which a `paths:` glob would catch.
-  Kept short on purpose — it is an always-on cost. The `brewfile` skill owns *maintaining* the file;
-  this rule only says "read it, and don't trust it too far".
+  Kept short on purpose — it is an always-on cost, and the user-level `toolbox` rule is already in
+  context beside it, so anything true of the *tools* belongs there, not here. This rule says only
+  "read the Brewfile, and don't trust it too far". The `brewfile` skill owns maintaining it.
 -->
 
 # Know what is on this machine before configuring it
 
-**`./Brewfile` is the inventory of this machine** — 89 entries across taps, formulae, casks and App
-Store apps, grouped by category, each with a one-line comment saying *why* it is installed. It is
-hand-maintained. The repo root is `~/.config`, so the file is `~/.config/Brewfile`. Reading it is
-cheap and it is almost always the fastest way to understand what you are working with.
+**`./Brewfile` is the inventory** — every tap, formula, cask, App Store app and uv tool, grouped by
+category, each with a one-line comment saying *why* it is installed. Hand-maintained. The repo root
+is `~/.config`, so the file is `~/.config/Brewfile`.
 
-**First check what you already have.** `claude-code/rules/toolbox.md` is a user-level rule, so its
-digest of the CLI toolbox — what to reach for, what each tool replaces, the macOS traps, what is
-*not* installed — is already in your context in every session. For a capability question, or before
-running or scripting a command, that is the answer; open the Brewfile for GUI apps, for the *why*
-behind an entry, or for anything the digest does not name.
+**Check the `toolbox` rule first** — it is user-level, so its digest of this machine's tooling is
+already in your context in every session, and for a capability question that is the answer. Open the
+Brewfile for GUI apps, for the *why* behind an entry, or for anything the digest does not name.
 
-## Read it before you
+**Read the Brewfile before** configuring anything under `~/.config`, writing a `conf.d/<tool>.fish`
+snippet or an abbreviation wrapping a command, or recommending or choosing between tools. Three
+abbreviations in `abbrs.fish` were dead for months because this was skipped.
 
-- Configure or improve anything under `~/.config` — you cannot sensibly write a `conf.d/<tool>.fish`
-  snippet, a git config, or a theme without knowing which tools exist and which do not.
-- Recommend, choose between, or install a tool. If it is already declared, do not propose installing it.
-- Write a script or example that shells out to anything.
-- Diagnose a "command not found", a dead abbreviation, or a config referencing a missing binary.
-- Answer "what am I working with?", "what do I have for X?", or any capability question.
+⚠ **Declared intent is not verified state** — it has failed in both directions here (`shellcheck`
+installed but undeclared until 2026-07-28; `tre` referenced by an abbreviation but installed
+nowhere). The Brewfile is the survey; run a live check on the dependency you are about to rely on.
+`toolbox.md` carries the liveness-check rules — the short version is that `command -v` misses
+keg-only, prefixed and binary-less formulae, so use `brew list --versions <formula>` for those.
 
-## ⚠ Declared intent is not verified state
+⚠ `brew bundle check` is **not** that check: it only proves the declared set is installed, so it
+passes on an incomplete file. `.claude/skills/brewfile/scripts/brewfile-audit.sh` is the full
+both-directions diff. ⚠ Absence from the Brewfile is not evidence for deliberately untracked classes
+— VS Code extensions and `bun`/`npm` globals are recorded nowhere.
 
-The Brewfile records what *should* be installed. It fails in **both** directions, and has done
-recently in both:
-
-- **Installed but undeclared** — `shellcheck` was installed and missing from the file until
-  2026-07-28.
-- **Referenced but never installed** — `tre` is used by an abbreviation in `abbrs.fish` and is absent
-  from both the machine and the Brewfile. `shfmt` is listed as installed in the user-level CLAUDE.md
-  and is installed nowhere.
-
-⚠ **Pick the right liveness check for the artefact type.** `command -v` only finds things on `$PATH`,
-so it reports "missing" for entries that never install a binary. `pam-reattach` was wrongly recorded
-as not-installed for exactly this reason — it ships a **PAM module**
-(`/opt/homebrew/lib/pam/pam_reattach.so`), not an executable. Likewise keg-only formulae (`curl`) and
-prefixed ones (`make` → `gmake`) are installed but invisible to a bare `command -v`. Use
-`brew list --versions <formula>` when the formula does not put its own name on `$PATH`.
-
-So: **the Brewfile for the survey, a live check for the dependency you are about to rely on.**
-
-```sh
-type -q <cmd>                                    # in fish
-command -v <cmd> >/dev/null                       # in bash/zsh — Bash tool calls run under zsh
-brew list --versions <formula>                    # for formulae that ship no same-named binary
-.claude/skills/brewfile/scripts/brewfile-audit.sh # the full both-directions diff
-```
-
-⚠ `brew bundle check` is **not** this check — it only proves the declared set is installed, so it
-passes on an incomplete file.
-
-## Two more things
-
-- **Prefer what is present.** Use the house tools in scripts and examples rather than the defaults they
-  replace — `toolbox.md` has the table, and the `<original>: <purpose>` comment on each Brewfile entry
-  tells you what it displaces.
-- **Absence is not evidence for untracked types.** `vscode` extensions and `cargo`/`uv`/`npm`/`go`
-  globals are deliberately out of scope, so the Brewfile says nothing about them either way.
-
-If you install something while working, add it to the Brewfile in the same change — that is the
-`brewfile` skill — and, if it is a CLI worth reaching for, add it to `claude-code/rules/toolbox.md`
-too. `brewfile-audit.sh` checks that digest in both directions and names any formula it omits.
+If you install something while working, add it to the `Brewfile` **and** to
+`claude-code/rules/toolbox.md` in the same change.

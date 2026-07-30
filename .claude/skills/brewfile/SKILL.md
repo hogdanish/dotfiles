@@ -29,9 +29,19 @@ here and is the real artifact.
 
 ## Scope
 
-Track **`tap` / `brew` / `cask` / `mas`** only. `vscode`, `cargo`, `uv`, `npm`, `go`, `krew`, `flatpak` and
-`winget` entries are deliberately out of scope — documented in the reference, absent from the file. When
-dumping for comparison, suppress them: `--no-vscode --no-go --no-cargo --no-uv --no-npm`.
+Track **`tap` / `brew` / `cask` / `mas` / `uv`** only. `vscode`, `cargo`, `npm`, `go`, `krew`, `flatpak`
+and `winget` entries are deliberately out of scope — documented in the reference, absent from the file.
+When dumping for comparison, suppress them: `--no-vscode --no-go --no-cargo --no-npm`.
+
+⚠ **`uv` was added to the tracked set on 2026-07-30**, reversing the earlier decision to exclude it. The
+reasoning: a python CLI installed with `uv tool install` is declared software exactly like a formula, and
+leaving it out meant `gdtoolkit` — the only headless GDScript formatter and linter on this machine — was
+recorded nowhere and audited by nothing. `brew bundle` has supported the entry natively since Homebrew 6
+(`uv "name"`, options `with:` and `source:`), so it costs one line and `check`/`cleanup` cover it.
+⚠ The other excluded types stay excluded: they are not "not yet done", they are decisions.
+⚠ A uv tool's shims land in `~/.local/bin`, which reaches `$PATH` only via `fish/conf.d/uv.fish` — so
+`brewfile-audit.sh` probes `uv tool dir --bin` directly rather than trusting `command -v`, and its verdict
+does not depend on which shell launched it.
 
 ## Procedure — a maintenance pass
 
@@ -122,6 +132,7 @@ For macOS built-ins with no command, describe the feature. When both tools stay 
   id denylist lives in `scripts/brewfile-audit.sh`.
 - `greedy:` is **omitted by default** — most casks here self-update, and `greedy` fights them.
 - **No Ruby conditionals.** This machine is the only target.
+- **`uv` tools are tracked** (since 2026-07-30); every other non-brew entry type is not. See §Scope.
 
 ---
 

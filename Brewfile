@@ -35,6 +35,9 @@ brew "eza"        # ls: dir listing with icons
 brew "bat"        # cat: syntax-highlighted viewer
 brew "fd"         # find: simpler file search
 brew "ripgrep"    # grep: fast recursive search
+brew "sd"         # sed: literal-by-default find & replace, no bsd/gnu split
+brew "yq"         # jq: the same for yaml, toml, xml and csv
+brew "gron"       # jq: flattens json to greppable lines for rg
 brew "less"       # pager
 brew "micro"      # nano: terminal editor
 brew "btop"       # top: resource monitor
@@ -42,12 +45,17 @@ brew "macchina"   # neofetch: system info
 brew "grc"        # command output colouriser
 brew "gum"        # interactive prompts in shell scripts
 brew "coreutils"  # gnu versions of the bsd core utils
+brew "moreutils"  # coreutils: sponge, ts, errno, ifne — the ones unix never shipped
 
 ## development
 brew "git"              # source control
 brew "git-lfs"          # git: large file storage
 brew "git-delta"        # less: git diff pager
 brew "git-filter-repo"  # git: history rewriting
+brew "difftastic"       # diff: structural, ast-aware diff (delta still pages git's)
+brew "ast-grep"         # rg: structural search and rewrite by syntax tree, not regex
+brew "hyperfine"        # time: statistical benchmarking with warmup and medians
+brew "tokei"            # wc: language and loc breakdown for orienting in a repo
 brew "gh"               # git: github cli
 brew "act"              # gh: run github actions locally
 brew "lefthook"         # git: hook manager — runs the pre-commit/pre-push gates in lefthook.yml
@@ -57,6 +65,7 @@ brew "uv"               # pip: python package manager
 brew "make"             # build tool
 brew "scons"            # make: python-based build system
 brew "shellcheck"       # bash: static analysis for hook scripts
+brew "shfmt"            # shellcheck: the formatter half, for the same hook scripts
 
 ## networking
 brew "curl"     # data transfer
@@ -86,9 +95,24 @@ brew "pam-reattach"  # sudo: touch id inside tmux and screen
 brew "jorgelbg/tap/pinentry-touchid"  # gnupg: touch id pinentry
 
 ## macos & system
-brew "mas"      # mac app store cli
-brew "duti"     # default app associations by file type
-brew "fswatch"  # file change monitor
+brew "mas"        # mac app store cli
+brew "duti"       # default app associations by file type
+brew "fswatch"    # file change monitor
+brew "watchexec"  # fswatch: runs a command on change, instead of just reporting it
+
+# ===============================
+# 🐍 uv tools
+# ===============================
+#
+# `brew bundle` installs these with `uv tool install` (homebrew 6 dsl; options are `with:` and
+# `source:`). they are here rather than outside the file because this is the machine's inventory
+# and a python cli is still declared software — brew bundle check/cleanup cover them like any
+# formula.
+#
+# ⚠ the shims land in ~/.local/bin, which no shell had on $PATH until fish/conf.d/uv.fish was
+# added 2026-07-30. an installed uv tool is not automatically a reachable one.
+
+uv "gdtoolkit"  # gdformat/gdlint: the only headless gdscript formatter and linter
 
 # ===============================
 # 🛢️ casks
