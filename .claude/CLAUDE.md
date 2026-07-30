@@ -23,7 +23,14 @@ already cost a cycle:
   `/fish/fish_variables  # note` is one literal pattern matching nothing.
 
 Untracked on purpose: `raycast/`, `op/`, `homebrew/`, `yt-dlp/cookies.txt`, `fish/fish_variables`,
-and all of `claude/` except `CLAUDE.md`, `settings.json` and `rules/`. `README.md` explains each.
+and `claude/`. `README.md` explains each.
+
+⚠ **`$CLAUDE_CONFIG_DIR` is `$XDG_STATE_HOME/claude`, not `~/.config/claude`.** Transcripts, prompt
+history and vendored plugins are state, not config, and are deliberately outside this repo's working
+tree. The three authored files live in `claude-code/` and are symlinked back from the state
+directory; `~/.config/claude` is only a compatibility symlink. ⚠ If Claude Code ever *rewrites*
+`settings.json` (via `/config`) it can replace that symlink with a real file and silently detach it
+from version control — `scripts/audit-config.fish` checks for exactly this.
 
 `scripts/` holds `bootstrap.sh` (POSIX sh — fish and gum may not exist when it runs),
 `link-home.fish`, and `audit-config.fish`. **Run the audit after anything installs a new tool**; it

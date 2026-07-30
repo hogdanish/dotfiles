@@ -17,7 +17,11 @@ test -n "$XDG_CACHE_HOME"; or set -gx XDG_CACHE_HOME $HOME/.cache
 # separate checkout to point at.
 set -gx PROJECTS $HOME/Projects
 set -gx DOTFILES $XDG_CONFIG_HOME
-set -gx CLAUDE_CONFIG_DIR $XDG_CONFIG_HOME/claude
+# ⚠ state, not config: transcripts, prompt history and vendored plugins — ~48 mb of it, and
+# it has held plaintext credentials that were `cat`-ed into a session. it lives under
+# $XDG_STATE_HOME so it is not inside a public repo's working tree. the three hand-authored
+# files symlink back to $XDG_CONFIG_HOME/claude-code/, which is what gets tracked.
+set -gx CLAUDE_CONFIG_DIR $XDG_STATE_HOME/claude
 
 # fish dirs
 # fish searches $fish_function_path and $fish_complete_path *non-recursively*, so these

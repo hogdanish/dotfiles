@@ -21,7 +21,8 @@ set -g KNOWN_IGNORED \
     .DS_Store \
     raycast \
     op \
-    homebrew
+    homebrew \
+    claude
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]
@@ -82,6 +83,24 @@ function __check_home_links --description 'home/ files are still symlinks into t
     __say info 'home/ symlinks intact'
 end
 
+function __check_claude_links --description 'authored claude config is still symlinked, not detached'
+    set -l state $XDG_STATE_HOME/claude
+    if not test -d $state
+        __fail "\$CLAUDE_CONFIG_DIR is missing: $state"
+        return
+    end
+    # claude code rewrites settings.json when you use /config. if it replaces the symlink
+    # with a regular file, edits silently stop being tracked — this is the check for that.
+    for f in CLAUDE.md settings.json rules
+        if not test -L $state/$f
+            __fail "$state/$f is not a symlink — edits to it are NOT tracked"
+        else if not test -e $state/$f
+            __fail "$state/$f is a broken symlink"
+        end
+    end
+    __say info 'claude-code symlinks intact'
+end
+
 function __check_permissions --description 'sensitive untracked files are not world-readable'
     set -l cookies $REPO/yt-dlp/cookies.txt
     test -e $cookies; or return
@@ -100,6 +119,7 @@ function main
     __check_new_arrivals
     __check_secrets
     __check_home_links
+    __check_claude_links
     __check_permissions
     __check_universals
 
