@@ -14,8 +14,10 @@ macOS 27.0, Apple Silicon.
 | SSH / Git over the 1Password agent | 1Password authorization prompt | yes |
 | Git commit signature (`op-ssh-sign`) | same | yes |
 | GPG passphrase | keychain ACL + Touch ID via `pinentry-touchid` | no (`~/.gnupg` absent) |
-| `sudo` | PAM: password, or `pam_tid.so` | **no** — password only |
-| `sudo` inside tmux/screen | needs `pam_reattach` before `pam_tid` | n/a (`pam-reattach` not installed) |
+| `sudo` | PAM: password, or `pam_tid.so` | ✅ `/etc/pam.d/sudo_local` (2026-07-30) |
+| `sudo` inside tmux/screen | needs `pam_reattach` before `pam_tid` | ✅ same file, line 1 |
+| `sudo mas upgrade` (App Store updates) | same `pam_tid.so` path as any `sudo` | ✅ via `brewup`; `mas update` needs root |
+| A launchd background job needing root | ⚠ **nothing works** — see §3.1 | avoided by design |
 | Keychain item access | per-item ACL | implicit |
 | macOS login / screen unlock | Touch ID | system default |
 
@@ -44,21 +46,19 @@ idle, 12 hours, or `op signout`.
 until the session ends — after that, only socket file permissions stand between any process running
 as you and that key. Reasonable for a short batch of work; not a default.
 
-## 3. Touch ID for `sudo`
+## 3. Touch ID for `sudo` — configured 2026-07-30
 
 macOS 14+ provides a drop-in that survives OS updates. `/etc/pam.d/sudo` already contains
-`auth include sudo_local` as its first line; only the template exists here:
-
-```sh
-sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
-sudo micro /etc/pam.d/sudo_local        # uncomment the pam_tid.so line
-```
-
-Target contents:
+`auth include sudo_local` as its first line. The live file on this machine:
 
 ```
+# touch id for sudo. managed by ~/.config/scripts/bootstrap.sh
+auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
 auth       sufficient     pam_tid.so
 ```
+
+`scripts/bootstrap.sh` step 10 writes exactly this, idempotently, and refuses to clobber an existing
+`sudo_local` that lacks a `pam_tid` line.
 
 `sufficient` means Touch ID satisfies auth if it succeeds and falls through to the password prompt if
 it fails or is unavailable (SSH sessions, lid closed, no finger enrolled) — so there is no lockout
@@ -67,6 +67,29 @@ risk. It takes effect on the next `sudo`.
 ⚠ Editing `/etc/pam.d/sudo` itself instead of `sudo_local` is the old advice; the file is replaced by
 OS updates and a syntax error there can make `sudo` unusable. Always use `sudo_local`, keep a root
 shell open while editing, and test in a second terminal before closing it.
+
+### 3.1 ⚠ Touch ID cannot rescue an unattended background job
+
+This is the limit that shapes the Homebrew autoupdate design (repo `CLAUDE.md`). A launchd agent that
+needs root has three options and all three are bad:
+
+| Mechanism | What the user sees at 04:00 |
+| --- | --- |
+| plain `sudo` | fails — no tty, no askpass. The one privileged step errors |
+| `pam_tid.so` | a Touch ID sheet nobody is there to touch; times out, falls through to a password prompt nobody is there to type |
+| `SUDO_ASKPASS` → `pinentry-mac` (what `brew autoupdate --sudo` writes) | a modal password dialog at an arbitrary moment, with **no Touch ID path at all** |
+
+So Touch ID for `sudo` is a fix for *interactive* `sudo`, not for automation. The correct design is to
+keep root out of the background job entirely and do the privileged step by hand, where the tap is
+worth it. `brew autoupdate` is therefore started **without `--sudo`**, and the two `pkg`-artifact
+casks (`temurin@25`, `font-sf-pro`) are upgraded manually.
+
+⚠ The remaining non-`sudo` blocker for background cask upgrades is **App Management** (TCC). macOS
+does not let a process prompt for it and wait — it is denied outright for a non-interactive job. The
+tap's README says to add
+`~/Library/Application Support/com.github.domt4.homebrew-autoupdate/brew_autoupdate` to
+System Settings → Privacy & Security → App Management. Check the run log after the first cask upgrade
+lands: `brew autoupdate logs`.
 
 ### Inside tmux/screen
 

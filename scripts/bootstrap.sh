@@ -68,6 +68,26 @@ fi
 [ -x "$BREW_PREFIX/bin/brew" ] || die "expected brew at $BREW_PREFIX/bin/brew"
 eval "$("$BREW_PREFIX/bin/brew" shellenv sh)"
 
+# ⚠ Only fish exports XDG_CONFIG_HOME. brew launched from launchd, cron or a GUI app therefore
+#   resolves its user config to ~/.homebrew, finds no trust.json there, and **silently treats
+#   every third-party tap as untrusted** — the autoupdate agent skipped pinentry-touchid for
+#   exactly this reason. brew reads this file before it does the XDG check, so pinning the value
+#   here makes the location launch-context-independent.
+# ⚠ brew.env accepts only HOMEBREW_*, SUDO_ASKPASS and the proxy variables, so a plain
+#   XDG_CONFIG_HOME line is dropped without a word. HOMEBREW_XDG_CONFIG_HOME is the documented
+#   fallback and is not in brew's forbidden-override list, unlike HOMEBREW_USER_CONFIG_HOME.
+# ⚠ Must run before `brew bundle`, which is what applies the Brewfile's `trusted:` options.
+BREW_ENV="$BREW_PREFIX/etc/homebrew/brew.env"
+if [ -f "$BREW_ENV" ] && grep -q '^HOMEBREW_XDG_CONFIG_HOME=' "$BREW_ENV"; then
+    say info 'brew.env already pins the config home'
+else
+    mkdir -p "${BREW_ENV%/*}"
+    printf '%s\n' \
+        '# managed by ~/.config/scripts/bootstrap.sh — see the repo CLAUDE.md' \
+        "HOMEBREW_XDG_CONFIG_HOME=$CONFIG" >>"$BREW_ENV"
+    say info "pinned HOMEBREW_XDG_CONFIG_HOME to $CONFIG"
+fi
+
 # ── 3. seed the repo into ~/.config ─────────────────────────────────────────────
 # ⚠ `git clone` refuses a non-empty directory, and ~/.config is never empty on a machine
 #   that has been booted. `reset --mixed` sets HEAD and the index from the remote while
@@ -129,7 +149,7 @@ if have op; then
     if op account list >/dev/null 2>&1; then
         say info 'already signed in'
     else
-        say warn 'run "op signin" in your own terminal, then: op plugin init gh brew'
+        say warn 'run "op signin" in your own terminal, then: op plugin init gh'
     fi
 else
     say warn 'op missing — install the 1password-cli@beta cask'
@@ -160,7 +180,46 @@ else
     say warn 'fish not installed'
 fi
 
+# ── 10. touch id for sudo ───────────────────────────────────────────────────────
+# ⚠ /etc/pam.d/sudo_local is Apple's sanctioned drop-in and survives OS updates; editing
+#   /etc/pam.d/sudo directly does not, and a syntax error there can make sudo unusable.
+# ⚠ `sufficient` means Touch ID satisfies auth when it succeeds and falls through to the
+#   password prompt when it fails or is unavailable (ssh, lid shut, no finger enrolled) —
+#   so there is no lockout risk. pam_reattach must come FIRST or Touch ID fails inside
+#   tmux/screen, where the session is re-parented away from the GUI login session.
+step 'Touch ID for sudo'
+PAM_LOCAL=/etc/pam.d/sudo_local
+PAM_REATTACH="$BREW_PREFIX/lib/pam/pam_reattach.so"
+if [ -f "$PAM_LOCAL" ] && grep -q '^auth[[:space:]].*pam_tid\.so' "$PAM_LOCAL"; then
+    say info 'already enabled'
+elif [ -f "$PAM_LOCAL" ]; then
+    say warn "$PAM_LOCAL exists but has no pam_tid line — add it by hand, not clobbering it"
+elif ask "Enable Touch ID for sudo? (needs your password once)"; then
+    # the reattach line is emitted only when the module is actually present: `optional`
+    # tolerates a missing module, but PAM logs a dlopen failure on every auth attempt.
+    {
+        echo '# touch id for sudo. managed by ~/.config/scripts/bootstrap.sh'
+        [ -f "$PAM_REATTACH" ] && echo "auth       optional       $PAM_REATTACH"
+        echo 'auth       sufficient     pam_tid.so'
+    } | sudo tee "$PAM_LOCAL" >/dev/null
+    say info 'enabled — verify in a second terminal with: sudo -k; sudo true'
+fi
+
+# ── 11. unattended homebrew updates ─────────────────────────────────────────────
+# `brew bundle` taps domt4/autoupdate and trusts its command, but cannot install the launch
+# agent — that is stateful and lives in ~/Library/LaunchAgents, not in this repo.
+# ⚠ deliberately no --sudo: the launchd job must never be able to raise a password prompt.
+#   The two pkg-installer casks (temurin@25, font-sf-pro) are upgraded by hand instead.
+step 'Homebrew autoupdate'
+if ! brew autoupdate status >/dev/null 2>&1; then
+    say warn 'autoupdate unavailable — run: brew trust --command domt4/autoupdate/autoupdate'
+elif brew autoupdate status 2>/dev/null | grep -q 'installed and running'; then
+    say info 'already running'
+elif ask 'Start unattended Homebrew updates every 12h?'; then
+    brew autoupdate start 12h --upgrade --cleanup --ac-only --notify-on-error
+fi
+
 # ── done ────────────────────────────────────────────────────────────────────────
 step 'Done'
 say info 'verify with: ~/.config/scripts/audit-config.fish'
-say info 'remaining manual steps: op signin · Touch ID for sudo (see the auth skill)'
+say info 'remaining manual step: op signin (see the auth skill)'

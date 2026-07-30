@@ -35,9 +35,8 @@ abbr -a refresh 'exec fish' # reload this shell in place
 abbr -a g git
 abbr -a ga 'git add .'
 
-# homebrew. `; and` rather than `&&`: both work in fish 4, but the word forms are the house
-# spelling and fish_indent formats them consistently.
-abbr -a brewup 'brew update; and brew upgrade; and brew cleanup'
+# homebrew. ⚠ `brewup` is deliberately NOT here any more — it is `functions/brewup.fish`, because
+# it now gates the app store phase on `mas outdated` and an abbreviation cannot hold a conditional.
 
 # claude code
 abbr -a cc claude

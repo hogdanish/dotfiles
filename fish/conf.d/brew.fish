@@ -42,9 +42,19 @@ set -a brewpath "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin"
 fish_add_path -g -m $brewpath
 
 # settings
-set -gx HOMEBREW_AUTO_UPDATE_SECS 86400
+# ⚠ every HOMEBREW_* below is a *presence* flag: homebrew declares them `boolean: :set`, so any
+# value at all — including `0` — enables the behaviour. there is no way to spell "off" except by
+# not setting the variable. `HOMEBREW_DEVELOPER 0` lived here and reported `set` in `brew config`,
+# i.e. it turned warnings into errors and dropped the auto-update interval to an hour. it is gone;
+# do not reintroduce it, or any other `<VAR> 0`. verify with `brew config`, not by reading this file.
+#
+# ⚠ HOMEBREW_AUTO_UPDATE_SECS gates the *git* `brew update` run before install/upgrade/tap, and
+# the launchd job from domt4/autoupdate now does that on its own 12h schedule — so a week here
+# only stops an interactive `brew install` from stalling to redo it. the json api metadata is a
+# different variable (HOMEBREW_API_AUTO_UPDATE_SECS, 450 s) and is deliberately left at default,
+# so nothing goes stale. ⚠ if `brew autoupdate` is ever stopped, lower this again.
+set -gx HOMEBREW_AUTO_UPDATE_SECS 604800
 set -gx HOMEBREW_NO_ANALYTICS 1
-set -gx HOMEBREW_DEVELOPER 0
 set -gx HOMEBREW_NO_ENV_HINTS 1
 set -gx HOMEBREW_BUNDLE_NO_LOCK 1
 set -gx HOMEBREW_DOWNLOAD_CONCURRENCY auto
@@ -55,10 +65,16 @@ set -gx HOMEBREW_CURL_RETRIES 3
 set -gx HOMEBREW_BAT 1
 set -gx HOMEBREW_CASK_OPTS --no-quarantine
 
-# ⚠ never call bare `brew` from this file. functions/brew.fish shadows it and is autoloadable
-# during conf.d sourcing, so it would raise a 1password prompt on every shell start. use
-# `command brew`. that is also why there is no cached `brew shellenv` here — the four lines
-# above are all of it that this machine actually needs.
+# ⚠ never call `brew` from this file — it is a ruby process on every shell start, including
+# non-interactive ones. that is why there is no cached `brew shellenv` here: the four path
+# lines above are all of it that this machine actually needs.
+#
+# there is no longer a functions/brew.fish either. it wrapped every invocation in
+# `op plugin run --` for HOMEBREW_GITHUB_API_TOKEN, which since homebrew 4 buys only a higher
+# github api rate limit for `brew search --desc` and the developer commands — metadata comes
+# from the json api and touches api.github.com not at all. it cost a 1password prompt per
+# session on the most-used command here. ⚠ if it ever comes back, this file must call
+# `command brew`: an autoloaded function is visible *during* conf.d sourcing.
 #
 # no completions wiring either: homebrew installs to share/fish/vendor_completions.d, which
 # fish already puts on $fish_complete_path automatically. the share/fish/completions path

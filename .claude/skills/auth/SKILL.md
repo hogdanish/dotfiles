@@ -61,7 +61,7 @@ Three independent chains, in descending order of how much of the machine they ca
 | 1Password app | `1password@beta` cask; one account, `my.1password.com` |
 | `op` | 2.38.1-beta.01, `/opt/homebrew/bin/op`; config at `~/.config/op` |
 | `op` sign-in | ✅ working interactively. ⚠ `op whoami` **always fails from a Claude Code Bash call** — see below; that is not a misconfiguration |
-| Shell plugins | `gh` + `brew` configured (`~/.config/op/plugins/*.json`); fish side is `functions/{gh,brew}.fish`, **not** `plugins.sh` |
+| Shell plugins | `gh` only, as `functions/gh.fish` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
 | SSH agent | on; `~/.ssh/config` sets `IdentityAgent`, and `conf.d/op.fish` exports `SSH_AUTH_SOCK` |
 | Keys served | **five** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant. ⚠ one below `MaxAuthTries 6` |
 | `agent.toml` | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only |
@@ -70,7 +70,7 @@ Three independent chains, in descending order of how much of the machine they ca
 | Local verification | `gpg.ssh.allowedSignersFile = ~/.config/git/allowed_signers` ✅ (file created) |
 | GnuPG | 2.5.21; `~/.gnupg` created (0700) with `gpg-agent.conf` → `pinentry-touchid`, agent running. **No key exists**, so the Touch ID path is untested |
 | pinentry | ⚠ `gpgconf` resolves to `/opt/homebrew/opt/pinentry/bin/pinentry`, a **symlink to `pinentry-curses`** — a TTY prompt. Bypassed by the explicit `pinentry-program` |
-| Touch ID for sudo | ⏳ **off**; only `/etc/pam.d/sudo_local.template` exists |
+| Touch ID for sudo | ✅ **on** (2026-07-30). `/etc/pam.d/sudo_local` = `pam_reattach` optional, then `pam_tid.so` sufficient. ⚠ Interactive `sudo` only — see `touchid-system-auth.md` §3.1 |
 | `pam-reattach` | **installed** (1.3, `/opt/homebrew/lib/pam/pam_reattach.so`) — it is a PAM module, so `command -v` finds nothing |
 | Plaintext secrets | ⏳ `~/.config/fish/conf.d/secrets.fish` still holds live API tokens as `-gx` vars |
 

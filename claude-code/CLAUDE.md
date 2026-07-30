@@ -119,6 +119,9 @@
   `java` · `keybindings` · `op` · `tools` · `xdg-apps`. ⚠ No `fisher.fish` (no plugin manager) and
   no `theme.fish` (renamed to `colours.fish`); `secrets.fish` was retired and must never return.
 - `/Users/ethan/.config/fish/functions/`: custom shell functions. ⚠ The subdirectory is `grc/`
-  (one wrapper per grc-colourised command), not `alias/`. The 1Password shell-plugin wrappers are
-  top-level: `gh.fish` and `brew.fish`, each `op plugin run -- <cli> $argv`.
+  (one wrapper per grc-colourised command), not `alias/`. There is exactly **one** 1Password
+  shell-plugin wrapper, `gh.fish` (`op plugin run -- gh $argv`); ⚠ the matching `brew.fish` was
+  **removed 2026-07-30** and must not come back — plain `brew` is not wrapped. `brewup.fish` is the
+  full update command (homebrew + mac app store); Homebrew also updates itself on a 12 h launchd
+  timer via `brew autoupdate`.
 - `/Users/ethan/Projects/`: git repositories
