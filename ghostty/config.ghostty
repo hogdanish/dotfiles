@@ -19,38 +19,49 @@ keybind = performable:cmd+v=paste_from_clipboard
 keybind = performable:cmd+r=reload_config
 
 # font
-## enabled: ligatures, arrows, smart case, symbol spacing, alt. g. disabled smart kerning (ss05)
 font-family = "CommitMono Nerd Font Mono"
+font-size = 13
 font-feature = ss01
 font-feature = ss02
 font-feature = ss03
 font-feature = ss04
+font-feature = ss05
 font-feature = cv02
 font-thicken = true
+font-thicken-strength = 128
 font-synthetic-style = false
 window-inherit-font-size = false
+adjust-cell-height = 8%
 
 # appearance
 ## minimalist appearance; subtle liquid glass effect
 theme = laramie
-background-opacity = 0.85
-background-blur = 100
+background-opacity = 0.92
+background-blur = macos-glass-regular
 alpha-blending = linear-corrected
 window-colorspace = display-p3
+palette-generate = true
+minimum-contrast = 1.1
 macos-titlebar-style = transparent
 window-decoration = auto
-macos-titlebar-proxy-icon = hidden
-window-padding-balance = true
+# macos-titlebar-proxy-icon = hidden
+window-padding-balance = equal
 window-padding-x = 16
 window-padding-y = 8
+window-width = 120
+window-height = 40
 window-save-state = never
+resize-overlay = never
 
 # behavior
 mouse-hide-while-typing = false
 cursor-style = bar
 cursor-click-to-move = true
 cursor-opacity = 0.8
-window-save-state = never
+copy-on-select = clipboard
+undo-timeout = 30s
+
+# security
 ## ask, not allow: OSC 52 clipboard *reads* are how a program — including one on a remote host
 ## you are ssh'd into — can silently exfiltrate whatever 1password last pasted.
 clipboard-read = ask
@@ -60,5 +71,7 @@ clipboard-trim-trailing-spaces = true
 ## enables macos secure keyboard entry when a password prompt is detected — a keylogger
 ## mitigation. ⚠ heuristic, and it does not work over ssh.
 macos-auto-secure-input = true
+title-report = false
+macos-shortcuts = deny
 confirm-close-surface = false
 desktop-notifications = true

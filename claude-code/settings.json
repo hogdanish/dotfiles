@@ -4,14 +4,7 @@
   },
   "model": "opus[1m]",
   "enabledPlugins": {
-    "context7@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
     "github@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "hookify@claude-plugins-official": true,
-    "mcp-server-dev@claude-plugins-official": true,
     "firecrawl@claude-plugins-official": true
   },
   "effortLevel": "high",
