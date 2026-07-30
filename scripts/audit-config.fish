@@ -98,6 +98,24 @@ function __check_claude_links --description 'authored claude config is still sym
             __fail "$state/$f is a broken symlink"
         end
     end
+
+    # every authored skill must be linked in, or it is written but never loaded.
+    for skill in (path filter -d $REPO/claude-code/skills/*)
+        set -l name (path basename $skill)
+        if not test -L $state/skills/$name
+            __fail "skills/$name is authored but not linked — run scripts/link-claude.fish"
+        else if not test -e $state/skills/$name
+            __fail "$state/skills/$name is a broken symlink"
+        end
+    end
+
+    # ...and the reverse: a dangling link loads nothing while looking installed. this is the
+    # exact failure `firecrawl setup skills` produced 31 times, undetected for two days.
+    for entry in $state/skills/*
+        test -L $entry; and not test -e $entry
+        and __fail "dangling skill link: "(path basename $entry)" — it loads nothing"
+    end
+
     __say info 'claude-code symlinks intact'
 end
 
