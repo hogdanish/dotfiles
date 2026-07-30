@@ -55,6 +55,13 @@ Read it only when you need something not named below.
   `ssh` is openssh's, ahead of Apple's.
 - **Git and GitHub** — `gh` (but the GitHub MCP server comes first), `git-lfs`, `git-filter-repo` for
   history rewriting, `lefthook` for hooks.
+- **Homebrew and the App Store** — ⚠ Homebrew **updates and upgrades itself** every 12 h via a
+  launchd agent (`brew autoupdate`; logs at `brew autoupdate logs`). Do not propose `brew update` as
+  a fix, and do not treat an out-of-date package as drift. ⚠ The agent deliberately cannot `sudo`,
+  so two things are outside it: the `pkg`-installer casks `temurin@25` and `font-sf-pro`, and
+  **every `mas` app** (`mas update` requires root — `mas help update`). All of that is what the
+  **`brewup`** fish function is for; suggest it rather than a raw command chain. ⚠ Plain `brew` is
+  **not** wrapped in `op`; invoke it directly.
 - **Correctness and secrets** — `shellcheck` every bash script you write, `betterleaks` to scan
   content for credentials, `op` for every credential (the `auth` skill), `jq` for JSON.
 - **System** — `fswatch` to watch paths, `duti` for default-app associations, `mas` for the App Store,

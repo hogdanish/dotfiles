@@ -16,6 +16,11 @@
 # touch id support for gpg
 tap "jorgelbg/tap", trusted: true
 
+# unattended `brew update && upgrade && cleanup` on a launchd timer.
+# command-scoped trust, not `trusted: true` — this permits only `brew autoupdate`,
+# not every present and future formula, cask and command in the tap.
+tap "domt4/autoupdate", trusted: {command: "autoupdate"}
+
 # ===============================
 # 🧪 formulae
 # ===============================

@@ -70,7 +70,7 @@ function cachecmd --description "cache a command's output, then source or print 
         builtin source $cachefile
     else
         # `command`: functions/grc/ may define wrappers that are autoloadable during
-        # conf.d sourcing, exactly like the functions/brew.fish trap.
+        # conf.d sourcing, and would shadow the real binary here.
         command cat $cachefile
     end
 end

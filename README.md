@@ -36,7 +36,8 @@ curl -fsSL https://raw.githubusercontent.com/hogdanish/dotfiles/main/scripts/boo
 ```
 
 Idempotent and safe to re-run. It installs Xcode CLT → Homebrew → seeds this repo into `~/.config`
-→ `brew bundle` → `lefthook install` → links `home/` → prompts for the manual 1Password steps.
+→ `brew bundle` → `lefthook install` → links `home/` → prompts for the manual 1Password steps →
+offers Touch ID for `sudo` and the unattended-update launch agent.
 
 ⚠ **You cannot `git clone` into `~/.config`** — it is never empty. The script uses
 `git init` + `fetch` + `reset --mixed`, which sets HEAD and the index from the remote while leaving
@@ -45,9 +46,13 @@ the working tree untouched, then shows you exactly what differs *before* overwri
 
 Manual steps it cannot do for you:
 
-- `op signin`, then `op plugin init gh brew` — `~/.config/op/` is machine state and is not tracked
-- Touch ID for `sudo` (`/etc/pam.d/sudo_local`) — see the `auth` skill
+- `op signin`, then `op plugin init gh` — `~/.config/op/` is machine state and is not tracked
 - `~/.agents/skills/` — the firecrawl/godot skill bundles are installed separately
+
+Two things the script *offers* but that live outside this repo, so a fresh clone does not carry them:
+`/etc/pam.d/sudo_local` (Touch ID for `sudo`) and `~/Library/LaunchAgents/…homebrew-autoupdate.plist`.
+Both are machine state by nature; the Brewfile carries their dependencies and `bootstrap.sh` carries
+the recipe.
 
 ## The allowlist
 

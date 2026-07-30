@@ -1,9 +1,11 @@
 # 1password — the ssh agent socket and cli wiring.
 #
-# the shell-plugin credentials for gh and brew live in ~/.config/op/plugins/*.json and need no
-# wiring here. ⚠ do NOT source ~/.config/op/plugins.sh — `op plugin init` writes posix shell
-# functions (`gh() { ... }`) regardless of the invoking shell, and it does not parse as fish.
-# the fish side is functions/gh.fish and functions/brew.fish instead.
+# the shell-plugin credentials live in ~/.config/op/plugins/*.json and need no wiring here.
+# ⚠ do NOT source ~/.config/op/plugins.sh — `op plugin init` writes posix shell functions
+# (`gh() { ... }`) regardless of the invoking shell, and it does not parse as fish. the fish side
+# is functions/gh.fish. ⚠ gh is the only one: the brew wrapper was removed 2026-07-30 because
+# HOMEBREW_GITHUB_API_TOKEN buys nothing post-homebrew-4 and cost a prompt per session.
+# brew.json is therefore orphaned plugin state — `op plugin clear brew` to drop it.
 
 # ssh agent
 # ~/.ssh/config sets IdentityAgent, which covers ssh(1) and everything that reads ssh_config.

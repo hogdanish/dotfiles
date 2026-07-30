@@ -285,7 +285,7 @@ already been read."*
 | Path | Role | State here |
 | --- | --- | --- |
 | `~/.config/fish/conf.d/` | sourced snippets, step 5 | 15 files — see §7 |
-| `~/.config/fish/functions/` | autoloaded functions | 13 top-level + 14 in `grc/`. ⚠ `functions/grc/` is *prepended* to `$fish_function_path`, so it shadows the top level |
+| `~/.config/fish/functions/` | autoloaded functions | **14** top-level + 14 in `grc/` (verified 2026-07-30 with `fd -e fish --max-depth 1`; the "13" here was an off-by-one — its own table below always listed 14). ⚠ `functions/grc/` is *prepended* to `$fish_function_path`, so it shadows the top level |
 | `~/.config/fish/completions/` | autoloaded completions | 6 files: `op`, `up`, `extract`, `funcfresh`, `cachecmd`, `fishprof` |
 | `~/.config/fish/themes/` | `*.theme` files for `fish_config theme` | `laramie.fish` (the `$theme_*` palette, sourced by `conf.d/colours.fish`, hex **with** `#`) and the generated `laramie.theme` (hex **without** `#`). The starship and glamour configs that used to sit here moved to `~/.config/starship.toml` and `~/.config/glamour/` |
 | `~/.config/fish/fish_variables` | universal-variable store, fish-managed | present, header comments only — **zero universals**, which is the intended steady state |
@@ -364,7 +364,8 @@ Design rules the layout now enforces:
 | `fish_should_add_to_history.fish` | Keeps `op read`/`op run`, inline `--token=`/`--password=` values, and literal credential shapes out of the history file. ⚠ Defining it takes over **all** filtering, so it reimplements the leading-space rule; ⚠ it does not affect atuin, whose own `history_filter` in `~/.config/atuin/config.toml` is the other half |
 | `__abbr_last_history_item.fish` | Backs the `!!` abbreviation |
 | `grc/*.fish` (14) | One autoloaded wrapper per grc-colourised command — `df du ping ps mount netstat ifconfig traceroute lsof uptime last nmap sysctl whois`. Zero startup cost. Each checks `isatty 1` so pipes and command substitutions stay clean. ⚠ `grc <cmd>`, not `grc command <cmd>` |
-| `brew.fish`, `gh.fish` | `op plugin run -- <cli> $argv` |
+| `gh.fish` | `op plugin run -- gh $argv`. ⚠ The matching `brew.fish` was **removed 2026-07-30** — `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt per session on the most-used command here. Do not restore it without also making `conf.d/brew.fish` use `command brew` |
+| `brewup.fish` | The full update command: `brew update`/`upgrade`, then `sudo mas upgrade` **only if `mas outdated` is non-empty**, then `brew cleanup`. Replaced the `brewup` abbreviation — an abbr cannot hold that conditional. ⚠ `mas update` requires root (`mas help update`), which is exactly why the `brew autoupdate` launchd agent does not do it and this does. Ships a private `__brewup_log` that degrades from `gum log` to `printf` |
 | `claude.fish`, `firecrawl.fish` | `op run` wrappers; see the `auth` skill |
 | `mcpkill.fish` | Kill stray Godot MCP servers |
 | `reload.fish` | Open a fresh terminal window at `$PWD` and close this one. `gum` is guarded; ⚠ `exit` is deliberate |

@@ -52,6 +52,47 @@ that destroys every comment and category. The `brewfile` skill owns it;
 `.claude/rules/machine-inventory.md` has the protocol and the ⚠ that it records *declared intent*,
 not verified state — confirm a binary with `type -q` before depending on it.
 
+**Homebrew updates itself unattended.** The `domt4/autoupdate` tap is declared in the Brewfile with
+**command-scoped** trust (`trusted: {command: "autoupdate"}`, *not* `trusted: true` — Homebrew 6's tap
+gate; this permits only `brew autoupdate`). A launchd agent runs `brew update && brew upgrade
+--formula && brew upgrade --cask && brew cleanup` every 12 h, **AC power only**, notifying only on
+failure. Logs: `brew autoupdate logs`.
+
+⚠ It is started **without `--sudo` on purpose.** That flag writes a `SUDO_ASKPASS` helper that raises a
+pinentry-mac password dialog at unpredictable times, and that dialog has **no Touch ID path** — it is
+precisely the intrusion this setup exists to avoid. The price is that the two casks with a `pkg`
+artifact, **`temurin@25`** and **`font-sf-pro`**, cannot be upgraded in the background; when a new
+version lands that one cask fails and you get an error notification. Upgrade those by hand
+(`brew upgrade --cask temurin@25`), where Touch ID covers the `sudo`. Every other cask either
+self-updates (`auto_updates true`, skipped because there is no `--greedy`) or needs no root.
+
+⚠ **The agent does not touch the App Store.** `mas update` **requires root** (`mas help update` says
+so), so putting it in the launchd job would reintroduce exactly the unattended password prompt this
+design removes — and `mas` is additionally known to hang without a GUI session. App Store apps are
+therefore updated by **`functions/brewup.fish`**, which is also where the two `pkg` casks get done:
+`brew update`/`upgrade` → `sudo mas upgrade` *only when `mas outdated` is non-empty* → `brew cleanup`.
+⚠ It replaced the `brewup` abbreviation, because an abbr cannot hold that conditional. ⚠ Do not
+"fix" this with a `NOPASSWD` sudoers rule for `mas`: it lives in `/opt/homebrew/bin`, which is
+user-writable, so that is a trivial root escalation.
+
+⚠ **Only fish exports `XDG_CONFIG_HOME`, and brew resolves its user config from it.** A brew launched
+by launchd, cron or a GUI app therefore looked in `~/.homebrew`, found no `trust.json`, and **silently
+treated every third-party tap as untrusted** — the first autoupdate run logged
+`Warning: Skipping pinentry-touchid: tap formula is not trusted`. This is the same failure class as
+the `GNUPGHOME` decision below, and the fix is `/opt/homebrew/etc/homebrew/brew.env` holding
+`HOMEBREW_XDG_CONFIG_HOME=/Users/ethan/.config`, written by `bootstrap.sh` step 2 (it must run before
+`brew bundle`, which is what applies the Brewfile's `trusted:` options). ⚠ That file accepts only
+`HOMEBREW_*`, `SUDO_ASKPASS` and the proxy variables — a plain `XDG_CONFIG_HOME=` line is dropped
+silently, and `HOMEBREW_USER_CONFIG_HOME` is on brew's forbidden-override list. Verify with
+`env -u XDG_CONFIG_HOME brew trust`, never with a plain `brew trust`.
+
+⚠ **`brew autoupdate` state is not re-derivable from this repo** — the plist and the generated script
+live in `~/Library`. To change a flag you must `brew autoupdate delete` **then** `start`; a bare
+`start` silently reuses the existing script and your new flags are ignored. ⚠ `start` bakes a snapshot
+of `PATH`, `HOMEBREW_CACHE`, `HOMEBREW_LOGS`, `HOMEBREW_DEVELOPER`, `HOMEBREW_NO_ANALYTICS`,
+`HOMEBREW_CASK_OPTS` and `SUDO_ASKPASS` into that script, so run it from a shell whose environment you
+actually want — nothing else is inherited, and no other `HOMEBREW_*` reaches the background job.
+
 **Commits are gated** by `lefthook.yml`: `betterleaks` on staged content, a force-add guard, `fish -n`
 + `fish_indent --check`, and `ruby -c` on the Brewfile. ⚠ `.git/hooks` is never version-controlled —
 `lefthook install` is required once per clone or none of that exists.
@@ -176,9 +217,19 @@ than trusting paths.
 `ya29.`. `.betterleaks.toml` adds them; re-verify after `brew upgrade betterleaks`.
 
 Configured: the SSH agent (`IdentityAgent` + `SSH_AUTH_SOCK` from `conf.d/op.fish`), `agent.toml`
-scoped to `Development`, `op-ssh-sign` signing with a working `allowedSignersFile`, the `gh`/`brew`
-shell plugins as `functions/{gh,brew}.fish`, `functions/{claude,firecrawl}.fish` for `op run`, and
-`gpg-agent.conf` → `pinentry-touchid`. Not yet: Touch ID for `sudo`.
+scoped to `Development`, `op-ssh-sign` signing with a working `allowedSignersFile`, the `gh`
+shell plugin as `functions/gh.fish`, `functions/{claude,firecrawl}.fish` for `op run`, and
+`gpg-agent.conf` → `pinentry-touchid`.
+
+⚠ **There is no `functions/brew.fish` any more** (removed 2026-07-30) and it should not come back.
+It wrapped every `brew` in `op plugin run --` to supply `HOMEBREW_GITHUB_API_TOKEN`, costing a
+1Password authorization on the most-used command here. Since Homebrew 4 all formula and cask metadata
+comes from the JSON API and `api.github.com` is not touched at all: the token only raises the
+unauthenticated rate limit for `brew search --desc`, `brew bump` and the developer commands.
+⚠ The one thing that *would* justify a token is `HOMEBREW_VERIFY_ATTESTATIONS` (Sigstore build
+provenance for core bottles) — it is **not** set here, and enabling it would break the autoupdate job,
+whose launchd script forwards no token. `~/.config/op/plugins/brew.json` is now orphaned machine
+state; `op plugin clear brew` removes it.
 
 ⚠ **`op whoami` always fails from a Bash tool call** — no tty means no biometric prompt. That is not
 evidence 1Password is misconfigured; ask the user to check in their own terminal.
@@ -247,6 +298,9 @@ python3 -m json.tool ~/.config/xh/config.json             # ...so is xh's
 macchina --doctor                                         # every declared readout still resolves
 brew bundle check --file=Brewfile                         # everything declared is installed
 .claude/skills/brewfile/scripts/brewfile-audit.sh         # ...and everything installed is declared
+brew config | rg HOMEBREW_                                # ⚠ what brew ACTUALLY has set, not the file
+env -u XDG_CONFIG_HOME brew trust                         # taps resolve outside fish (launchd, cron)
+brew autoupdate status                                    # the unattended-update agent is running
 ```
 
 New-config spot checks, none of which have a `--validate` of their own:
@@ -268,8 +322,10 @@ Ghostty reloads with `cmd+r`; fish with the `refresh` abbreviation (`exec fish`)
 
 ## Known gaps
 
-1. Touch ID for `sudo` is still not configured (`auth` skill). ⚠ `pam-reattach` is installed
-   *specifically* for this and currently does nothing; `/etc/pam.d/sudo_local` does not exist.
+1. ~~Touch ID for `sudo`~~ — **closed 2026-07-30.** `/etc/pam.d/sudo_local` now holds
+   `pam_reattach` (optional) then `pam_tid.so` (sufficient); verified with `sudo -k && sudo true`.
+   ⚠ It does **not** help an unattended launchd job — see the `auth` skill's
+   `touchid-system-auth.md` §3.1, which is why `brew autoupdate` runs without `--sudo`.
 2. **`act` cannot run** — it needs a container runtime and neither docker nor podman is installed.
    `~/.config/act/actrc` is written and correct, waiting on that dependency.
 3. **fzf has no preview.** `FZF_DEFAULT_OPTS` is themed, but `FZF_CTRL_T_OPTS`/`FZF_ALT_C_OPTS` are
@@ -299,8 +355,12 @@ default — see `README.md`.
 
 ⚠ Traps that would undo earlier fixes: **never** reintroduce a bare `fish_add_path` (it writes a
 universal `fish_user_paths`); **never** put an environment variable in a git `include.path`; **never**
-source `/opt/homebrew/etc/grc.fish` (it writes a universal and `eval`s arguments). Details and
-reproduction live in `fish/references/caveats.md` and the `auth` skill — not here.
+source `/opt/homebrew/etc/grc.fish` (it writes a universal and `eval`s arguments); **never** write
+`set -gx HOMEBREW_<X> 0` (every `HOMEBREW_*` here is `boolean: :set`, so `0` *enables* it — that is how
+`HOMEBREW_DEVELOPER 0` silently ran this machine in developer mode until 2026-07-30; the only way to
+spell "off" is to omit the line, and `brew config` is what proves it); **never** restore
+`functions/brew.fish` without making `conf.d/brew.fish` use `command brew`. Details and reproduction
+live in `fish/references/caveats.md` and the `auth` skill — not here.
 
 ## Handle with care in `~/.config`
 
