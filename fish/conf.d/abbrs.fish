@@ -6,9 +6,11 @@
 # months because it was not checked; see .claude/rules/machine-inventory.md.
 #
 # an abbreviation is purely a line-editor feature — it expands on typed input and scripts
-# never see one, so defining 30 of them in a non-interactive shell is 0.4 ms (~9% of its
-# whole startup) spent on something nothing can read. `fish -c` sources all of conf.d/.
+# never see one, so defining them in a non-interactive shell is time spent on something
+# nothing can read. `fish -c` sources all of conf.d/, hence the guard below.
 # ⚠ the every-target-resolves check in the fish skill must therefore run under `fish -i`.
+# measured 2026-07-30: all 68 abbrs cost 0.30 ms of a 9.93 ms interactive startup, and the
+# 38 git ones added here moved the median by less than the run-to-run noise.
 status is-interactive; or return
 
 # modern replacements for the coreutils defaults
@@ -31,9 +33,69 @@ abbr -a rm trash
 abbr -a ping 'ping -c 5'
 abbr -a refresh 'exec fish' # reload this shell in place
 
-# git
+# git. these expand to *raw git*, not to the aliases in git/.gitconfig, even where
+# an alias exists — the point of an abbr is that the buffer and the history end up
+# holding a command that also works from zsh, from a script, and on another machine.
+# the exceptions are `glg`/`gla`/`gll`/`gbr`, whose formats live in the gitconfig and
+# have nowhere shorter to come from.
+#
+# ⚠ two obvious names are deliberately missing. `gs` is ghostscript and `gcp` is gnu
+# coreutils' cp, both installed here (Brewfile), and an abbr at command position would
+# shadow them in the buffer. `gss` and `gchp` stand in.
 abbr -a g git
 abbr -a ga 'git add .'
+abbr -a gaa 'git add --all'
+abbr -a gap 'git add --patch'
+abbr -a gst 'git status'
+abbr -a gss 'git status --short --branch'
+
+# committing
+abbr -a gc 'git commit'
+abbr -a gcm 'git commit --message'
+abbr -a gcam 'git commit --all --message'
+abbr -a gam 'git commit --amend --no-edit'
+
+# exchanging with a remote. no --set-upstream anywhere: push.autoSetupRemote is on,
+# and fetch.prune is already true, so neither flag needs typing.
+abbr -a gp 'git push'
+abbr -a gpf 'git push --force-with-lease'
+abbr -a gl 'git pull'
+abbr -a gf 'git fetch --all'
+abbr -a gcl 'git clone'
+
+# branches
+abbr -a gsw 'git switch'
+abbr -a gswc 'git switch --create'
+abbr -a gco 'git checkout'
+abbr -a gb 'git branch'
+abbr -a gbd 'git branch --delete'
+abbr -a gbr 'git branches' # gitconfig alias: sorted, with upstream and subject
+
+# reading history. delta is git's pager, so all of these are already themed.
+abbr -a gd 'git diff'
+abbr -a gds 'git diff --staged'
+abbr -a gsh 'git show'
+abbr -a gbl 'git blame'
+abbr -a glg 'git lg' # gitconfig alias: --graph
+abbr -a gla 'git lga' # ...the same, --all
+abbr -a gll 'git ll' # ...flat, last 20
+
+# undoing. `grh` is destructive, which is exactly why it is an abbr and not a
+# function: the full `git reset --hard` sits in the buffer before you press enter.
+abbr -a grs 'git restore'
+abbr -a gun 'git restore --staged'
+abbr -a grh 'git reset --hard'
+
+# stashing and replaying
+abbr -a gsta 'git stash push'
+abbr -a gstp 'git stash pop'
+abbr -a gstl 'git stash list'
+abbr -a grb 'git rebase'
+abbr -a grbi 'git rebase --interactive'
+abbr -a grbc 'git rebase --continue'
+abbr -a grba 'git rebase --abort'
+abbr -a gchp 'git cherry-pick'
+abbr -a gwt 'git worktree'
 
 # homebrew. ⚠ `brewup` is deliberately NOT here any more — it is `functions/brewup.fish`, because
 # it now gates the app store phase on `mas outdated` and an abbreviation cannot hold a conditional.
@@ -57,5 +119,5 @@ for i in 2 3 4 5 6 7 8 9
 end
 
 # bash-style !! — recall the previous command line. --function means the expansion is
-# computed at expansion time by functions/__abbr_last_history_item.fish.
+# computed at expansion time by functions/internal/__abbr_last_history_item.fish.
 abbr -a '!!' --position anywhere --function __abbr_last_history_item

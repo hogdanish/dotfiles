@@ -1,5 +1,27 @@
 [alias]
+; one-word verbs for things git spells awkwardly. an alias can never shadow a
+; builtin subcommand, so these are purely additive — and unlike a fish abbr they
+; also work from zsh, from a script, and inside `gh`.
 staged = "diff --staged"
+unstage = "restore --staged"
+amend = "commit --amend --no-edit"
+undo = "reset --soft HEAD~1"
+last = "show --stat"
+root = "rev-parse --show-toplevel"
+aliases = "config --get-regexp alias"
+
+; formatted history. `lg` is the graph, `ll` the flat list, `lga` every ref.
+; ⚠ the colours are ANSI *names*, not laramie hexes, on purpose: named colours
+; resolve through the terminal palette, so this follows the ghostty theme instead
+; of adding a fifteenth place the palette has to be hand-duplicated.
+lg = "log --graph --pretty=lg --date=human"
+lga = "log --graph --all --pretty=lg --date=human"
+ll = "log --pretty=lg --date=human --max-count=20"
+; ⚠ the inner single quotes are load-bearing: git splits an alias body on
+; whitespace with shell rules, so an unquoted --format=… becomes five arguments.
+; ⚠ %(color:auto) is a *log* placeholder and is rejected here — for-each-ref
+; formats need a real colour name, so the current branch is marked with %(HEAD).
+branches = "branch --sort=-committerdate --format='%(color:green)%(HEAD)%(color:blue)%(refname:short)%(color:reset)%(if)%(upstream)%(then) %(color:brightblack)→ %(upstream:short)%(end)  %(color:brightblack)%(committerdate:relative) · %(contents:subject)%(color:reset)'"
 
 [commit]
 gpgsign = true
@@ -58,6 +80,11 @@ diffFilter = "delta --features=interactive"
 
 [merge]
 conflictStyle = diff3
+
+[pretty]
+; the format behind `git lg`/`ll`/`lga`. %C(auto) colours the hash and decorates
+; refs by kind; brightblack is palette slot 8, i.e. laramie's dim.
+lg = "%C(auto)%h%d%C(reset) %s %C(brightblack)· %ad · %an%C(reset)"
 
 [push]
 autoSetupRemote = true
