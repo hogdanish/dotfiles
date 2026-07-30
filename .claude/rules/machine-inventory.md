@@ -7,10 +7,10 @@
 
 # Know what is on this machine before configuring it
 
-**`./Brewfile` is the inventory of this machine** — 87 entries across taps, formulae, casks and App
+**`./Brewfile` is the inventory of this machine** — 89 entries across taps, formulae, casks and App
 Store apps, grouped by category, each with a one-line comment saying *why* it is installed. It is
-hand-maintained and 143 lines. Reading it is cheap and it is almost always the fastest way to
-understand what you are working with.
+hand-maintained. The repo root is `~/.config`, so the file is `~/.config/Brewfile`. Reading it is
+cheap and it is almost always the fastest way to understand what you are working with.
 
 ## Read it before you
 

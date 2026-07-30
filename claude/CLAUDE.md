@@ -96,7 +96,7 @@
 
 ### Resources
 
-**Installed system tools** — ⚠ do not maintain a list here. `~/Projects/dotfiles/Brewfile` is the
+**Installed system tools** — ⚠ do not maintain a list here. `~/.config/Brewfile` is the
 machine's inventory: every entry carries a one-line comment saying *why* it is installed, and it is
 the only copy that gets updated when something is added. Read it before recommending, configuring or
 diagnosing any tool. A hand-kept duplicate in this file drifted badly enough that config was written
@@ -119,7 +119,15 @@ needs a container runtime, and neither docker nor podman is present.
 - `code-insiders .` opens VS Code Insiders
 
 **Notable system paths:**
-- `/Users/ethan/.config/`: system dotfiles
+- `/Users/ethan/.config/`: system dotfiles — **and the dotfiles git repo itself**, tracked in place
+  since 2026-07-29. `$DOTFILES` and `$XDG_CONFIG_HOME` are deliberately the same path. ⚠ Nothing is
+  tracked unless `.gitignore` (an allowlist) names it; adding a config means adding one `!` line.
+  Its own guidance is `~/.config/.claude/CLAUDE.md`.
+- `/Users/ethan/.config/home/`: files that cannot live under `~/.config` because their consumer
+  hardcodes a `$HOME` path — `zshrc`, `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf`. They are
+  symlinked into `$HOME`, so ⚠ edit them here, not at the `$HOME` path.
+- `/Users/ethan/.agents/skills/`: firecrawl + godot skill bundles, symlinked into
+  `$CLAUDE_CONFIG_DIR/skills/`. Installed separately and **not** part of the dotfiles repo.
 - `/Users/ethan/.config/fish/conf.d/`: shell config — 15 snippets, one concern each, in load order:
   `_init` · `_shell` · `abbrs` · `brew` · `bun` · `colours` · `fzf` · `ghostty` · `git` · `gum` ·
   `java` · `keybindings` · `op` · `tools` · `xdg-apps`. ⚠ No `fisher.fish` (no plugin manager) and

@@ -5,22 +5,44 @@ Guidance for Claude Code in this repository.
 ⚠ Every `SKILL.md` links docs in an adjacent `references/`. Read **all** that could plausibly bear
 on the task — floors, not menus.
 
-## Read this first: the configs are not in this repo
+## Read this first: the repo IS `~/.config`
 
-**Edit `~/.config` directly.** No dotfiles manager has been adopted yet (checked: stow, chezmoi,
-yadm, rcm, dotter, nix — none installed), so `~/.config` is the single source of truth. Do not copy
-configs into this repo, do not create a `config/` mirror, and do not treat anything here as the
-"real" version to be deployed later. Absolute paths like `~/.config/fish/conf.d/git.fish` are in
-scope for reading and editing even though they sit outside the working directory. In-place editing
-is deliberate, not a shortcut; choosing a manager would change this section.
+**Edit `~/.config` directly — and that is the repository.** Since 2026-07-29 `~/.config` is a git
+repo tracked in place. There is no manager, no mirror, no templating, and no deploy step: editing
+`~/.config/fish/conf.d/git.fish` *is* editing the repo. Do not create a `config/` subdirectory, do
+not copy files "into the repo", and do not treat any path here as a staging copy.
 
-This repo holds only what is *not* a live config: `.claude/`, `README.md`, `.editorconfig`, and the
-`Brewfile`. The `Brewfile` is **hand-maintained**, not generated, and doubles as this machine's
-**software inventory** — 87 entries, each saying why it is installed. **Read it before configuring
-any tool, recommending one, or diagnosing a missing command.** ⚠ Never run `brew bundle dump --force`
-over it; that destroys every comment and category. The `brewfile` skill owns it;
+⚠ **Nothing is tracked unless `.gitignore` names it.** The allowlist opens with an anchored `/*`
+and re-includes explicitly, so the default for anything new is *ignored*. Adding a config means
+adding one `!` line; `git check-ignore -v <path>` says which rule decided. Two traps that have
+already cost a cycle:
+
+- A bare `*` instead of `/*` matches directory entries at every depth, and git never descends into
+  an excluded directory — so every `!foo/**` beneath it silently never fires.
+- **`.gitignore` has no trailing comments.** `#` opens a comment only at the start of a line, so
+  `/fish/fish_variables  # note` is one literal pattern matching nothing.
+
+Untracked on purpose: `raycast/`, `op/`, `homebrew/`, `yt-dlp/cookies.txt`, `fish/fish_variables`,
+and all of `claude/` except `CLAUDE.md`, `settings.json` and `rules/`. `README.md` explains each.
+
+`scripts/` holds `bootstrap.sh` (POSIX sh — fish and gum may not exist when it runs),
+`link-home.fish`, and `audit-config.fish`. **Run the audit after anything installs a new tool**; it
+names every top-level entry that is neither tracked nor known junk.
+
+`home/` holds the files that cannot live under `~/.config` because their consumer hardcodes a
+`$HOME` path — `zshrc`, `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf` — symlinked into place.
+⚠ Edit them at `~/.config/home/…`; the `$HOME` paths are symlinks.
+
+The `Brewfile` is **hand-maintained**, not generated, and doubles as this machine's **software
+inventory** — each entry says why it is installed. **Read it before configuring any tool,
+recommending one, or diagnosing a missing command.** ⚠ Never run `brew bundle dump --force` over it;
+that destroys every comment and category. The `brewfile` skill owns it;
 `.claude/rules/machine-inventory.md` has the protocol and the ⚠ that it records *declared intent*,
 not verified state — confirm a binary with `type -q` before depending on it.
+
+**Commits are gated** by `lefthook.yml`: `betterleaks` on staged content, a force-add guard, `fish -n`
++ `fish_indent --check`, and `ruby -c` on the Brewfile. ⚠ `.git/hooks` is never version-controlled —
+`lefthook install` is required once per clone or none of that exists.
 
 ## System facts
 
@@ -125,9 +147,21 @@ commit signing, the GnuPG/pinentry-touchid/keychain chain, and every Touch ID su
 `sudo`. Load it before writing any config that stores or consumes a secret.
 `.claude/rules/security.md` carries the always-on subset.
 
-**No plaintext secrets on this machine** — verified. `conf.d/secrets.fish` is gone and the tokens
-live in the `Claude Code` 1Password Environment; **never recreate it**. Never read, print or copy
-`~/.config/yt-dlp/cookies.txt`, and never run a command whose output would be a resolved secret.
+**No plaintext secrets in any *config* file** — verified. `conf.d/secrets.fish` is gone and the
+tokens live in the `Claude Code` 1Password Environment; **never recreate it**. Never read, print or
+copy `~/.config/yt-dlp/cookies.txt`, and never run a command whose output would be a resolved secret.
+
+⚠ **The stronger claim "no plaintext secrets on this machine" was false and has been corrected.**
+On 2026-07-29 an audit found the full contents of the retired `secrets.fish` — a GitHub
+fine-grained PAT, the Firecrawl key and the Context7 key — captured verbatim in Claude Code
+transcripts under `$CLAUDE_CONFIG_DIR/projects/`. Those four credentials were rotated. The lesson
+is structural, not incidental: **transcripts are append-only and hostile.** Anything `cat`-ed into a
+session persists in plaintext long after the file is deleted. Never design a guardrail that assumes
+that directory is clean — which is why it is untracked, and why `betterleaks` runs on content rather
+than trusting paths.
+
+⚠ The 412 built-in betterleaks rules do **not** cover `fc-` (Firecrawl), `ctx7sk-` (Context7) or
+`ya29.`. `.betterleaks.toml` adds them; re-verify after `brew upgrade betterleaks`.
 
 Configured: the SSH agent (`IdentityAgent` + `SSH_AUTH_SOCK` from `conf.d/op.fish`), `agent.toml`
 scoped to `Development`, `op-ssh-sign` signing with a working `allowedSignersFile`, the `gh`/`brew`
@@ -222,9 +256,9 @@ Ghostty reloads with `cmd+r`; fish with the `refresh` abbreviation (`exec fish`)
 
 ## Known gaps
 
-1. **Nothing is version-controlled.** `~/.config` is a plain directory and this repo has **no
-   commits**. Until a dotfiles manager is chosen, a mistake is recoverable only from a shell that is
-   still running — the largest remaining risk on the machine.
+1. **The repo is local-only.** `~/.config` is under git with a full history, but there is no remote
+   yet and nothing has been pushed. A disk failure still loses everything — publishing is the
+   remaining step.
 2. Touch ID for `sudo` is still not configured (`auth` skill). ⚠ `pam-reattach` is installed
    *specifically* for this and currently does nothing; `/etc/pam.d/sudo_local` does not exist.
 3. **`act` cannot run** — it needs a container runtime and neither docker nor podman is installed.
