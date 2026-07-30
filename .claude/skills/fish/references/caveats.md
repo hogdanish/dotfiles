@@ -216,6 +216,25 @@ will get them wrong again.
 
 ## Tooling and environment
 
+### a median of 15 startups cannot resolve a sub-millisecond change — use per-line attribution
+`2026-07-30` · measuring what 38 new git abbreviations cost in `conf.d/abbrs.fish`
+- **Cause** — the existing advice ("compare medians", §7 of [config-layout.md](config-layout.md)) is
+  right about not trusting a single run, but understates the drift. Measured back to back on an
+  otherwise idle machine: 11.04 ms with the file, 9.49 ms with it renamed `.off`, **9.84 ms with the
+  identical file restored**. The first and third configurations are byte-identical, so 1.2 ms of that
+  1.55 ms "effect" was drift, not the change. A 21-run batch the same minute had min 10.30 and max
+  20.93.
+- **Do** — for anything under ~1 ms, do not benchmark wall clock at all. Read the cost straight out of
+  the profile, where it is stable and directly attributable:
+  ```sh
+  fish --profile-startup=/tmp/p -c exit
+  awk 'NR>1 && $1 ~ /^[0-9]+$/ && $0 ~ /abbr -a/ {s+=$1; n++} END{printf "%d lines, %.2f ms\n", n, s/1000}' /tmp/p
+  ```
+  That gave 68 abbr lines = **0.30 ms**, reproducibly, while the medians disagreed with themselves.
+  Keep the median comparison for changes of several ms (a new fork, an uncached tool init).
+- **Verified** — the three benchmarks above, 15 runs each, run in one command with nothing else
+  started in between.
+
 ### atuin's per-session `atuin uuid` fork is **avoidable** — it was called unavoidable here for a day
 `2026-07-29` · a benchmark pass; it was **31% of interactive startup**, the single largest line
 - **Cause** — the cached init opens with
@@ -396,7 +415,7 @@ Tracked here only while unfixed; the current-state inventory is
 
 ### ~~`conf.d/secrets.fish` holds plaintext credentials~~ — RESOLVED
 `2026-07-28` · four live API tokens as environment variables; **file retired the same day**
-- **Outcome** — moved to the `Claude Code` 1Password Environment, consumed by `functions/claude.fish`
+- **Outcome** — moved to the `Claude Code` 1Password Environment, consumed by `functions/wrappers/claude.fish`
   via `op run --no-masking --environment`. Verified: a fresh login fish exports none of the four.
 - **⚠ Never recreate it.** A shell that needs a credential gets it at the moment of use.
 

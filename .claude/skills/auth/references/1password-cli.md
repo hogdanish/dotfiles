@@ -176,7 +176,7 @@ gh() {
 **The fish path is one autoloaded function per CLI**, mirroring what `plugins.sh` would have defined:
 
 ```fish
-# ~/.config/fish/functions/gh.fish
+# ~/.config/fish/functions/wrappers/gh.fish
 function gh --wraps gh --description 'gh with a github pat supplied by the 1password shell plugin'
     op plugin run -- gh $argv
 end

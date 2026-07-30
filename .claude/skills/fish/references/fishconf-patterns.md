@@ -139,7 +139,7 @@ fishconf reserves `config.fish` for documentation by choice, whereas Ethan's is 
 
 ### 3.1 `cachecmd` — the highest-value pattern in the repo
 
-**fishconf** — `functions/cachecmd.fish`:
+**fishconf** — `functions/internal/cachecmd.fish`:
 
 ```fish
 function cachecmd --description "Cache command output, skip running if fresh"
@@ -180,7 +180,7 @@ caching the generated code makes each one a `builtin source`. Three weaknesses, 
 failure. Verified: cache hit on the second call, regenerated after the binary is replaced.
 
 ```fish
-# adapted — functions/cachecmd.fish
+# adapted — functions/internal/cachecmd.fish
 function cachecmd --description 'cache a command\'s output, then source or print the cache'
     argparse --stop-nonopt s/source -- $argv; or return
     if test (count $argv) -eq 0
@@ -533,7 +533,7 @@ Ordered by payoff ÷ effort. Every row was a gap verified against the live confi
 | 2 | **Guard the Ghostty source** with `test -r`. Verified: with `GHOSTTY_RESOURCES_DIR` unset the current line prints `source: No such file or directory` on every non-Ghostty shell (ssh, VS Code task, `fish -c`). | `conf.d/_shell.fish` | S | Startup noise → silence. §0.4. |
 | 3 | **Add `.editorconfig`** (§3.9 verbatim + a `[*.fish]` block). | `/Users/ethan/Projects/dotfiles/.editorconfig` (new) | S | Enforces §1 on save; `_shell.fish` and `brew.fish` both fail `fish_indent --check` today. |
 | 4 | **`fish_indent -w` the three failing files** — `_shell.fish`, `brew.fish`, `abbrs.fish` fail `--check`; `_init.fish` and `git.fish` pass. | `conf.d/*.fish` | S | Makes `fish_indent --check` a usable gate. Do after #3. |
-| 5 | **Add `functions/cachecmd.fish`** (adapted, §3.1). | `functions/cachecmd.fish` (new) | M | Prerequisite for #6; five forks per shell → five `builtin source`s, with the upgrade-safe invalidation the original lacks. |
+| 5 | **Add `functions/internal/cachecmd.fish`** (adapted, §3.1). | `functions/internal/cachecmd.fish` (new) | M | Prerequisite for #6; five forks per shell → five `builtin source`s, with the upgrade-safe invalidation the original lacks. |
 | 6 | **Add `conf.d/tools.fish`** (adapted, §3.2) — `starship`, `atuin`, `zoxide`, `fzf`, `grc` are all installed and all uninitialized (CLAUDE.md gap 5). | `conf.d/tools.fish` (new) | S | Closes five gaps in one file. Notably makes `abbr -a cd z` work — it is dead today. |
 | 7 | **Add `functions/cls.fish`.** Verified: no `cls` binary and no `cls` function, so `abbr -a c cls` expands to nothing runnable. | `functions/cls.fish` (new) | S | Fixes a broken abbr in 3 lines (below). |
 | 8 | **Resolve `abbr -a tree tre`.** Verified: `tre` is not installed. Either `brew install tre-command` or repoint the abbr at `eza --tree`. | `conf.d/abbrs.fish` or `Brewfile` | S | Fixes CLAUDE.md gap 4. Decide; don't leave it dangling. |

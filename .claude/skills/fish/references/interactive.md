@@ -363,7 +363,7 @@ suppresses bash-history import. `set -gx fish_history ''` stores nothing at all.
 stops working unless you reimplement it:
 
 ```fish
-# functions/fish_should_add_to_history.fish
+# functions/internal/fish_should_add_to_history.fish
 function fish_should_add_to_history --description 'keep secrets and noise out of the history file'
     # preserve fish's built-in rule, which this function otherwise replaces
     string match -q ' *' -- $argv[1]; and return 1
