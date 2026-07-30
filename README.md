@@ -74,6 +74,13 @@ Two things the script *offers* but that live outside this repo, so a fresh clone
 Both are machine state by nature; the Brewfile carries their dependencies and `bootstrap.sh` carries
 the recipe.
 
+It also *writes* two files outside the repo, unconditionally:
+`/opt/homebrew/etc/homebrew/brew.env` and `/opt/homebrew/etc/npmrc`. They exist for one reason —
+only fish exports `XDG_CONFIG_HOME` and `NPM_CONFIG_USERCONFIG`, so brew and npm launched from
+launchd, a GUI app or Claude Code's zsh resolve their user config somewhere else entirely and fall
+back to defaults. Pinning each value where the launch context cannot matter is what stops brew
+silently distrusting every third-party tap, and npm scattering a cache into `~/.npm`.
+
 ## The allowlist
 
 `.gitignore` starts with an anchored `/*` and re-includes only what is named. **The default for

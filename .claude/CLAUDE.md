@@ -105,6 +105,15 @@ the `GNUPGHOME` decision below, and the fix is `/opt/homebrew/etc/homebrew/brew.
 silently, and `HOMEBREW_USER_CONFIG_HOME` is on brew's forbidden-override list. Verify with
 `env -u XDG_CONFIG_HOME brew trust`, never with a plain `brew trust`.
 
+⚠ **npm has the identical failure, closed 2026-07-30.** Only fish exports `NPM_CONFIG_USERCONFIG`, so
+an npm launched by launchd, a GUI app or Claude Code's zsh never reads `npm/npmrc` **at all** — that
+variable is the only thing that says where to look. It fell back to `~/.npmrc`, found nothing, and
+cached into `~/.npm`. The floor is the **global** config `/opt/homebrew/etc/npmrc` holding `cache=`,
+written by `bootstrap.sh` step 4 and read regardless of launch context. ⚠ Precedence is
+cli > env > project > user > global > builtin, so it can only ever be the fallback, never an
+override. ⚠ `logs-dir` defaults to `{cache}/_logs`, so pinning the cache moves the logs with it.
+⚠ The path is not owned by the `node` formula, so `brew upgrade node` does not clobber it.
+
 ⚠ **`brew autoupdate` state is not re-derivable from this repo** — the plist and the generated script
 live in `~/Library`. To change a flag you must `brew autoupdate delete` **then** `start`; a bare
 `start` silently reuses the existing script and your new flags are ignored. ⚠ `start` bakes a snapshot
