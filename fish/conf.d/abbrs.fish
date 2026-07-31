@@ -44,61 +44,17 @@ abbr -a refresh 'exec fish' # reload this shell in place
 # shadow them in the buffer. `gss` and `gchp` stand in.
 abbr -a g git
 abbr -a ga 'git add .'
-abbr -a gaa 'git add --all'
-abbr -a gap 'git add --patch'
 abbr -a gst 'git status'
-abbr -a gss 'git status --short --branch'
-
-# committing
-abbr -a gc 'git commit'
-abbr -a gcm 'git commit --message'
-abbr -a gcam 'git commit --all --message'
-abbr -a gam 'git commit --amend --no-edit'
-
-# exchanging with a remote. no --set-upstream anywhere: push.autoSetupRemote is on,
-# and fetch.prune is already true, so neither flag needs typing.
+abbr -a gc 'git commit --message'
 abbr -a gp 'git push'
-abbr -a gpf 'git push --force-with-lease'
-abbr -a gl 'git pull'
+abbr -a gpl 'git pull'
 abbr -a gf 'git fetch --all'
 abbr -a gcl 'git clone'
-
-# branches
 abbr -a gsw 'git switch'
-abbr -a gswc 'git switch --create'
 abbr -a gco 'git checkout'
 abbr -a gb 'git branch'
-abbr -a gbd 'git branch --delete'
-abbr -a gbr 'git branches' # gitconfig alias: sorted, with upstream and subject
-
-# reading history. delta is git's pager, so all of these are already themed.
 abbr -a gd 'git diff'
-abbr -a gds 'git diff --staged'
-abbr -a gsh 'git show'
-abbr -a gbl 'git blame'
-abbr -a glg 'git lg' # gitconfig alias: --graph
-abbr -a gla 'git lga' # ...the same, --all
-abbr -a gll 'git ll' # ...flat, last 20
-
-# undoing. `grh` is destructive, which is exactly why it is an abbr and not a
-# function: the full `git reset --hard` sits in the buffer before you press enter.
 abbr -a grs 'git restore'
-abbr -a gun 'git restore --staged'
-abbr -a grh 'git reset --hard'
-
-# stashing and replaying
-abbr -a gsta 'git stash push'
-abbr -a gstp 'git stash pop'
-abbr -a gstl 'git stash list'
-abbr -a grb 'git rebase'
-abbr -a grbi 'git rebase --interactive'
-abbr -a grbc 'git rebase --continue'
-abbr -a grba 'git rebase --abort'
-abbr -a gchp 'git cherry-pick'
-abbr -a gwt 'git worktree'
-
-# homebrew. ⚠ `brewup` is deliberately NOT here any more — it is `functions/brewup.fish`, because
-# it now gates the app store phase on `mas outdated` and an abbreviation cannot hold a conditional.
 
 # claude code
 abbr -a cc claude
