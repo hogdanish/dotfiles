@@ -14,21 +14,47 @@ verify-absent: docker docker-compose podman cargo rustup go mvn gradle gsed pret
 
 # The toolbox on this machine
 
-**One file, one question: what do I reach for?** Everything named below is **installed and verified
-present** unless the final *Not installed* section says otherwise. Two standing imperatives:
+**One file, one question: *if* I am about to run a shell command, what do I reach for?** Everything
+named below is **installed and verified present** unless the final *Not installed* section says
+otherwise.
 
-1. **Never check whether one of these exists, and never offer to install it — just use it.**
-2. **Before writing a shell loop, a multi-step pipeline, or a throwaway script, look here for a tool
-   that does the whole job in one invocation.** Reinventing `jq`, `ffmpeg`, `hyperfine` or `ast-grep`
-   in forty lines of bash is the expensive mistake, not picking `grep` over `rg`.
+**This is an inventory, not an obligation.** Its whole job is to spare you from checking what exists
+and from settling for a clumsier tool out of caution. It has no opinion on whether shelling out is
+the right move at all — that call comes first, and nothing here applies until you have made it.
 
-⚠ This is about *shell* work. For reading and editing files your Read/Edit/Grep tools still beat
-piping `bat` or `sd` into context.
+⚠ **Never let this file invent work.** Your own capabilities come first, every time:
+
+- **You read images, screenshots, PDFs and diagrams natively.** Never pipe one through `magick`,
+  `sips`, `qlmanage` or an ASCII converter to "analyze" it — just look at it. Shell out for an image
+  only when a transformed *file* is the deliverable.
+- **Read/Edit/Grep/Glob beat `bat`, `cat`, `sed -n` and `head`** for getting file content into your
+  own context, and the reason is mechanical rather than aesthetic: `Read` numbers the lines and
+  registers the file with the harness, which is what makes a later `Edit` legal. A `bat` dump does
+  neither. ⚠ Need part of a large file? That is `Read` with `offset`/`limit` — never
+  `sed -n '95,115p'`. ⚠ Batching several file reads into one `bash` call to save a round trip is a
+  false economy; it buys one turn and costs the line numbers and the registration. `bat` is for
+  showing a file to **the user**.
+- **Reasoning, writing and judgement are not tool-shaped.** Nothing below substitutes for thinking.
+
+What this file *does* license, so you never have to ask:
+
+1. **Don't check whether something below exists, and don't offer to install it** — it is here.
+2. **When you were already going to write a shell loop, a multi-step pipeline or a throwaway
+   script**, look here first for something that does the whole job in one invocation. Reinventing
+   `jq`, `ffmpeg`, `hyperfine` or `ast-grep` in forty lines of bash is the expensive mistake.
+
+Everything below is a **default, not a rule**. A concrete reason to go elsewhere — a flag only the
+other tool has, a script that must run on another machine, the user asked for it that way — outranks
+any table here and needs no justification. Reaching for `grep` over `rg` is a rounding error; never
+make it a discussion, and never rewrite a working command just to comply.
 
 `~/.config/Brewfile` is the complete inventory — GUI apps included, with a one-line *why* per entry.
 Read it when you need something not named here, or before recommending a new tool.
 
-## Use instead of the default
+## Better defaults for shell work
+
+When a job below genuinely comes up *in a shell*, the middle column is the better tool here. This is
+a preference, not a ban on the right column.
 
 | Job | Use | Instead of |
 | --- | --- | --- |
@@ -51,7 +77,10 @@ Read it when you need something not named here, or before recommending a new too
 | Edit a file in its own pipeline | `… \| sponge file` (moreutils) | `cmd file > file` (truncates!) |
 | Jump to a directory | `z` (zoxide — interactive fish only) | `cd` |
 
-## Reach for these without asking — by task
+## What is here, by task
+
+Use any of these without asking permission when the task actually calls for it. That is not the same
+as needing to find a use for them.
 
 - **Benchmark a command** → `hyperfine` (warmup, mean/median/σ, `--export-json`). ⚠ Never time
   something once and call it a result.
@@ -65,8 +94,10 @@ Read it when you need something not named here, or before recommending a new too
 - **Size up an unfamiliar repo** → `tokei` for the language/LOC breakdown.
 - **Media** → `ffmpeg`/`ffprobe` for any transcode, trim, concat or probe. `sox`/`soxi` for raw audio
   sample-rate work. `yt-dlp` for any media URL. ⚠ Never read or pass `~/.config/yt-dlp/cookies.txt`.
-- **Images** → `magick` (imagemagick 7). ⚠ The legacy `convert` still resolves but is deprecated.
-  `rsvg-convert` (librsvg) gives it SVG input, `gs` (ghostscript) PDF/PostScript.
+- **Images** → `magick` (imagemagick 7) **to produce or transform an image file**. ⚠ Never to *look*
+  at one — you see images natively, and converting a screenshot to text throws away the information
+  you wanted. The legacy `convert` still resolves but is deprecated. `rsvg-convert` (librsvg) gives
+  `magick` SVG input, `gs` (ghostscript) PDF/PostScript.
 - **Fonts** → `woff2_compress` / `woff2_decompress` (woff2).
 - **Network** → `caddy file-server` for an instant static server or reverse proxy; `wget` to mirror
   recursively; `nmap` to scan ports; `iperf3` for bandwidth, `dnsperf` for DNS. `ssh` is openssh's.
@@ -96,15 +127,17 @@ whole volume) · `sqlite3` · `sips` (quick image convert/resize) · `textutil` 
 
 ## Non-CLI tools — MCP servers, connectors, plugins
 
-The same question, different transport. Prefer these over a shell command or built-in web tool:
+The same question, different transport. When the work *is* documentation lookup, GitHub, Godot or web
+extraction, these beat a shell command or the built-in web tools:
 
 - **Docs / API lookup → Context7, always first.** A claude.ai **connector**, not a plugin —
   account-level, so the same server backs Claude Code, Desktop and claude.ai, with nothing installed
   locally. ⚠ There is deliberately **no** `context7` plugin: it was the same upstream server reached a
   worse way (`npx -y @upstash/context7-mcp` respawned every session), removed 2026-07-30. Do not
   reinstall it. Use `resolve-library-id` then `query-docs` for **any** named library, framework, SDK,
-  API, CLI tool or cloud service — including ones you think you know. Version-sensitive or obscure
-  makes it *mandatory*. Never answer an API question from memory when a lookup would settle it.
+  API, CLI tool or cloud service — including ones you think you know, because your training data
+  lags. Version-sensitive or obscure makes it *mandatory*; for stable, well-known basics your own
+  knowledge is fine, and a lookup you would not have needed is just latency.
   ⚠ Cap: 3 `resolve-library-id` and 3 `query-docs` per question; one concept per `query-docs` call.
   Fall back to built-in search/fetch only when Context7 has no entry.
 - **GitHub → the GitHub MCP server first**, then `gh` CLI, then manual.
@@ -149,10 +182,12 @@ The same question, different transport. Prefer these over a shell command or bui
 
 ## Not installed
 
-Do not reach for, propose, or write examples against: `docker`/`docker-compose`, `podman`,
-`rustup`/`cargo`, `go`, `mvn`/`gradle`, `gsed`, `prettier`, `eslint`, `tre`, `chafa`,
-`AtomicParsley`, `macos-defaults`, `pip`. (`pip3` resolves only as an artefact of Homebrew's python —
-never use it to install anything.) Absence here is not evidence for deliberately untracked classes:
+Don't assume these are available, and don't write a command or example against one: `docker`/
+`docker-compose`, `podman`, `rustup`/`cargo`, `go`, `mvn`/`gradle`, `gsed`, `prettier`, `eslint`,
+`tre`, `chafa`, `AtomicParsley`, `macos-defaults`, `pip`. (`pip3` resolves only as an artefact of
+Homebrew's python — never use it to install anything.) If one of them genuinely *is* the right answer
+to something, say so and say it is not installed — this list is a fact about the machine, not a
+prohibition on the topic. Absence here is not evidence for deliberately untracked classes:
 VS Code extensions and `bun`/`uv`/`npm` globals are recorded nowhere.
 
 ## Keeping this file true

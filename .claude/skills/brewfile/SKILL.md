@@ -73,6 +73,12 @@ half of the Brewfile — what to reach for, what each tool replaces, the macOS/B
 deliberately absent — and it is written by hand, because the usage guidance is the point and no generator
 produces it.
 
+⚠ **Its register is *inventory*, not mandate**, and keeping it that way is part of maintaining it. Phrase
+every entry as a default that applies once shelling out is already the right move. The original imperative
+framing ("two standing imperatives", "reach for these without asking") had agents in unrelated projects
+piping attached screenshots through `magick` to read them as ASCII instead of just looking at them —
+softened 2026-07-30, when the header gained an explicit native-capabilities-first precedence.
+
 **Adding or removing a CLI formula means updating it in the same change.** It is allowed to duplicate
 the Brewfile only because it is verified rather than trusted: a stripped HTML comment at its top carries
 `verify-present:` and `verify-absent:` lists, and the audit's *claude toolbox digest* section fails when
