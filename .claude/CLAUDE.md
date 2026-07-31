@@ -352,7 +352,7 @@ ghostty +validate-config                                  # ghostty config is va
 .claude/skills/ghostty/scripts/ghostty-audit.sh           # ...and the ghostty skill matches the build
 python3 -m json.tool ~/.config/micro/settings.json        # micro configs are JSON
 python3 -m json.tool ~/.config/xh/config.json             # ...so is xh's
-macchina --doctor                                         # every declared readout still resolves
+fastfetch --list-config-paths                             # ⚠ confirms which single config is read
 brew bundle check --file=Brewfile                         # everything declared is installed
 .claude/skills/brewfile/scripts/brewfile-audit.sh         # ...and everything installed is declared
 scripts/link-claude.fish --dry-run                        # authored claude config is linked in
@@ -396,7 +396,7 @@ Ghostty reloads with `cmd+r`; fish with the `refresh` abbreviation (`exec fish`)
    `~/.config/act/actrc` is written and correct, waiting on that dependency.
 3. **fzf has no preview.** `FZF_DEFAULT_OPTS` is themed, but `FZF_CTRL_T_OPTS`/`FZF_ALT_C_OPTS` are
    unset, so `ctrl-t` and `alt-c` show bare filenames while `bat` and `eza` sit installed and themed.
-4. No completions for `macchina`, `claude`, `code-insiders`, `ffmpeg`, `fswatch`, `scons`, `woff2` —
+4. No completions for `claude`, `code-insiders`, `ffmpeg`, `fswatch`, `scons`, `woff2` —
    none of them ship one and none has a manpage for `fish_update_completions` to derive one from.
    Everything else is covered; re-run `fish_update_completions` after installing a new tool.
 
