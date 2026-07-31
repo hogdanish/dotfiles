@@ -1,0 +1,99 @@
+// fastfetch — the system readout. replaced macchina on 2026-07-30.
+//
+// ⚠ there is no theme file, and there must not be one. fastfetch has no include/import
+// directive and reads exactly one config (`fastfetch --list-config-paths`), so a separate
+// themes/laramie.jsonc could only be loaded with an explicit `-c` on every invocation.
+// this is not a regression: every colour below is an **ANSI name**, never a hex, so the whole
+// readout inherits `ghostty/themes/laramie` for free. that is laramie doctrine 3 — "if a tool
+// accepts ANSI colour names and needs nothing outside the 16, use the name". it also means this
+// file is not a fifteenth hand-maintained copy of the palette, and that the `colors` module at
+// the bottom is a *true* preview: the chrome and the swatches read the same 16 slots.
+//
+// ⚠ the apple logo's colours are deliberately left unset. the builtin art already emits bare
+// ANSI 31–35/91, so it is laramie-coloured with zero configuration — overriding it with hexes
+// would break exactly the inheritance described above.
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+    "logo": {
+        "type": "builtin",
+        "source": "macos",
+        // top padding seats the title level with the apple's stem rather than its crown.
+        "padding": { "top": 1, "right": 4 }
+    },
+
+    "display": {
+        // no glyph between key and value — `key.width` does the alignment by emitting a cursor
+        // -column escape, so a separator would only add noise. ⚠ width must exceed the longest
+        // rendered key (paddingLeft 1 + icon 1 + space 1 + "Packages" 8 = 11) or the value
+        // column collides with it.
+        "separator": "",
+        "key": {
+            "width": 13,
+            "type": "both-1",
+            "paddingLeft": 1
+        },
+        "color": {
+            "keys": "blue", //          ui.label     — accent.blue.base
+            "title": "magenta", //      ui.accent    — accent.violet.base
+            "separator": "light_black" //            — text.dim
+        },
+        // ⚠ the numeric tiers are the *base* accents (green/yellow/red), not the bright ones
+        // fastfetch defaults to. base is what laramie's state.ok / state.warn / state.error
+        // alias, and bright is reserved for emphasis on a coloured ground.
+        "percent": {
+            "type": ["bar", "num", "num-color"],
+            "color": { "green": "green", "yellow": "yellow", "red": "red" }
+        },
+        "bar": {
+            "width": 12,
+            // ⚠ heavy vs light, not one glyph in two colours: the bar has to stay readable when
+            // the output is piped, redirected or read by someone who cannot separate the hues.
+            "char": { "elapsed": "━", "total": "─" },
+            "border": null,
+            // elapsed stays "auto" so it tracks the green/yellow/red state above.
+            "color": { "total": "light_black" }
+        }
+    },
+
+    "modules": [
+        { "type": "title", "color": { "user": "magenta", "at": "light_black", "host": "magenta" } },
+        { "type": "separator", "string": "─", "outputColor": "light_black" },
+
+        "break",
+        { "type": "custom", "format": "{#magenta}▌{#light_black} system" },
+        { "type": "os", "key": "OS", "format": "{name} {codename} {version}" },
+        { "type": "host", "key": "Host" },
+        { "type": "kernel", "key": "Kernel" },
+        { "type": "uptime", "key": "Uptime" },
+        { "type": "packages", "key": "Packages", "format": "{brew} brew · {brew-cask} cask" },
+
+        "break",
+        { "type": "custom", "format": "{#magenta}▌{#light_black} shell" },
+        { "type": "shell", "key": "Shell" },
+        { "type": "terminal", "key": "Terminal" },
+        { "type": "terminalfont", "key": "Font", "format": "{name} {size}pt" },
+        // ⚠ there is deliberately no `editor` row. fastfetch prefers $VISUAL, which is
+        // "code-insiders --new-window --wait" here — a command line, not a path, so fastfetch
+        // resolves {exe-name}, {path} and {version} to empty strings and only {name} renders,
+        // at 33 characters. format strings have no truncation operator (verified on 2.66.0),
+        // so the choice is a wrecked column or no row. do not "restore" this.
+
+        "break",
+        { "type": "custom", "format": "{#magenta}▌{#light_black} hardware" },
+        { "type": "cpu", "key": "CPU" },
+        { "type": "gpu", "key": "GPU", "format": "{name} ({core-count} cores)" },
+        { "type": "memory", "key": "Memory" },
+        { "type": "disk", "key": "Disk", "folders": "/", "format": "{size-percentage-bar} {size-percentage} · {size-used} / {size-total}" },
+        { "type": "display", "key": "Display", "format": "{width}x{height} @ {refresh-rate} Hz" },
+        { "type": "battery", "key": "Battery", "format": "{capacity-bar} {capacity} · {status}" },
+        { "type": "localip", "key": "Network", "format": "{ipv4} ({ifname})" },
+
+        "break",
+        { "type": "custom", "format": "{#magenta}▌{#light_black} palette" },
+        // the reason this file exists at all, per the request: a live preview of the terminal's
+        // 16 ANSI slots. `background` symbol = solid swatches; two rows, normal then bright.
+        // ⚠ this is the check that laramie's brights are not byte-identical to its normals.
+        { "type": "colors", "symbol": "background", "paddingLeft": 1, "block": { "width": 4 } }
+    ]
+}

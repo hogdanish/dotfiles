@@ -3,7 +3,7 @@
      costs nothing to carry. update both lists whenever the prose below changes.
 
 verify-present: fish starship atuin fzf zoxide eza bat fd rg sd yq gron sponge ts less micro btop
-  macchina grc gum gls gdate gsort git git-lfs delta git-filter-repo difft ast-grep hyperfine tokei
+  fastfetch grc gum gls gdate gsort git git-lfs delta git-filter-repo difft ast-grep hyperfine tokei
   gh act lefthook node bun uv gdformat gdlint make gmake scons shellcheck shfmt curl xh wget ssh
   nmap iperf3 dnsperf doge caddy ffmpeg ffprobe magick yt-dlp sox soxi gs rsvg-convert
   woff2_compress woff2_decompress betterleaks gpg pinentry-touchid pinentry-mac mas duti fswatch
@@ -104,7 +104,7 @@ as needing to find a use for them.
 - **Git and GitHub** → `gh` (but the GitHub MCP server comes first), `git-lfs`, `git-filter-repo` for
   history rewriting, `lefthook` for hooks.
 - **Secrets** → `op` for every credential (the `auth` skill); `betterleaks` to scan content.
-- **System** → `duti` for default-app associations, `mas` for the App Store, `macchina` for system
+- **System** → `duti` for default-app associations, `mas` for the App Store, `fastfetch` for system
   info, `make` (GNU) and `scons` to build, `less` as pager, `grc` to colourise. `fish`, `starship`,
   `atuin`, `fzf` are the shell furniture and are already configured.
 - **Homebrew and the App Store** → ⚠ Homebrew **updates and upgrades itself** every 12 h via a launchd

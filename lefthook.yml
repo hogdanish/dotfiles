@@ -30,9 +30,12 @@ pre-commit:
     #    ⚠ do NOT add --verbose here. with -v, check-ignore exits 0 when a path matches ANY
     #      pattern *including a negation* — so `!/​.gitignore` counted as a hit and this job
     #      failed every legitimate commit. without -v it prints only genuinely ignored paths.
+    #    ⚠ --diff-filter=d (lower-case = exclude) drops deletions. untracking a directory is done
+    #      by removing its `!` line, which makes every path in that same commit newly ignored —
+    #      without this the guard made `!/macchina/` impossible to retire without --no-verify.
     - name: no-force-added-ignored-files
       run: |
-        offenders=$(git diff --cached --name-only | git check-ignore --no-index --stdin || true)
+        offenders=$(git diff --cached --name-only --diff-filter=d | git check-ignore --no-index --stdin || true)
         if [ -n "$offenders" ]; then
           echo "✗ these staged paths are excluded by .gitignore:" >&2
           printf '%s\n' "$offenders" | sed 's/^/    /' >&2

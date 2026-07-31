@@ -7,9 +7,10 @@ time — this table is the decision.** Values are in `spec.md`; never inline a h
 
 ## Coverage
 
-Fifteen files carry hexes. Four more consume colour but must stay on **ANSI names** (`SKILL.md`
+Fourteen files carry hexes. Five more consume colour but must stay on **ANSI names** (`SKILL.md`
 doctrine 3): `starship.toml`, `LS_COLORS`/`EZA_COLORS` and `LESS_TERMCAP_*` (both in `colours.fish`),
-and `git/.gitconfig`'s `[pretty] lg` / `branches` formats. ⚠ Do not hex-code these.
+`git/.gitconfig`'s `[pretty] lg` / `branches` formats, and `fastfetch/config.jsonc`. ⚠ Do not
+hex-code these.
 
 ---
 
@@ -259,13 +260,26 @@ Gradients follow one of two shapes:
   `loud`, so brightness rises with the value: `free` green, `available` cyan, `cached` blue,
   `download` cyan, `upload` violet.
 
-## macchina/themes/laramie.toml
+## fastfetch/config.jsonc
 
-**Format:** TOML. macchina accepts hex, indexed (`"046"`) and named (`"Blue"`) — this file uses hex on
-purpose, so the palette is exact rather than at the mercy of the 0–15 mapping. Selected by
-`macchina.toml` `theme = "laramie"`. **Verify:** `macchina --doctor`.
+**Format:** JSONC. ⚠ **ANSI names only — this file carries no hexes and must not gain any.** It
+replaced `macchina/themes/laramie.toml` on 2026-07-30, which did hex-code its two values.
+⚠ fastfetch has **no include/import directive** and reads exactly one config
+(`fastfetch --list-config-paths`), so a separate `themes/laramie.jsonc` could only ever be loaded via
+an explicit `-c` on every invocation. Doctrine 3 makes that a non-issue: every colour is a name, so
+the readout inherits `ghostty/themes/laramie` for free. **Verify:** run `fastfetch`.
 
-`key_color` `ui.label` · `separator_color` `surface.border`. That is the whole colour surface.
+`display.color.keys` `ui.label` (blue) · `.title` `ui.accent` (magenta) · `.separator` `text.dim`
+(light_black) · `title.user`/`.host` `ui.accent` · `title.at` `text.dim` · `bar.color.total`
+`text.dim` · module headings `ui.accent` + `text.dim`.
+
+⚠ `percent.color` uses the **base** accents (`green`/`yellow`/`red`), not the brights fastfetch
+defaults to — base is what `state.ok`/`state.warn`/`state.error` alias, and bright is reserved for
+emphasis on a coloured ground. ⚠ The builtin `macos` logo's colours are deliberately **unset**: the
+art already emits bare ANSI 31–35/91 and is laramie-coloured with zero configuration.
+
+The trailing `colors` module is a live 16-slot preview — the standing check that laramie's brights
+are not byte-identical to its normals.
 
 ## claude-code/themes/laramie.json
 

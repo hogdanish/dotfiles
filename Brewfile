@@ -41,7 +41,7 @@ brew "gron"       # jq: flattens json to greppable lines for rg
 brew "less"       # pager
 brew "micro"      # nano: terminal editor
 brew "btop"       # top: resource monitor
-brew "macchina"   # neofetch: system info
+brew "fastfetch"  # neofetch: system info
 brew "grc"        # command output colouriser
 brew "gum"        # interactive prompts in shell scripts
 brew "coreutils"  # gnu versions of the bsd core utils

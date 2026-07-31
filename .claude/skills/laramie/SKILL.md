@@ -1,7 +1,7 @@
 ---
 name: laramie
-description: The laramie colour theme — the machine's single palette, derived in OKLCH from 5 surfaces + 4 diff surfaces, 5 text steps and 6 hues × 3 lightness tiers, and hand-carried into fifteen tool configs (ghostty, bat, micro, delta/git, glamour/gum, fish, fzf, atuin, btop, macchina, claude code). Owns the token spec, the per-tool binding tables, the ANSI-16 contract, and the strict three-colour syntax doctrine adapted from tonsky.me/blog/syntax-highlighting.
-when_to_use: Load before editing ANY file that carries a colour value — ghostty/themes/laramie, bat/themes/laramie.tmTheme, micro/colorschemes/laramie-tc.micro, git/themes.gitconfig, glamour/*.json, fish/themes/laramie.*, fish/conf.d/{colours,fzf,gum}.fish, atuin/themes/laramie.toml, btop/themes/laramie.theme, macchina/themes/laramie.toml — and before answering anything about theme colours, contrast, syntax highlighting, ANSI palettes, or "what colour should X be". Also load when adding a new tool that needs theming, or when a colour looks wrong. Boundary — this owns colour VALUES and their semantics everywhere; the tool's own config surface belongs to its skill (`ghostty` for terminal options, `fish` for .fish syntax, `gum` for gum usage), and those skills defer here for the hexes.
+description: The laramie colour theme — the machine's single palette, derived in OKLCH from 5 surfaces + 4 diff surfaces, 5 text steps and 6 hues × 3 lightness tiers, and hand-carried into fourteen tool configs (ghostty, bat, micro, delta/git, glamour/gum, fish, fzf, atuin, btop, claude code). Owns the token spec, the per-tool binding tables, the ANSI-16 contract, and the strict three-colour syntax doctrine adapted from tonsky.me/blog/syntax-highlighting.
+when_to_use: Load before editing ANY file that carries a colour value — ghostty/themes/laramie, bat/themes/laramie.tmTheme, micro/colorschemes/laramie-tc.micro, git/themes.gitconfig, glamour/*.json, fish/themes/laramie.*, fish/conf.d/{colours,fzf,gum}.fish, atuin/themes/laramie.toml, btop/themes/laramie.theme, fastfetch/config.jsonc — and before answering anything about theme colours, contrast, syntax highlighting, ANSI palettes, or "what colour should X be". Also load when adding a new tool that needs theming, or when a colour looks wrong. Boundary — this owns colour VALUES and their semantics everywhere; the tool's own config surface belongs to its skill (`ghostty` for terminal options, `fish` for .fish syntax, `gum` for gum usage), and those skills defer here for the hexes.
 ---
 
 # laramie
@@ -9,7 +9,7 @@ when_to_use: Load before editing ANY file that carries a colour value — ghostt
 A Tokyo Night Storm derivative, rebuilt 2026-07-30 as a derived token system. Two facts govern
 everything else:
 
-1. **There is no build step.** Fifteen files carry the hexes by hand. This skill is the reference
+1. **There is no build step.** Fourteen files carry the hexes by hand. This skill is the reference
    they all derive from; keeping them in sync is a human/agent job, not a script's.
 2. **The spec is the source of truth, not any config file.** If a config disagrees with
    `references/spec.md`, the config is wrong — fix it, don't copy from it.
