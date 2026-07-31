@@ -1,12 +1,16 @@
 [theme]
 name = "laramie"
 
+# ⚠ values come from .claude/skills/laramie/references/spec.md. atuin's key names are its own
+# `Meaning` enum, and two of them are overloaded — the comments record what each actually paints.
 [colors]
-Guidance = "#545c7e"   # entry age
-AlertInfo = "#7aa2f7"  # entry time
-AlertError = "#bb9af7" # entry time (bad) + selected entry name
-Base = "#8089b3"       # title + unselected entry name
-Annotation = "#6881C0" # help controls
-AlertWarn = "#bb9af7"  # unused?
-Important = "#bb9af7"  # unused?
-Title = "#bb9af7"      # unused?
+Base = "#a9b1d6"       # text.base — title + unselected entry name
+Title = "#49ebf0"      # syntax.definition
+Annotation = "#9099be" # text.muted — help controls
+Guidance = "#656e94"   # text.faint — entry age
+AlertInfo = "#6cb6fa"  # state.info — entry time
+AlertWarn = "#e0a332"  # state.warn
+# ⚠ AlertError also paints the SELECTED ENTRY NAME, not just errors. bound to ui.accent rather
+# than state.error on purpose — red here would make every selected history row read as failed.
+AlertError = "#cb92fc" # ui.accent
+Important = "#cb92fc"  # ui.accent

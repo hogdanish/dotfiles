@@ -11,31 +11,37 @@
 
 type -q gum; or return
 
+# ⚠ values come from the $theme_* palette, not literal hex — conf.d/colours.fish sources it
+# above its own interactive guard and sorts earlier ('c' < 'g'), so it is always present here.
+# bail rather than export empty strings, which gum renders as unstyled rather than erroring.
+set -q theme_violet_base; or return
+
 # markdown. ⚠ gum does NOT read GLAMOUR_STYLE (which conf.d/xdg-apps.fish sets for gh) — it has
 # its own variable, pointed at the same file so both renderers agree.
 set -gx GUM_FORMAT_THEME $XDG_CONFIG_HOME/glamour/laramie.json
 
-# accents: magenta cursor, blue headers, dim placeholders
-set -gx GUM_CHOOSE_CURSOR_FOREGROUND '#bb9af7'
-set -gx GUM_CHOOSE_SELECTED_FOREGROUND '#7dcfff'
-set -gx GUM_CHOOSE_HEADER_FOREGROUND '#7aa2f7'
-set -gx GUM_FILTER_INDICATOR_FOREGROUND '#bb9af7'
-set -gx GUM_FILTER_MATCH_FOREGROUND '#e0af68'
-set -gx GUM_FILTER_HEADER_FOREGROUND '#7aa2f7'
-set -gx GUM_FILTER_PROMPT_FOREGROUND '#414868'
-set -gx GUM_FILTER_PLACEHOLDER_FOREGROUND '#414868'
-set -gx GUM_INPUT_CURSOR_FOREGROUND '#bb9af7'
-set -gx GUM_INPUT_PROMPT_FOREGROUND '#7aa2f7'
-set -gx GUM_INPUT_PLACEHOLDER_FOREGROUND '#414868'
-set -gx GUM_WRITE_CURSOR_FOREGROUND '#bb9af7'
-set -gx GUM_WRITE_HEADER_FOREGROUND '#7aa2f7'
-set -gx GUM_CONFIRM_PROMPT_FOREGROUND '#7aa2f7'
-set -gx GUM_CONFIRM_SELECTED_BACKGROUND '#bb9af7'
-set -gx GUM_CONFIRM_SELECTED_FOREGROUND '#1f2335'
-set -gx GUM_CONFIRM_UNSELECTED_BACKGROUND '#414868'
-set -gx GUM_CONFIRM_UNSELECTED_FOREGROUND '#a9b1d6'
-set -gx GUM_SPIN_SPINNER_FOREGROUND '#bb9af7'
-set -gx GUM_FILE_DIRECTORY_FOREGROUND '#7aa2f7'
-set -gx GUM_FILE_SELECTED_FOREGROUND '#bb9af7'
-set -gx GUM_FILE_SYMLINK_FOREGROUND '#7dcfff'
-set -gx GUM_TABLE_SELECTED_FOREGROUND '#bb9af7'
+# accents: ui.accent (violet) for anything that moves or is chosen, ui.label (blue) for
+# headers and prompts, text.faint for placeholders the user is meant to type over.
+set -gx GUM_CHOOSE_CURSOR_FOREGROUND $theme_violet_base
+set -gx GUM_CHOOSE_SELECTED_FOREGROUND $theme_cyan_base
+set -gx GUM_CHOOSE_HEADER_FOREGROUND $theme_blue_base
+set -gx GUM_FILTER_INDICATOR_FOREGROUND $theme_violet_base
+set -gx GUM_FILTER_MATCH_FOREGROUND $theme_amber_base
+set -gx GUM_FILTER_HEADER_FOREGROUND $theme_blue_base
+set -gx GUM_FILTER_PROMPT_FOREGROUND $theme_text_muted
+set -gx GUM_FILTER_PLACEHOLDER_FOREGROUND $theme_text_faint
+set -gx GUM_INPUT_CURSOR_FOREGROUND $theme_violet_base
+set -gx GUM_INPUT_PROMPT_FOREGROUND $theme_blue_base
+set -gx GUM_INPUT_PLACEHOLDER_FOREGROUND $theme_text_faint
+set -gx GUM_WRITE_CURSOR_FOREGROUND $theme_violet_base
+set -gx GUM_WRITE_HEADER_FOREGROUND $theme_blue_base
+set -gx GUM_CONFIRM_PROMPT_FOREGROUND $theme_blue_base
+set -gx GUM_CONFIRM_SELECTED_BACKGROUND $theme_violet_base
+set -gx GUM_CONFIRM_SELECTED_FOREGROUND $theme_surface_base
+set -gx GUM_CONFIRM_UNSELECTED_BACKGROUND $theme_surface_overlay
+set -gx GUM_CONFIRM_UNSELECTED_FOREGROUND $theme_text_base
+set -gx GUM_SPIN_SPINNER_FOREGROUND $theme_violet_base
+set -gx GUM_FILE_DIRECTORY_FOREGROUND $theme_blue_base
+set -gx GUM_FILE_SELECTED_FOREGROUND $theme_violet_base
+set -gx GUM_FILE_SYMLINK_FOREGROUND $theme_cyan_base
+set -gx GUM_TABLE_SELECTED_FOREGROUND $theme_violet_base

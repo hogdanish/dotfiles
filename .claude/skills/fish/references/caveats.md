@@ -466,3 +466,23 @@ Tracked here only while unfixed; the current-state inventory is
   fish function, abbreviation or `plugins.sh` alias ever is.
 - **Verified** — `[[ -o interactive ]]` → false, `[[ -o login ]]` → true; `echo $GIT_CONFIG_GLOBAL` →
   `/Users/ethan/.config/git/.gitconfig`.
+
+## `GIT_CONFIG_GLOBAL` is invisible to libgit2, so delta never read its own config
+
+**Symptom.** `git config --get delta.laramie.plus-style` returns the right value, `delta.features` is
+`laramie`, and delta still renders its built-in diff colours. `delta --show-config` reports
+`plus-style = syntax "#002800"` — the default — while correctly reporting `syntax-theme = laramie`,
+which makes it look like the config *is* being read.
+
+**Mechanism.** `GIT_CONFIG_GLOBAL` is a **git-CLI** environment variable. libgit2 does not implement
+it: it searches `$XDG_CONFIG_HOME/git/config` and `~/.gitconfig` only. This repo deliberately names
+its global config `git/.gitconfig` *because* of the override, so neither libgit2 path existed and
+every libgit2-backed tool saw **no global config whatsoever**. The misleading `syntax-theme = laramie`
+comes from the exported `BAT_THEME`, not from the file.
+
+⚠ The fix is the tracked symlink `~/.config/git/config -> .gitconfig` (2026-07-30). It is
+load-bearing for every libgit2-backed tool, not just delta.
+
+```sh
+delta --show-config | rg plus-style     # must NOT say: syntax "#002800"
+```

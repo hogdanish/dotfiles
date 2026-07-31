@@ -21,7 +21,7 @@ auto-updating), installed at `/Applications/Ghostty.app`, renderer Metal, font e
 | Config | `~/.config/ghostty/config.ghostty` — **edited in place**, this repo holds no mirror |
 | Theme | `~/.config/ghostty/themes/laramie` — user-authored, not a built-in |
 | Shell | `command = /opt/homebrew/bin/fish --login --interactive`, `shell-integration = fish` |
-| Look | `theme = laramie`, `background-opacity = 0.85`, `background-blur = 100`, `alpha-blending = linear-corrected`, `window-colorspace = display-p3`, `macos-titlebar-style = transparent` |
+| Look | `theme = laramie`, `background-opacity = 0.92`, `background-blur = macos-glass-regular`, `alpha-blending = linear-corrected`, `window-colorspace = display-p3`, `minimum-contrast = 1.1`, `macos-titlebar-style = transparent` |
 | Font | CommitMono Nerd Font Mono with `ss01`–`ss04` + `cv02` |
 | Updates | `auto-update = download`, `auto-update-channel = tip` |
 
@@ -128,10 +128,14 @@ prefer them over ghostty.org, which documents the latest tip and may be ahead of
    direction. New keys go into `configuration.md` in the same change.
 2. **Changing `~/.config/ghostty/` updates this skill in the same change** — the live-setup table
    above, and the `laramie` palette wherever it is duplicated.
-3. **`laramie` is hand-duplicated across tools that share no format.** Changing one colour means
-   changing Ghostty's theme file, `~/.config/git/themes.gitconfig`, and
-   `~/.config/micro/colorschemes/laramie-tc.micro`; a bat theme is still missing. The repo `CLAUDE.md`
-   holds that list.
+3. **Colour values are the `laramie` skill's, not this one's.** `~/.config/ghostty/themes/laramie` is
+   the **ANSI-16 contract** (`laramie` skill → `references/spec.md` §4) and is the most leveraged file
+   in the theme: every tool that takes ANSI colour *names* inherits it, including ones laramie never
+   configures. Load that skill before changing a hex here, and never hex-code a tool that could use a
+   name instead.
+   ⚠ **`window-colorspace = display-p3` means Ghostty interprets the theme's sRGB hexes as P3**, so
+   everything renders more saturated than the spec's figures state. The spec's contrast and ΔE numbers
+   are therefore *nominal*. Deliberate — the palette was signed off as rendered this way.
 4. **Verify before writing anything down.** A claim about a `tip` build is worth nothing unless
    `+explain-config`, `+show-config` or a real run produced it. Several ⚠ entries in these references
    exist because the obvious assumption was wrong.

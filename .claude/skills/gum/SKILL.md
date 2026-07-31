@@ -117,10 +117,15 @@ restyle every `gum style` call in every script in the shell.
 ## The live configuration
 
 **`~/.config/fish/conf.d/gum.fish`** (added 2026-07-29) is gum's entire configuration — gum has no
-config file, so theming is ~24 `GUM_<COMMAND>_<FLAG>` environment variables. It is laramie's
-**eleventh** hand-maintained copy of the palette; a colour change there must be made here too. It sets
-foreground accents only (magenta cursors, blue headers, dim placeholders on `#414868`), leaving every
-background at gum's default except `confirm`'s selected/unselected pills.
+config file, so theming is ~24 `GUM_<COMMAND>_<FLAG>` environment variables. It sets foreground
+accents only — `ui.accent` (violet) cursors and selections, `ui.label` (blue) headers and prompts,
+`text.faint` placeholders — leaving every background at gum's default except `confirm`'s two pills.
+
+⚠ **Since 2026-07-30 the values are `$theme_*` variables, not literal hex.** `conf.d/colours.fish`
+sources the palette earlier and above its own interactive guard, so this is no longer a hand-maintained
+copy at all. **The `laramie` skill owns every colour value** — look one up in its `references/spec.md`,
+never pick a hex here. The file carries `set -q theme_violet_base; or return` so a failed palette load
+cannot export empty strings.
 
 ⚠ **It is deliberately *not* interactive-guarded.** A script calling `gum choose` is exactly the case
 that needs these variables, and `functions/reload.fish` is one such caller. Do not "fix" it by adding
@@ -131,8 +136,10 @@ a `status is-interactive` guard.
 `~/.config/glamour/laramie.json`. **gum does not read `GLAMOUR_STYLE`** — if markdown renders wrong in
 gum, check `GUM_FORMAT_THEME`, and remember both need changing to move the theme.
 
-Verified live: the exported values are bare hex (`#bb9af7`, not `'#bb9af7'` — fish's `set` listing adds
-display quotes around `#` because it is a comment character), and `gum format` renders laramie magenta.
+Verified live: the exported values are bare hex once expanded (fish's `set` listing adds display quotes
+around a leading `#` because it is a comment character — the value itself is 7 characters), and
+`gum format` renders laramie. ⚠ Its *markdown chrome* is truecolour, but the fenced-code `chroma` path
+always quantizes to 256 colours regardless of `COLORTERM` — see the `laramie` skill's `bindings.md`.
 
 The block itself is *not* mirrored in this skill — `~/.config` is the single source of truth. Read
 `conf.d/gum.fish` when you need the current values; [recipes.md](references/recipes.md) §6 covers the

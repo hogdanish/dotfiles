@@ -26,8 +26,12 @@ function __gen_body --description 'print the live fish_color_* palette in .theme
     #   #             set_color accepts a leading hash, but a .theme file is parsed with
     #                 `read -at`, i.e. fish tokenizer rules, so `#a9b1d6` reads as a COMMENT
     #                 and the variable is silently set to nothing
+    #
+    # ⚠ the group MUST be non-capturing. `string match -r` prints the full match AND every
+    # capture group, so `(pager_)` emitted a bare `pager_` line per pager variable — twelve
+    # junk lines in the output, and twelve phantom entries in main's `count $body` floor.
     fish -i -c '
-        for var in (set -n | string match -r "^fish_(pager_)?color_.*" | sort)
+        for var in (set -n | string match -r "^fish_(?:pager_)?color_.*" | sort)
             set -l value (string match -v -r -- "^--theme=" $$var | string replace -a "#" "")
             printf "%s %s\n" $var (string join " " -- $value)
         end' 2>/dev/null | string trim -r

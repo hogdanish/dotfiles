@@ -9,50 +9,150 @@
 	<string>laramie</string>
 	<key>semanticClass</key>
 	<string>fractalcounty.theme.laramie</string>
+	<key>comment</key>
+	<string>laramie syntax doctrine — three colours, adapted from tonsky.me/blog/syntax-highlighting.
+	green = literals (strings, numbers, constants) · cyan = a name being INTRODUCED · amber = comments,
+	bright. Everything else falls back to the global foreground, which is why there are no rules for
+	keywords, function CALLS, variable usage, types-in-position, tags or attributes: the doctrine is
+	enforced by the ABSENCE of a rule. Do not add them back. Red is reserved for errors; blue and violet
+	do no syntax work at all (see .claude/skills/laramie/references/rationale.md §3).
+	⚠ run `bat cache --build` after editing, or bat silently falls back AND delta's syntax-theme breaks.</string>
 	<key>settings</key>
 	<array>
 		<dict>
 			<key>settings</key>
 			<dict>
 				<key>activeGuide</key>
-				<string>#373d5a</string>
+				<string>#444b6b</string>
 				<key>background</key>
 				<string>#1f2335</string>
 				<key>caret</key>
-				<string>#cfc9c2</string>
+				<string>#cb92fc</string>
 				<key>findHighlight</key>
-				<string>#ff9e64</string>
+				<string>#e0a332</string>
 				<key>findHighlightForeground</key>
-				<string>#000000</string>
+				<string>#1f2335</string>
 				<key>foreground</key>
 				<string>#a9b1d6</string>
 				<key>guide</key>
-				<string>#414868</string>
+				<string>#292e43</string>
 				<key>gutterForeground</key>
-				<string>#737aa2</string>
+				<string>#656e94</string>
 				<key>inactiveSelection</key>
-				<string>#292e42</string>
+				<string>#292e43</string>
 				<key>invisibles</key>
-				<string>#4f4f5e</string>
+				<string>#444b6b</string>
 				<key>lineHighlight</key>
-				<string>#292e42</string>
+				<string>#292e43</string>
 				<key>selection</key>
-				<string>#373d5a</string>
+				<string>#343a55</string>
 				<key>selectionBorder</key>
-				<string>#7aa2f7</string>
+				<string>#444b6b</string>
 				<key>shadow</key>
-				<string>#00000010</string>
+				<string>#16192530</string>
 				<key>stackGuide</key>
-				<string>#41486860</string>
+				<string>#343a55</string>
 				<key>tagsOptions</key>
 				<string>underline</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>Italics - Comments, Storage, Keyword Flow, Vue attributes, Decorators</string>
+			<string>Comment — syntax.comment, bright on purpose. Italic is a texture cue, not the highlight.</string>
 			<key>scope</key>
-			<string>comment, meta.var.expr storage.type, keyword.control.flow, meta.directive.vue punctuation.separator.key-value.html, meta.directive.vue entity.other.attribute-name.html, tag.decorator.js entity.name.tag.js, tag.decorator.js punctuation.definition.tag.js, storage.modifier</string>
+			<string>comment, comment.block, comment.line, comment.block.documentation, punctuation.definition.comment</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#ffc55b</string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Literal — strings, numbers, chars, booleans, null, named constants. One colour for all of them.</string>
+			<key>scope</key>
+			<string>string, string.quoted, string.unquoted, string.regexp, punctuation.definition.string, constant.numeric, constant.language, constant.character, constant.other, constant.other.symbol, constant.other.key, support.constant, variable.other.constant, punctuation.definition.constant, meta.attribute-selector</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#86c452</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Escape — one tier louder than the literal it sits inside</string>
+			<key>scope</key>
+			<string>constant.character.escape, constant.character.escape.regexp</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#a7e775</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Definition — any name being INTRODUCED. Not calls, not usage.</string>
+			<key>scope</key>
+			<string>entity.name.function, entity.name.class, entity.name.type, entity.name.struct, entity.name.enum, entity.name.trait, entity.name.interface, entity.name.namespace, entity.name.module, entity.other.attribute-name.class</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#49ebf0</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Punctuation — muted, so names separate from syntax without competing</string>
+			<key>scope</key>
+			<string>punctuation, punctuation.separator, punctuation.terminator, punctuation.accessor, punctuation.section, meta.brace</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#9099be</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup heading — document structure is the prose analogue of a definition</string>
+			<key>scope</key>
+			<string>markup.heading, markup.heading entity.name</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#49ebf0</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup link</string>
+			<key>scope</key>
+			<string>string.other.link, markup.underline.link</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#6cb6fa</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup emphasis</string>
+			<key>scope</key>
+			<string>markup.bold</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#c9d3f7</string>
+				<key>fontStyle</key>
+				<string>bold</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Markup italic</string>
+			<key>scope</key>
+			<string>markup.italic</string>
 			<key>settings</key>
 			<dict>
 				<key>fontStyle</key>
@@ -61,114 +161,46 @@
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>Comment</string>
+			<string>Markup raw / inline code</string>
 			<key>scope</key>
-			<string>comment, comment.block.documentation, punctuation.definition.comment</string>
+			<string>markup.raw, markup.inline.raw</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#565f89</string>
+				<string>#c9d3f7</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>Number, Boolean, Undefined, Null</string>
+			<string>Diff — state.ok / state.error, the same pair delta uses</string>
 			<key>scope</key>
-			<string>variable.other.constant, punctuation.definition.constant, constant.language, constant.numeric, support.constant</string>
+			<string>markup.inserted</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#ff9e64</string>
+				<string>#86c452</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>String, Symbols, Markup Heading</string>
+			<string>Diff deleted</string>
 			<key>scope</key>
-			<string>meta.property.lua,string.unquoted.key.lua,support.other.metaproperty.lua,support.other.metaproperty.lua,constant.other.symbol, constant.other.key, markup.heading, meta.attribute-selector</string>
+			<string>markup.deleted</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#73daca</string>
+				<string>#fc8697</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>String</string>
+			<string>Error — red is reserved for exactly this</string>
 			<key>scope</key>
-			<string>string</string>
+			<string>markup.error, invalid.illegal</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#9ece6a</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Support Function</string>
-			<key>scope</key>
-			<string>support.function</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#2ac3de</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Control Keywords</string>
-			<key>scope</key>
-			<string>keyword.control, storage.type, keyword.operator.logical, entity.name.tag</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#bb9af7</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Function Names</string>
-			<key>scope</key>
-			<string>entity.name.function, support.function</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#7aa2f7</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Variables and Classes</string>
-			<key>scope</key>
-			<string>variable, support.class, meta.class</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#c0caf5</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Invalid deprecated</string>
-			<key>scope</key>
-			<string>invalid.deprecated</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#bb9af7</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Error</string>
-			<key>scope</key>
-			<string>markup.error</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#f7768e</string>
-				<key>background</key>
-				<string>#362c3d</string>
+				<string>#fc8697</string>
 			</dict>
 		</dict>
 		<dict>
@@ -179,53 +211,18 @@
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#e0af68</string>
-				<key>background</key>
-				<string>#373640</string>
+				<string>#e0a332</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>Regular Expressions</string>
+			<string>Deprecated — the syntax.dead treatment: present, but meant to be skipped</string>
 			<key>scope</key>
-			<string>string.regexp</string>
+			<string>invalid.deprecated</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
-				<string>#b4f9f8</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Markdown Link</string>
-			<key>scope</key>
-			<string>string.other.link, markup.underline.link</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#73daca</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>Markdown Heading</string>
-			<key>scope</key>
-			<string>markup.heading</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#7dcfff</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>CSS Class Names</string>
-			<key>scope</key>
-			<string>entity.other.attribute-name.class, meta.at-rule</string>
-			<key>settings</key>
-			<dict>
-				<key>foreground</key>
-				<string>#9ece6a</string>
+				<string>#656e94</string>
 			</dict>
 		</dict>
 	</array>

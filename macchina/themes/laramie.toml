@@ -1,7 +1,7 @@
 # laramie — tokyo night derived, hand-kept to match every other laramie theme on this machine.
 # see the repo CLAUDE.md for the full list; changing a core hex means changing all of them.
 #
-# macchina accepts three colour syntaxes — hex "#7aa2f7", indexed "046", and named "Blue".
+# macchina accepts three colour syntaxes — hex, indexed ("046") and named ("Blue").
 # hex is used throughout so the palette is exact rather than at the mercy of the terminal's
 # 0-15 mapping, matching how the delta and btop themes are written.
 
@@ -15,8 +15,8 @@ prefer_small_ascii = true
 
 separator = "→"
 
-key_color = "#7aa2f7"
-separator_color = "#414868"
+key_color = "#6cb6fa"
+separator_color = "#444b6b"
 
 [box]
 border = "rounded"

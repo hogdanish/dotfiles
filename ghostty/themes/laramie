@@ -1,21 +1,32 @@
-palette = 0=#1a1b29
-palette = 1=#f7768e
-palette = 2=#9ece6a
-palette = 3=#e0af68
-palette = 4=#7aa2f7
-palette = 5=#bb9af7
-palette = 6=#7dcfff
+# laramie — the ANSI-16 contract. see .claude/skills/laramie/references/spec.md §4.
+#
+# ⚠ this is the most leveraged file in the theme. every tool that takes ANSI colour NAMES
+# inherits these — starship, git log's %C(brightblack), LS_COLORS, EZA_COLORS, grc, gh, and
+# every TUI — including tools laramie never configures. do not hex-code those; fix them here.
+#
+# ⚠ normals are the `base` tier, brights are the `loud` tier. until 2026-07-30 slots 9-14 were
+# byte-identical to 1-6, so six of sixteen did no work. re-collapsing them is a regression.
+# ⚠ slot 8 (brblack) is text.dim at 4.53:1, NOT a border colour. it used to hold a surface-ramp
+# value at 1.74:1 — effectively invisible — and it is what most tools use for secondary TEXT.
+
+palette = 0=#161925
+palette = 1=#fc8697
+palette = 2=#86c452
+palette = 3=#e0a332
+palette = 4=#6cb6fa
+palette = 5=#cb92fc
+palette = 6=#3bc5ca
 palette = 7=#a9b1d6
-palette = 8=#414868
-palette = 9=#f7768e
-palette = 10=#9ece6a
-palette = 11=#e0af68
-palette = 12=#7aa2f7
-palette = 13=#bb9af7
-palette = 14=#7dcfff
-palette = 15=#c0caf5
+palette = 8=#8089af
+palette = 9=#fdadb6
+palette = 10=#a7e775
+palette = 11=#ffc55b
+palette = 12=#98ccff
+palette = 13=#dab4fe
+palette = 14=#49ebf0
+palette = 15=#c9d3f7
 background = 1f2335
 foreground = a9b1d6
 cursor-color = a9b1d6
-selection-background = 373d5a
-selection-foreground = c0caf5
+selection-background = 343a55
+selection-foreground = c9d3f7

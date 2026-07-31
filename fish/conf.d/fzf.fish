@@ -28,8 +28,8 @@ end
 # so ghostty's background-opacity/blur still show through the finder.
 set -gx FZF_DEFAULT_OPTS "\
 --height=40% --layout=reverse --border=rounded --info=inline --cycle \
---color=fg:$theme_foreground,bg:-1,hl:$theme_blue \
---color=fg+:$theme_white,bg+:$theme_dust,hl+:$theme_light_blue \
---color=info:$theme_purple,prompt:$theme_green,pointer:$theme_red \
---color=marker:$theme_light_green,spinner:$theme_yellow,header:$theme_gray \
---color=border:$theme_darker_gray"
+--color=fg:$theme_text_base,bg:-1,hl:$theme_cyan_base \
+--color=fg+:$theme_text_loud,bg+:$theme_surface_overlay,hl+:$theme_cyan_loud \
+--color=info:$theme_text_muted,prompt:$theme_blue_base,pointer:$theme_violet_base \
+--color=marker:$theme_green_base,spinner:$theme_violet_base,header:$theme_text_dim \
+--color=border:$theme_surface_border"

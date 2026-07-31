@@ -316,84 +316,31 @@ set -g fish_color_command 7aa2f7
 # … 37 more lines
 ```
 
-## 7. Adding laramie to fish
+## 7. laramie in fish
 
-Palette, confirmed against `~/.config/ghostty/themes/laramie` (16-colour palette + bg/fg/selection) and
-`~/.config/git/themes.gitconfig` (the `[delta "laramie"]` block):
+⚠ **This file does not own any colour value.** The **`laramie` skill** does — `references/spec.md`
+holds the 28 OKLCH primitives, and `references/bindings.md` holds the `fish_color_*` → token table.
+Load it before changing a colour here. A second copy of the palette lived in this section until
+2026-07-30 and had drifted from the live config on seven variables; do not recreate it.
 
-| From ghostty | Hex | From ghostty | Hex | From delta (extras) | Hex |
-| --- | --- | --- | --- | --- | --- |
-| background | `1f2335` | red 1/9 | `f7768e` | panel background | `24283b` |
-| foreground, palette 7 | `a9b1d6` | green 2/10 | `9ece6a` | line highlight | `292e42` |
-| black, palette 0 | `1a1b29` | yellow 3/11 | `e0af68` | dim foreground | `737aa2` |
-| brblack 8 (comment) | `414868` | blue 4/12 | `7aa2f7` | teal (diff add) | `73daca` |
-| brwhite 15, selection fg | `c0caf5` | magenta 5/13 | `bb9af7` | light grey | `cfc9c2` |
-| selection background | `373d5a` | cyan 6/14 | `7dcfff` | | |
+What belongs to *fish*, and is true regardless of the values:
 
-laramie's bright variants 9–14 are identical to 1–6; only `brblack` and `brwhite` differ from their base.
+| | |
+| --- | --- |
+| `themes/laramie.fish` | the 28 `$theme_*` primitives, hex **with** `#`. Sourced by `conf.d/colours.fish` above its interactive guard, because `conf.d/fzf.fish` and `conf.d/gum.fish` read them too |
+| `themes/laramie.theme` | **generated** by `.claude/skills/fish/scripts/gen-fish-theme.fish`; exists only so `fish_config theme list/show` works. ⚠ bare hex, no `#` (§6) |
+| `conf.d/colours.fish` | what actually applies the palette at startup — `fish_config theme choose` in `conf.d/` costs ~5.4 ms |
 
-⚠ **Superseded by the live config as of 2026-07-29.** `~/.config/fish/themes/laramie.theme` is now
-**generated** from `themes/laramie.fish` by `.claude/skills/fish/scripts/gen-fish-theme.fish`, and
-`conf.d/colours.fish` is what actually applies the palette at startup. Do not hand-edit either the
-`.theme` file or the block below; regenerate. The table below is kept as the design record of which
-hex maps to which role.
+⚠ **The commandline is a syntax surface**, so laramie's three-colour syntax doctrine applies to it:
+literals, comments and *definitions* get a colour, everything else is `fish_color_normal`. One
+adaptation — `fish_color_command` keeps a colour, because the command is what you scan history for,
+making it the commandline's analogue of a definition. ⚠ **`fish_color_keyword` and `fish_color_param`
+must therefore be set explicitly**: left unset they fall back to `command` (§5) and would silently
+inherit the definition colour, defeating the doctrine.
 
 Deliberately sectionless — laramie is dark-only, and a sectionless theme applies whatever the
-terminal reports. Verified: `theme list` shows it, `choose` exits 0 and round-trips
-`fish_color_command` as `7aa2f7`.
-
-```
-# name: 'Laramie'
-# preferred_background: 1f2335
-
-fish_color_normal a9b1d6
-fish_color_command 7aa2f7
-fish_color_keyword bb9af7
-fish_color_builtin 7dcfff
-fish_color_function 73daca
-fish_color_param a9b1d6
-fish_color_option 9ece6a
-fish_color_quote e0af68
-fish_color_redirection 7dcfff
-fish_color_end 737aa2
-fish_color_error f7768e
-fish_color_comment 414868
-fish_color_operator 9ece6a
-fish_color_escape bb9af7
-fish_color_autosuggestion 414868
-fish_color_valid_path --underline
-fish_color_selection c0caf5 --background=373d5a
-fish_color_search_match --background=373d5a
-fish_color_history_current --bold
-fish_color_cwd 73daca
-fish_color_cwd_root f7768e
-fish_color_user 9ece6a
-fish_color_host 7aa2f7
-fish_color_host_remote e0af68
-fish_color_status f7768e
-fish_color_cancel -r
-fish_pager_color_progress 737aa2
-fish_pager_color_background
-fish_pager_color_prefix 7dcfff --bold
-fish_pager_color_completion a9b1d6
-fish_pager_color_description 414868 --italics
-fish_pager_color_selected_background --background=373d5a
-fish_pager_color_selected_prefix 7dcfff --bold
-fish_pager_color_selected_completion c0caf5
-fish_pager_color_selected_description 737aa2 --italics
-fish_pager_color_secondary_background --background=24283b
-fish_pager_color_secondary_prefix 7dcfff
-fish_pager_color_secondary_completion a9b1d6
-fish_pager_color_secondary_description 414868 --italics
-```
-
-Then generate `conf.d/theme.fish` with the pipeline in §6. `fish_color_search_match` carries no
-foreground because the docs call it background-only; the selection foreground `c0caf5` matches
-ghostty's `selection-foreground` exactly; and empty `fish_pager_color_background` is a deliberate
-"inherit the terminal background", the shape the tokyonight themes use.
-
-The sibling gap in `CLAUDE.md` stays open: there is still no laramie **bat** theme, which is why
-`delta.syntax-theme = laramie` does not resolve. Not this file's problem.
+terminal reports. Verified: `theme list` shows it, `choose` exits 0 and round-trips. ⚠ Passing
+`--color-theme=light` to a sectionless theme **fails** (§6).
 
 ## 8. Testing colours and prompts
 

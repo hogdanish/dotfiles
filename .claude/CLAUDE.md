@@ -309,6 +309,14 @@ Both are set in `~/.config/fish/conf.d/git.fish` and change how git behaves ever
   unusual path `git/.gitconfig` (git's own default would be `git/config`).
 - `GIT_CONFIG_SYSTEM=/dev/null` — the system config is deliberately disabled.
 
+⚠ **`git/config` is a tracked symlink to `.gitconfig`, and it is load-bearing** (added 2026-07-30).
+`GIT_CONFIG_GLOBAL` is a **git-CLI** variable; **libgit2 ignores it entirely** and looks only at
+`$XDG_CONFIG_HOME/git/config` or `~/.gitconfig`. Neither existed, so every libgit2-backed tool saw
+*no global config at all*. That is why `delta` silently rendered its built-in colours and the whole
+`[delta "laramie"]` block had never once applied — discovered while rebuilding the theme, and the
+symlink is the fix. ⚠ Anything else libgit2-backed (`git-delta`, `git-filter-repo`'s libgit2 paths,
+GUI clients, Rust/Go git bindings) depends on that symlink. Do not "tidy" it away.
+
 ⚠ **Both *are* set in Bash tool calls** — `claude` is launched from fish, so its whole environment is
 inherited. The Bash tool's zsh is a *non-interactive login* shell: `~/.zprofile` is read, `~/.zshrc`
 is not, and aliases never expand — so fish functions and `op plugin` aliases can never serve Claude
@@ -321,28 +329,16 @@ GIT_CONFIG_GLOBAL=~/.config/git/.gitconfig GIT_CONFIG_SYSTEM=/dev/null git confi
 
 ## The `laramie` theme
 
-A custom Tokyo Night-derived palette, duplicated by hand across every tool because none share a
-format. Changing one colour means changing all of these:
+**The `laramie` skill is the source of truth** — the 32-token OKLCH spec, the per-tool binding tables
+for all fifteen files that carry a hex, the ANSI-16 contract, and the three-colour syntax doctrine.
+Load it before touching any file with a colour in it, or answering anything about contrast, syntax
+highlighting or terminal palettes. Rebuilt from the ground up 2026-07-30; ⚠ the old "core hexes" list
+that used to live here is **retired** — every one of those values changed.
 
-- `~/.config/ghostty/themes/laramie` — 16-color palette + bg/fg/cursor/selection
-- `~/.config/git/themes.gitconfig` — `[delta "laramie"]` feature block
-- `~/.config/micro/colorschemes/laramie-tc.micro`
-- `~/.config/bat/themes/laramie.tmTheme` — ⚠ **re-run `bat cache --build` after editing**, or bat
-  falls back silently and `delta.syntax-theme = laramie` breaks with it
-- `~/.config/atuin/themes/laramie.toml`
-- `~/.config/fish/themes/laramie.fish` (hex **with** `#`) + the generated `laramie.theme` (bare hex —
-  a `.theme` file is tokenised, so `#` starts a comment). Regenerate with
-  `.claude/skills/fish/scripts/gen-fish-theme.fish`
-- `~/.config/glamour/laramie.json` — markdown, read by **two** renderers via two variables:
-  `GUM_FORMAT_THEME` (`conf.d/gum.fish`) and `GLAMOUR_STYLE` (`conf.d/xdg-apps.fish`, for `gh`)
-- `~/.config/fish/conf.d/gum.fish` — ~24 `GUM_*` accent variables; gum has no config file (`gum` skill)
-- `~/.config/btop/themes/laramie.theme` — ⚠ `theme[main_bg]` is deliberately **empty**, not
-  `#1f2335`; that plus `theme_background = False` in `btop.conf` is what lets Ghostty's
-  `background-opacity`/`background-blur` show through instead of an opaque rectangle
-- `~/.config/macchina/themes/laramie.toml` — hex, not the named colours macchina also accepts
-
-Core hexes: bg `#1f2335`, fg `#a9b1d6`, red `#f7768e`, green `#9ece6a`, yellow `#e0af68`, blue
-`#7aa2f7`, magenta `#bb9af7`, cyan `#7dcfff`, bright-white `#c0caf5`, comment/dim `#414868`.
+Two things worth knowing without loading it: ⚠ **`bat cache --build` after editing the tmTheme**, or
+bat falls back silently and `delta.syntax-theme = laramie` breaks with it. ⚠ **If a tool accepts ANSI
+colour *names*, use them** — `starship.toml`, `LS_COLORS`, `EZA_COLORS`, `LESS_TERMCAP_*` and git's log
+formats all do, and they inherit laramie for free from `ghostty/themes/laramie`. Do not hex-code them.
 
 ## Verifying a change
 
@@ -373,7 +369,15 @@ curl -sso /dev/null https://example.com/nope; echo $?   # 22, i.e. curlrc's `fai
 uv run --no-project python -c 'import sys; print(sys.executable)'  # a uv-managed python, not brew's
 script -q /dev/null btop                          # theme loads; ⚠ btop needs a tty, `q` to quit
 duti -x json                                      # what actually handles .json right now
-fish -lc 'printf "# hi\n" | CLICOLOR_FORCE=1 gum format' | rg -q '187;154;247'  # laramie markdown
+fish -lc 'printf "# hi\n" | CLICOLOR_FORCE=1 gum format' | rg -q '73;235;240'  # laramie markdown
+```
+
+⚠ **Every hex in every theme file must appear in the `laramie` skill's `references/spec.md`.** Any
+other value is drift, by definition — that check is the closest thing to a validator the theme has:
+
+```sh
+rg -o '`#[0-9a-f]{6}`' .claude/skills/laramie/references/spec.md | tr -d '`' | sort -u > /tmp/spec
+rg -o '#[0-9a-fA-F]{6}' <theme file> | tr 'A-F' 'a-f' | sort -u | comm -23 - /tmp/spec  # must be empty
 ```
 
 ⚠ `ghostty +validate-config` silently ignores a nonexistent `--config-file` path, so a typo'd path
