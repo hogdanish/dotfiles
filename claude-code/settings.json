@@ -5,7 +5,8 @@
   "model": "opus[1m]",
   "enabledPlugins": {
     "github@claude-plugins-official": true,
-    "firecrawl@claude-plugins-official": true
+    "firecrawl@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true
   },
   "effortLevel": "high",
   "showClearContextOnPlanAccept": true,
