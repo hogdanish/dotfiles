@@ -33,9 +33,13 @@ tree. The authored config lives in `claude-code/` and is symlinked back from the
 detach it from version control — `scripts/audit-config.fish` checks for exactly this.
 
 `claude-code/rules/` holds the **user-level** rules, which load in every project on this machine, not
-just here: `gdscript.md` (scoped to `**/*.gd`) and `toolbox.md` (unscoped — the always-in-context
-digest of this machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it).
-⚠ Adding or removing a CLI formula means updating `toolbox.md` in the same change.
+just here: `gdscript.md` (scoped to `**/*.gd`), `toolbox.md` (unscoped — the always-in-context digest
+of this machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it), and
+`context-architecture.md` (unscoped — the doctrine for CLAUDE.md/rules/skills/references/memory in
+*any* repo; it replaced the project-scoped `claude-framework` skill on 2026-07-30, whose skill map
+described a Godot project this machine does not contain). ⚠ Adding or removing a CLI formula means
+updating `toolbox.md` in the same change. ⚠ Unlike skills, `rules/` is symlinked **as a directory**,
+so a new rule needs no `link-claude.fish` run.
 
 `claude-code/skills/` holds the **user-level** skills, added 2026-07-30 — currently just `godot`.
 ⚠ Do not confuse them with `.claude/skills/`, which loads only inside this repo; these load
