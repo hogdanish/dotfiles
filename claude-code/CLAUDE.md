@@ -21,8 +21,10 @@
 - Proactively research using tools whenever you're unsure about something, the topic may have changed recently, or a library/API version matters.
 - Don't solely rely on your knowledge and prefer fetching actual up-to-date documentation for anything that is version-sensitive or particularly obscure.
 - Use any tools at your disposal without asking permission when they are clearly appropriate and low-risk.
-- **Which tool to reach for — CLI, MCP server, connector or plugin — is answered in one place: the
-  `toolbox` rule, already in your context.** Act on it directly.
+- **Wondering whether this machine has a tool, or which of several to use? The `toolbox` rule is
+  already in your context — consult it instead of checking.** ⚠ It is an inventory, not a mandate:
+  it says which tool is best *if* a shell command is the right move, never that one is. Your native
+  capabilities — reading images, Read/Edit/Grep, reasoning — always come first.
 
 ## Coding Guidelines
 
