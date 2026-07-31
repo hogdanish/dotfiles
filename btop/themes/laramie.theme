@@ -1,8 +1,8 @@
 #? laramie — tokyo night derived, hand-kept to match every other laramie theme on this machine.
-#? see the repo CLAUDE.md for the full list; changing a core hex means changing all of them.
+#? ⚠ values come from .claude/skills/laramie/references/spec.md — do not invent one here.
 
 # main background. ⚠ deliberately EMPTY, not "#1f2335": an empty value means "terminal default",
-# which is what lets ghostty's background-opacity = 0.85 and background-blur show through btop.
+# which is what lets ghostty's background-opacity and background-blur show through btop.
 # setting it to the literal background hex would paint an opaque rectangle over the blur.
 theme[main_bg]=""
 
@@ -10,76 +10,76 @@ theme[main_bg]=""
 theme[main_fg]="#a9b1d6"
 
 # title colour for boxes
-theme[title]="#c0caf5"
+theme[title]="#c9d3f7"
 
 # highlight colour for keyboard shortcuts
-theme[hi_fg]="#7aa2f7"
+theme[hi_fg]="#3bc5ca"
 
 # selected item in the processes box
-theme[selected_bg]="#373d5a"
-theme[selected_fg]="#c0caf5"
+theme[selected_bg]="#343a55"
+theme[selected_fg]="#c9d3f7"
 
 # inactive/disabled text
-theme[inactive_fg]="#565f89"
+theme[inactive_fg]="#656e94"
 
 # text drawn on top of graphs — uptime, network scaling
 theme[graph_text]="#a9b1d6"
 
 # background of the percentage meters
-theme[meter_bg]="#292e42"
+theme[meter_bg]="#292e43"
 
 # misc process box text (tree lines, thread counts)
-theme[proc_misc]="#73daca"
+theme[proc_misc]="#3bc5ca"
 
 # box outlines and the divider between them. all four share the terminal-black tone so the
 # boxes recede and the data is what carries colour.
-theme[cpu_box]="#414868"
-theme[mem_box]="#414868"
-theme[net_box]="#414868"
-theme[proc_box]="#414868"
-theme[div_line]="#414868"
+theme[cpu_box]="#444b6b"
+theme[mem_box]="#444b6b"
+theme[net_box]="#444b6b"
+theme[proc_box]="#444b6b"
+theme[div_line]="#444b6b"
 
 # temperature gradient — calm to alarming
-theme[temp_start]="#9ece6a"
-theme[temp_mid]="#e0af68"
-theme[temp_end]="#f7768e"
+theme[temp_start]="#86c452"
+theme[temp_mid]="#e0a332"
+theme[temp_end]="#fc8697"
 
 # cpu load gradient
-theme[cpu_start]="#9ece6a"
-theme[cpu_mid]="#e0af68"
-theme[cpu_end]="#f7768e"
+theme[cpu_start]="#86c452"
+theme[cpu_mid]="#e0a332"
+theme[cpu_end]="#fc8697"
 
-# memory: free
-theme[free_start]="#9ece6a"
-theme[free_mid]="#73daca"
-theme[free_end]="#2ac3de"
+# memory: free — intensity ramp (deep -> base -> loud), brightness rises with the value
+theme[free_start]="#59931f"
+theme[free_mid]="#86c452"
+theme[free_end]="#a7e775"
 
 # memory: cached
-theme[cached_start]="#7dcfff"
-theme[cached_mid]="#7aa2f7"
-theme[cached_end]="#bb9af7"
+theme[cached_start]="#0584da"
+theme[cached_mid]="#6cb6fa"
+theme[cached_end]="#98ccff"
 
 # memory: available
-theme[available_start]="#b4f9f8"
-theme[available_mid]="#7dcfff"
-theme[available_end]="#7aa2f7"
+theme[available_start]="#299194"
+theme[available_mid]="#3bc5ca"
+theme[available_end]="#49ebf0"
 
 # memory: used — shares the cpu ramp, so "a lot of it" reads the same way everywhere
-theme[used_start]="#9ece6a"
-theme[used_mid]="#e0af68"
-theme[used_end]="#f7768e"
+theme[used_start]="#86c452"
+theme[used_mid]="#e0a332"
+theme[used_end]="#fc8697"
 
 # network download
-theme[download_start]="#73daca"
-theme[download_mid]="#7dcfff"
-theme[download_end]="#7aa2f7"
+theme[download_start]="#299194"
+theme[download_mid]="#3bc5ca"
+theme[download_end]="#49ebf0"
 
-# network upload — warm, so the two directions are distinguishable at a glance
-theme[upload_start]="#bb9af7"
-theme[upload_mid]="#ff9e64"
-theme[upload_end]="#f7768e"
+# network upload — violet, so the two directions are distinguishable at a glance
+theme[upload_start]="#9b61c9"
+theme[upload_mid]="#cb92fc"
+theme[upload_end]="#dab4fe"
 
 # process box cpu gradient
-theme[process_start]="#9ece6a"
-theme[process_mid]="#e0af68"
-theme[process_end]="#f7768e"
+theme[process_start]="#86c452"
+theme[process_mid]="#e0a332"
+theme[process_end]="#fc8697"

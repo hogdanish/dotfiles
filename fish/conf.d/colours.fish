@@ -1,6 +1,6 @@
 # every colour this shell is responsible for: the tools it launches, and fish's own line
-# editor and pager. ghostty, delta and micro each carry their own hand-kept copy of laramie
-# (see the repo CLAUDE.md) — this file is the fish and CLI half.
+# editor and pager. this is the fish and CLI half of laramie; thirteen other files carry
+# their own hand-kept copy. ⚠ the `laramie` skill owns the values and the per-tool bindings.
 #
 # ⚠ sorts before fzf.fish and tools.fish, which is load-bearing: it exports the $theme_*
 # palette that conf.d/fzf.fish builds FZF_DEFAULT_OPTS from.
@@ -78,43 +78,48 @@ status is-interactive; or return
 # these would each be set to an empty list, which fish silently treats as "unset" and falls
 # back to its own defaults — a theme that reads as applied and is not. hence the hard
 # `return 1` on a missing palette rather than a warning.
-# builtin/function/keyword fall back to command, and option to param, so only the ones
-# whose fish default is a hardcoded terminal colour need setting here.
-set -g fish_color_normal $theme_foreground # general text
-set -g fish_color_command $theme_blue # commands and function names
-set -g fish_color_keyword $theme_purple # control keywords (if, while)
-set -g fish_color_quote $theme_green # strings
-set -g fish_color_redirection $theme_orange # redirection operators (>, >>)
-set -g fish_color_end $theme_foreground # process separators (; and &)
-set -g fish_color_option $theme_light_blue # options and flags
-set -g fish_color_error $theme_red # syntax errors
-set -g fish_color_param $theme_white # parameters
-set -g fish_color_comment $theme_dark_gray # comments
-set -g fish_color_operator $theme_cyan # expansion operators (*, ~)
-set -g fish_color_escape $theme_light_green # escape sequences (\n, \t)
-set -g fish_color_autosuggestion $theme_gray # the proposed rest of the command
-set -g fish_color_search_match $theme_light_cyan --background=$theme_dust # fish reads the background only
-set -g fish_color_selection $theme_white --background=$theme_dust # selected text in vi visual mode
+#
+# ⚠ the commandline IS a syntax surface, so the laramie syntax doctrine applies (the `laramie`
+# skill): only literals, definitions and comments get a colour; everything else is plain text.
+# one adaptation — the *command* keeps a colour, because it is the thing you scan history for,
+# which makes it the commandline's analogue of a definition.
+# ⚠ keyword and param must be set EXPLICITLY. unset, they fall back to command and would
+# inherit the definition colour, defeating the doctrine.
+set -g fish_color_normal $theme_text_base # general text
+set -g fish_color_command $theme_cyan_loud # syntax.definition — the command being run
+set -g fish_color_keyword $theme_text_base # plain: `if`, `while`, `and` (⚠ see above)
+set -g fish_color_param $theme_text_base # plain: ordinary parameters (⚠ see above)
+set -g fish_color_quote $theme_green_base # syntax.literal — strings
+set -g fish_color_escape $theme_green_loud # escapes, one tier louder inside a literal
+set -g fish_color_comment $theme_amber_loud # syntax.comment — bright, per the doctrine
+set -g fish_color_option $theme_text_muted # flags modify, they are not content
+set -g fish_color_operator $theme_text_muted # syntax.punctuation — expansion operators (*, ~)
+set -g fish_color_redirection $theme_text_muted # syntax.punctuation — (>, >>)
+set -g fish_color_end $theme_text_muted # syntax.punctuation — separators (; and &)
+set -g fish_color_error $theme_red_base # state.error
+set -g fish_color_autosuggestion $theme_text_faint # meant to be ignorable
+set -g fish_color_search_match $theme_text_loud --background=$theme_surface_overlay
+set -g fish_color_selection $theme_text_loud --background=$theme_surface_overlay
 
 # default prompt. starship owns the prompt here, so these only surface if it is ever absent.
-set -g fish_color_cwd $theme_light_blue # current working directory
-set -g fish_color_cwd_root $theme_red # ...when root
-set -g fish_color_user $theme_light_cyan # username
-set -g fish_color_host $theme_light_green # hostname
-set -g fish_color_host_remote $theme_yellow # ...over ssh
-set -g fish_color_status $theme_red # non-zero exit status
+set -g fish_color_cwd $theme_blue_base # current working directory
+set -g fish_color_cwd_root $theme_red_base # ...when root
+set -g fish_color_user $theme_cyan_base # username
+set -g fish_color_host $theme_cyan_base # hostname
+set -g fish_color_host_remote $theme_amber_base # ...over ssh (state.warn)
+set -g fish_color_status $theme_red_base # non-zero exit status
 
 # completion pager
-set -g fish_pager_color_progress $theme_foreground
+set -g fish_pager_color_progress $theme_text_muted
 set -e fish_pager_color_background # inherit the terminal background
-set -g fish_pager_color_prefix $theme_foreground
-set -g fish_pager_color_completion $theme_light_blue
-set -g fish_pager_color_description $theme_foreground
-set -g fish_pager_color_selected_background --background=$theme_dust
-set -g fish_pager_color_selected_prefix $theme_green
-set -g fish_pager_color_selected_completion $theme_light_green --background=$theme_dust
-set -g fish_pager_color_selected_description $theme_red
-set -g fish_pager_color_secondary_background --background=$theme_black # zebra striping
-set -g fish_pager_color_secondary_prefix $theme_red
-set -g fish_pager_color_secondary_completion $theme_light_blue
-set -g fish_pager_color_secondary_description $theme_light_blue
+set -g fish_pager_color_prefix $theme_text_loud # the part already typed
+set -g fish_pager_color_completion $theme_text_base
+set -g fish_pager_color_description $theme_text_dim
+set -g fish_pager_color_selected_background --background=$theme_surface_overlay
+set -g fish_pager_color_selected_prefix $theme_cyan_loud
+set -g fish_pager_color_selected_completion $theme_text_loud
+set -g fish_pager_color_selected_description $theme_text_muted
+set -g fish_pager_color_secondary_background --background=$theme_surface_raised # zebra striping
+set -g fish_pager_color_secondary_prefix $theme_cyan_base
+set -g fish_pager_color_secondary_completion $theme_text_base
+set -g fish_pager_color_secondary_description $theme_text_dim

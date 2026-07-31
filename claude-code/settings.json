@@ -8,11 +8,11 @@
     "firecrawl@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "showClearContextOnPlanAccept": true,
   "tui": "default",
   "skipDangerousModePermissionPrompt": true,
-  "theme": "auto",
+  "theme": "custom:laramie",
   "editorMode": "normal",
   "preferredNotifChannel": "ghostty",
   "inputNeededNotifEnabled": true,

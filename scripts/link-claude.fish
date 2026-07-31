@@ -33,7 +33,9 @@ set -g FORCE 0
 set -g DRY_RUN 0
 
 # the fixed entries. skills are discovered instead, below.
-set -g LINKS CLAUDE.md rules settings.json
+# ⚠ themes/ is linked as a whole directory, unlike skills/: it is a user-only namespace (plugin
+# themes ship inside the plugin, not here), so nothing else writes into it.
+set -g LINKS CLAUDE.md rules settings.json themes
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]

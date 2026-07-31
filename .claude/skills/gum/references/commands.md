@@ -51,7 +51,7 @@ pipe. `FORCE_COLOR` is **not** honoured.
 
 | Value | Format |
 | --- | --- |
-| Colour | ANSI `0`–`15`, ANSI256 `0`–`255`, or hex `"#7aa2f7"`. Adaptive/light-dark pairs are not supported. |
+| Colour | ANSI `0`–`15`, ANSI256 `0`–`255`, or hex `"#6cb6fa"`. Adaptive/light-dark pairs are not supported. |
 | Padding / margin | 1, 2 or 4 space-separated ints — `"1"` = all sides, `"1 2"` = vertical horizontal, `"1 2 3 4"` = top right bottom left. ⚠ **3 tokens, or any non-integer, silently yields `0 0 0 0`.** |
 | Duration | Go duration string — `500ms`, `5s`, `2m`. `0s` disables the timeout. |
 

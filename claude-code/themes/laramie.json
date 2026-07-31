@@ -1,0 +1,29 @@
+{
+  "name": "laramie",
+  "base": "dark-ansi",
+  "overrides": {
+    "claude": "#cb92fc",
+    "claudeShimmer": "#dab4fe",
+
+    "inactive": "#8089af",
+    "inactiveShimmer": "#9099be",
+    "subtle": "#656e94",
+    "suggestion": "#9099be",
+
+    "diffAdded": "#29381d",
+    "diffRemoved": "#49282c",
+    "diffAddedDimmed": "#292e43",
+    "diffRemovedDimmed": "#292e43",
+    "diffAddedWord": "#3a5723",
+    "diffRemovedWord": "#743841",
+
+    "userMessageBackground": "#292e43",
+    "userMessageBackgroundHover": "#343a55",
+    "bashMessageBackgroundColor": "#161925",
+    "memoryBackgroundColor": "#292e43",
+    "selectionBg": "#343a55",
+
+    "rate_limit_fill": "#3bc5ca",
+    "rate_limit_empty": "#444b6b"
+  }
+}

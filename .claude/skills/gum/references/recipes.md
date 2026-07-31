@@ -86,15 +86,15 @@ Abbreviations and functions that wrap gum belong in `~/.config/fish/functions/` 
 `gum style` boxes text; `gum join` glues boxes. Build leaves first, compose last.
 
 ```fish
-set -l ok (gum style --border rounded --border-foreground '#9ece6a' --padding '0 2' ' PASS ' | string collect)
-set -l no (gum style --border rounded --border-foreground '#f7768e' --padding '0 2' ' FAIL ' | string collect)
+set -l ok (gum style --border rounded --border-foreground '#86c452' --padding '0 2' ' PASS ' | string collect)
+set -l no (gum style --border rounded --border-foreground '#fc8697' --padding '0 2' ' FAIL ' | string collect)
 gum join --horizontal $ok $no
 ```
 
 ```bash
-TITLE=$(gum style --bold --foreground '#c0caf5' 'Deploy')
+TITLE=$(gum style --bold --foreground '#c9d3f7' 'Deploy')
 BODY=$(gum style --faint 'staging → production')
-gum style --border double --border-foreground '#7aa2f7' --padding '1 3' --align center \
+gum style --border double --border-foreground '#6cb6fa' --padding '1 3' --align center \
     "$(gum join --vertical --align center "$TITLE" "$BODY")"
 ```
 
@@ -161,19 +161,26 @@ What it does, and the decisions worth not re-litigating:
 | --- | --- |
 | `type -q gum; or return` at the top | one concern per file, so the bare `return` is safe |
 | **No** `status is-interactive` guard | a *script* calling `gum choose` is precisely the case that needs the palette; `functions/reload.fish` is one such caller |
-| Foreground accents only | magenta `#bb9af7` cursors/indicators, blue `#7aa2f7` headers/prompts, dim `#414868` placeholders. Backgrounds stay at gum's defaults except `confirm`'s two pills |
+| `set -q theme_violet_base; or return` | ⚠ **added 2026-07-30.** The values are now `$theme_*`, not literal hex — see below. Without this guard a failed palette load would export empty strings, which gum renders unstyled rather than erroring |
+| Foreground accents only | `ui.accent` (violet) for cursors/indicators/spinners/selections, `ui.label` (blue) for headers/prompts, `text.faint` for placeholders. Backgrounds stay at gum's defaults except `confirm`'s two pills |
 | `GUM_FORMAT_THEME` set here, `GLAMOUR_STYLE` set in `xdg-apps.fish` | two renderers, two variables, one JSON file — see §5 |
 | Unprefixed `$FOREGROUND`/`$BORDER`/`$PADDING` deliberately absent | not namespaced; exporting them would restyle every `gum style` call on the machine |
 
+⚠ **The values are `$theme_*` variables, not literal hex — changed 2026-07-30.** `conf.d/colours.fish`
+sources the palette *above* its own interactive guard and sorts earlier (`c` < `g`), so the palette is
+always present here. This removed 23 hardcoded hexes and one whole copy of the palette; benchmarked as
+marginally faster than the literals it replaced (30 runs, `hyperfine`), since variable expansion forks
+nothing.
+
 Extending it: add the `GUM_<COMMAND>_<KEY>_FOREGROUND` line ([commands.md](commands.md) lists every
-style key per command), keep the value a bare `#rrggbb` from the laramie core hexes, and re-run the
-verification in the SKILL.md.
+style key per command), set it to the `$theme_*` primitive named by the **`laramie` skill's**
+`references/bindings.md`, and re-run the verification in the SKILL.md.
 
-⚠ This file is laramie's **eleventh** hand-maintained copy of the palette. A colour change means
-changing all eleven — the list is in the repo `CLAUDE.md`.
+⚠ **The `laramie` skill owns every colour value and the per-tool binding table.** Do not pick a hex
+here; look it up there. A colour change is a change to `references/spec.md` first.
 
-⚠ `set -x` displays these values as `'#bb9af7'` **with quotes**. That is fish quoting `#` for
-round-trip safety in its listing, not a literal part of the value; `string length` confirms 7.
+⚠ `set -x` displays a literal hex value as `'#cb92fc'` **with quotes**. That is fish quoting `#` for
+round-trip safety in its listing, not part of the value; `string length` confirms 7.
 
 ⚠ Do **not** export the unprefixed `gum style` variables (`$FOREGROUND`, `$BORDER`, `$PADDING`, …)
 globally. They are not namespaced and would restyle every `gum style` call in every script.
