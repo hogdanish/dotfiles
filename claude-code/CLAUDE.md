@@ -76,7 +76,7 @@
 - **Shell**: Fish (interactive)
 - **Terminal emulator**: Ghostty
 - **Package manager**: Homebrew 6.x 
-- **JS/TS runtime**: node
+- **JS/TS runtime**: bun (or node for compatibility)
 - **IDE**: VS Code Insiders
 - **Auth**: 1Password / `op` CLI for all secrets and credentials
 - **Version control**: git + GitHub CLI (via 1Password shell plugin)
