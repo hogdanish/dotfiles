@@ -6,9 +6,10 @@
   "enabledPlugins": {
     "github@claude-plugins-official": true,
     "firecrawl@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "showClearContextOnPlanAccept": true,
   "tui": "default",
   "skipDangerousModePermissionPrompt": true,
@@ -20,5 +21,17 @@
   "skipAutoPermissionPrompt": true,
   "additionalDirectories": [
     "/Users/ethan/.config"
-  ]
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-notify attention \"$(jq -r '.message // \"Claude Code is waiting on you\"')\""
+          }
+        ]
+      }
+    ]
+  }
 }
