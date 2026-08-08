@@ -6,7 +6,7 @@ description: Write, rewrite, or audit Markdown documentation under Orwell's six 
 # prose — clear technical English, enforced
 
 The always-on `prose` rule supplies a light style baseline. This skill supplies the documentation
-workflow, the full writing rules, and the audit process.
+method, the full writing rules, and the audit process.
 
 ## Scope
 
@@ -26,6 +26,13 @@ Read both references before drafting, rewriting, or auditing documentation:
 - `references/asd-ste100.md` contains the two modes, text classification, all 53 distilled rules,
   vocabulary discipline, and untouchables.
 - `references/checklist.md` contains the final mechanical and judgment checks.
+
+## Execution independence
+
+Apply this skill the same way whether the task covers one file or many files. This skill defines how
+to draft, revise, preserve, and verify documentation. It does not choose or prescribe subagents,
+agent teams, workflows, parallel execution, delegation boundaries, or any other orchestration method.
+The caller and execution environment own those decisions.
 
 ## Invoking
 
@@ -121,7 +128,7 @@ diff <(extract old.md) <(extract new.md)
 
 Anything that disappears must be a duplicate. Investigate every other removal.
 
-## Auditing many files
+## Revising or auditing many files
 
 For `rewrite all skills starting with addon-` and similar:
 
@@ -132,9 +139,9 @@ For `rewrite all skills starting with addon-` and similar:
    Show the user the file list and line counts. Confirm the set if it is larger than expected.
 2. **Rank by likely waste**, not by size. A 2,000-line specification may be correct; a 90-line
    reference for a system with three moving parts is not.
-3. **One subagent per file** when the set exceeds three files. Each rewrite needs the whole file in
-   context, and the fact-set check is per file. Give each agent this skill's preservation contract and
-   the single-file workflow.
+3. **Apply the single-file method to every file.** Read each complete file before revising it, and run
+   the fact-set check separately for each file. Do this regardless of how the surrounding task
+   schedules or groups the work.
 4. **Never batch-edit with a regex.** Prose compression is judgement, not substitution.
 5. **Report a table**: file, lines before, lines after, percent cut, facts lost (must be `0`).
 6. Stop and ask if any file needs a structural change — a split, a merge, a deletion. That is a
