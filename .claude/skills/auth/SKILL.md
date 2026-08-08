@@ -54,17 +54,17 @@ Three independent chains, in descending order of how much of the machine they ca
   settings, `pam_tid.so` via `/etc/pam.d/sudo_local`, `pam-reattach` for tmux, keychain ACLs, and
   what Touch ID does *not* protect. Read when the goal is "stop asking me for my password".
 
-## Verified state of this machine (2026-07-28, mid-buildout)
+## Verified state of this machine (2026-08-08)
 
 | Piece | State |
 | --- | --- |
 | 1Password app | `1password@beta` cask; one account, `my.1password.com` |
 | `op` | 2.38.1-beta.01, `/opt/homebrew/bin/op`; config at `~/.config/op` |
 | `op` sign-in | ✅ working interactively. ⚠ `op whoami` **always fails from a Claude Code Bash call** — see below; that is not a misconfiguration |
-| Shell plugins | `gh` only, as `functions/wrappers/gh.fish` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
+| Shell plugins | `gh` and `linode-cli`, as fish functions under `functions/wrappers/` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
 | SSH agent | on; `~/.ssh/config` sets `IdentityAgent`, and `conf.d/op.fish` exports `SSH_AUTH_SOCK` |
-| Keys served | **five** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant. ⚠ one below `MaxAuthTries 6` |
-| `agent.toml` | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only |
+| Keys served | **six** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant, Linode. ⚠ exactly at the common `MaxAuthTries 6` limit |
+| `agent.toml` | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only. ⚠ A 2026-08-08 named-item ordering attempt served only its first item in this app build, so do not repeat it without a fail-safe `ssh-add -l` check |
 | SSH bookmarks | `~/.ssh/1Password/config` generated but holds only `Match all`; not yet included |
 | Commit signing | `gpg.format=ssh`, `op-ssh-sign`, `commit.gpgsign=true`, `tag.gpgsign=true`; key fingerprint matches the agent's *Git SSH* entry |
 | Local verification | `gpg.ssh.allowedSignersFile = ~/.config/git/allowed_signers` ✅ (file created) |
@@ -72,7 +72,7 @@ Three independent chains, in descending order of how much of the machine they ca
 | pinentry | ⚠ `gpgconf` resolves to `/opt/homebrew/opt/pinentry/bin/pinentry`, a **symlink to `pinentry-curses`** — a TTY prompt. Bypassed by the explicit `pinentry-program` |
 | Touch ID for sudo | ✅ **on** (2026-07-30). `/etc/pam.d/sudo_local` = `pam_reattach` optional, then `pam_tid.so` sufficient. ⚠ Interactive `sudo` only — see `touchid-system-auth.md` §3.1 |
 | `pam-reattach` | **installed** (1.3, `/opt/homebrew/lib/pam/pam_reattach.so`) — it is a PAM module, so `command -v` finds nothing |
-| Plaintext secrets | ✅ `conf.d/secrets.fish` was retired; development tokens come from the 1Password Environment at agent launch |
+| Plaintext secrets | ✅ `conf.d/secrets.fish` was retired; development tokens come from the 1Password Environment or direct `op://` references at agent launch. The plaintext token written by `linode-cli` browser setup was removed from `~/.config/linode-cli` on 2026-08-08 |
 
 ⏳ = outstanding. Re-verify before relying on any row — this table is a snapshot, not a live check.
 
@@ -100,6 +100,13 @@ Codex uses the same Environment for tools it launches, while retaining its own C
 # ~/.config/fish/functions/wrappers/codex.fish
 op run --no-masking --environment $__op_codex_env -- codex $argv
 ```
+
+The Linode PAT remains one 1Password item rather than being copied into that Environment.
+`conf.d/op.fish` stores only its `op://` reference. Every Claude Code and Codex launch exports it as
+`LINODE_CLI_TOKEN`, so the parent `op run` resolves it once and a bare `linode-cli` works inside the
+agent without loading an MCP. `claude --infra` and `codex --infra` additionally export the same
+reference as `LINODE_API_TOKEN` and opt the session into the pinned `instances` MCP server. Humans
+use `functions/wrappers/linode-cli.fish`, which delegates to the installed 1Password shell plugin.
 
 ⚠ **`GH_TOKEN` and `GITHUB_PERSONAL_ACCESS_TOKEN` are both required** and must hold the same value:
 `gh` reads the former, the GitHub MCP plugin interpolates the latter. That is not a duplication bug.

@@ -147,6 +147,12 @@ path — `/opt/homebrew/bin/op` on this machine — as `command`.
 The same shape works with `op://` references instead of an Environment
 (`op run -- <cmd>` with references exported), which is preferable for a single token.
 
+That is the Linode arrangement here: `conf.d/op.fish` stores the PAT's `op://` reference, and every
+Claude Code or Codex launch exports it as `LINODE_CLI_TOKEN` before the single parent `op run`.
+Agent shells inherit the resolved value, so the official CLI works without a nested `op` call or a
+token in config. `claude --infra` / `codex --infra` additionally export `LINODE_API_TOKEN` and load
+Linode's large MCP schema catalogue only for that session.
+
 ## 7. The 1Password MCP Server (beta)
 
 A separate thing from the hook: an MCP server that lets Codex or Kiro *manage* Environments (create

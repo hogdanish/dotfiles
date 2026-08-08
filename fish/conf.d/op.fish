@@ -3,9 +3,9 @@
 # the shell-plugin credentials live in ~/.config/op/plugins/*.json and need no wiring here.
 # ⚠ do NOT source ~/.config/op/plugins.sh — `op plugin init` writes posix shell functions
 # (`gh() { ... }`) regardless of the invoking shell, and it does not parse as fish. the fish side
-# is functions/wrappers/gh.fish. ⚠ gh is the only one: the brew wrapper was removed 2026-07-30 because
-# HOMEBREW_GITHUB_API_TOKEN buys nothing post-homebrew-4 and cost a prompt per session.
-# brew.json is therefore orphaned plugin state — `op plugin clear brew` to drop it.
+# is one autoloaded function per cli in functions/wrappers/. `gh` and `linode-cli` are live; the brew
+# wrapper was removed 2026-07-30 because HOMEBREW_GITHUB_API_TOKEN buys nothing post-homebrew-4 and
+# cost a prompt per session. brew.json is therefore orphaned plugin state.
 
 # ssh agent
 # ~/.ssh/config sets IdentityAgent, which covers ssh(1) and everything that reads ssh_config.
@@ -22,3 +22,9 @@ set -g __op_claude_env uiba73phjvsgnivopa7bujlpbq
 # codex inherits the same development-tool credentials as claude code. this does not
 # replace codex's chatgpt oauth login; the wrapper only supplies child-process variables.
 set -g __op_codex_env uiba73phjvsgnivopa7bujlpbq
+
+# the linode shell plugin serves humans. agents cannot inherit fish functions, so their parent
+# wrappers export this reference for `op run` to resolve as the cli token. `--infra` additionally
+# exposes the same value to the mcp, whose large tool catalogue remains opt-in.
+# the reference is a locator, not a credential; keep the resolved value out of shell state and files.
+set -g __op_linode_pat_ref 'op://Development/Linode PAT/token'

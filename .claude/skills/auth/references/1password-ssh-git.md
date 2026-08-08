@@ -81,6 +81,12 @@ account = "my.1password.com"
   the agent and reports in Settings → Developer.
 - The file is local-only, never synced; version it yourself if you want it shared.
 
+⚠ **Observed exception on this machine (2026-08-08):** replacing the single vault selector with
+six named-item sections served only the first item despite the documented concatenation/order
+semantics. `ssh-add -l` caught it before Git access was lost. Keep the vault selector until a future
+1Password build is retested; never rely on section ordering here without checking the complete key
+set immediately afterward.
+
 ## 4. Client configuration
 
 ### `IdentityAgent` (preferred)

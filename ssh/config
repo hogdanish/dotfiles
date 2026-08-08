@@ -15,6 +15,22 @@
 # host-specific blocks go here, above the defaults
 # ---------------------------------------------------------------------------
 
+Host cg-test cg-test-ord-01
+    HostName 172.234.197.254
+    User root
+    Port 22
+    PreferredAuthentications publickey
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    ForwardAgent no
+
+Host cg-test-ord-01-lish
+    HostName lish-us-ord.linode.com
+    User pondethan
+    RequestTTY force
+    RemoteCommand cg-test-ord-01
+
 
 # ---------------------------------------------------------------------------
 # defaults for every host — keep this last
