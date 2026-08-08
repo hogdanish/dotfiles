@@ -61,12 +61,13 @@ cannot carry is machine-specific contradiction of its own docs: Firecrawl's bund
 tells the agent to run `firecrawl init` / `setup skills` / `login`, all three of which are wrong
 here, so that override lives in `claude-code/CLAUDE.md` instead.
 
-`codex/` holds the **authored** global Codex configuration. Codex does not separate config from
-state, so the live `~/.codex/` directory remains untracked; `AGENTS.md`, `config.toml` and each
-`*.config.toml` opt-in profile symlink back into this repo. `codex/skills/` links one directory at a time into
-`~/.agents/skills/`, the documented user-skill namespace; vendor skills still belong in plugins.
-Run `scripts/link-codex.fish` after adding a skill, and keep `scripts/audit-config.fish` able to
-detect detached or dangling links.
+`codex/` holds only **Codex-specific** TOML configuration. Codex does not separate config from state,
+so the live `~/.codex/` directory remains untracked. Its `config.toml` and each `*.config.toml`
+profile link back into `codex/`; its `AGENTS.md` links to `claude-code/CLAUDE.md`, and each global
+skill under `~/.agents/skills/` links directly to `claude-code/skills/`. This sharing is local to
+this dotfiles repo. Other projects may use Claude-only skill frontmatter. Vendor skills still belong
+in plugins. Run `scripts/link-codex.fish` after adding a global skill, and keep
+`scripts/audit-config.fish` able to detect detached or dangling links.
 
 Claude Code remains the canonical owner of this repository's project instructions and skills.
 Root `AGENTS.md` symlinks to `.claude/CLAUDE.md`, and `.agents/skills/<name>` links each directory

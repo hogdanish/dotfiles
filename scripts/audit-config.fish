@@ -121,8 +121,8 @@ function __check_claude_links --description 'authored claude config is still sym
     __say info 'claude-code symlinks intact'
 end
 
-function __check_codex_links --description 'authored codex config and skills are linked'
-    set -l authored_config AGENTS.md config.toml
+function __check_codex_links --description 'Codex config and shared global skills are linked'
+    set -l authored_config config.toml
     for profile in (path filter -f $REPO/codex/*.config.toml)
         set -a authored_config (path basename $profile)
     end
@@ -136,18 +136,28 @@ function __check_codex_links --description 'authored codex config and skills are
         end
     end
 
-    for skill in (path filter -d $REPO/codex/skills/*)
+    if not test -L $HOME/.codex/AGENTS.md
+        __fail "$HOME/.codex/AGENTS.md is not a symlink — edits to it are NOT tracked"
+    else if not test -e $HOME/.codex/AGENTS.md
+        __fail "$HOME/.codex/AGENTS.md is a broken symlink"
+    else if not test (path resolve $HOME/.codex/AGENTS.md) = (path resolve $REPO/claude-code/CLAUDE.md)
+        __fail "$HOME/.codex/AGENTS.md does not resolve to claude-code/CLAUDE.md"
+    end
+
+    for skill in (path filter -d $REPO/claude-code/skills/*)
         set -l name (path basename $skill)
         if not test -L $HOME/.agents/skills/$name
-            __fail "codex skill $name is authored but not linked — run scripts/link-codex.fish"
+            __fail "shared global skill $name is not linked for Codex — run scripts/link-codex.fish"
         else if not test -e $HOME/.agents/skills/$name
             __fail "$HOME/.agents/skills/$name is a broken symlink"
+        else if not test (path resolve $HOME/.agents/skills/$name) = (path resolve $skill)
+            __fail "$HOME/.agents/skills/$name does not resolve to claude-code/skills/$name"
         end
     end
 
     for entry in $HOME/.agents/skills/*
         test -L $entry; and not test -e $entry
-        and __fail "dangling codex skill link: "(path basename $entry)" — it loads nothing"
+        and __fail "dangling Codex skill link: "(path basename $entry)" — it loads nothing"
     end
     __say info 'codex symlinks intact'
 end

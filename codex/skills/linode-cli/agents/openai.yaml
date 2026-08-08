@@ -1,4 +1,0 @@
-interface:
-  display_name: "Linode CLI"
-  short_description: "Operate Akamai Cloud safely with linode-cli"
-  default_prompt: "Use $linode-cli to inspect or manage Linode resources safely with the official CLI."

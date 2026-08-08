@@ -5,6 +5,7 @@
 
 set -g REPO (path resolve (status dirname)/..)
 set -g SRC $REPO/codex
+set -g SHARED_SRC $REPO/claude-code
 set -g CODEX_DEST $HOME/.codex
 set -g SKILL_DEST $HOME/.agents/skills
 set -g FAILED 0
@@ -74,16 +75,16 @@ function main --description 'link codex config and user-authored skills'
         return 1
     end
 
-    __link_one $SRC/AGENTS.md $CODEX_DEST/AGENTS.md codex/AGENTS.md
+    __link_one $SHARED_SRC/CLAUDE.md $CODEX_DEST/AGENTS.md claude-code/CLAUDE.md
     __link_one $SRC/config.toml $CODEX_DEST/config.toml codex/config.toml
     for profile in (path filter -f $SRC/*.config.toml)
         set -l name (path basename $profile)
         __link_one $profile $CODEX_DEST/$name codex/$name
     end
 
-    set -l skills (path filter -d $SRC/skills/*)
+    set -l skills (path filter -d $SHARED_SRC/skills/*)
     if test -z "$skills"
-        __say warn 'no skills in codex/skills — nothing to link'
+        __say warn 'no skills in claude-code/skills — nothing to link'
     else
         for skill in $skills
             set -l name (path basename $skill)
