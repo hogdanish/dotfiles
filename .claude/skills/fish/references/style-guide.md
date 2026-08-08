@@ -358,9 +358,14 @@ Before calling a fish change done:
 ```sh
 fish_indent --check <file>                  # formatting is canonical
 fish -n <file>                              # parses
-fish --no-config -c 'source <file>'         # sources clean in isolation, no stray output
+fish --no-config -c 'source <file>'         # sources clean in isolation — judge STDOUT, not exit code
 script -q /dev/null fish --login --interactive -c exit   # a real startup, on a tty
 ```
+
+⚠ **That third check is a no-stray-output test, not an exit-status test.** A snippet ending in the
+house idiom `set -q VAR; or set -gx VAR val` exits **1** whenever `VAR` was unset, because a successful
+`set` preserves the previous `$status` rather than clearing it ([caveats.md](caveats.md)). Silence is
+the pass condition; `conf.d` discards the status anyway.
 
 ⚠ `--no-config` has two blind spots: it leaves `$fish_function_path` **unset**, so it cannot exercise
 autoloading (a function your file calls will appear missing), and it **demotes `set -U` to global**, so

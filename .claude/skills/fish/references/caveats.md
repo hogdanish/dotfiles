@@ -27,6 +27,22 @@ file too** and note it here. Keep entries under ~6 lines.
 These were each asserted confidently during this skill's authoring and then disproved. Assume a model
 will get them wrong again.
 
+### a successful `set` does not reset `$status` — it preserves the previous command's
+`2026-08-06` · writing `conf.d/cloudflare.fish`; `fish --no-config -c 'source <file>'` exited 1 with no output
+- **Cause** — `set` only assigns `$status` on *failure*. On success it leaves the prior value intact.
+  So the house idiom `set -q VAR; or set -gx VAR val` returns **1** whenever `VAR` was unset: `set -q`
+  fails (1), `or` runs `set -gx`, which succeeds but never clears the 1. `false; or true` returns 0;
+  `false; or set -gx X 1` returns 1. Harmless in `conf.d/` (a snippet's exit status is discarded), but
+  it **silently poisons `; or return`** in a function and any `if` testing that line.
+- **Do** — never let that idiom be the last statement of a function, and never chain `; or return`
+  onto it. Where the status must be clean, end the block with an explicit `true` or `return 0`.
+- **Verified** — `fish --no-config -c 'false; set -gx C 1; echo $status'` → `1`;
+  `fish --no-config -c 'set -gx C 1; echo $status'` → `0`.
+- ⚠ **`style-guide.md` §Review-checklist was fixed in the same change** — it read "sources clean in
+  isolation", which invites an exit-code reading. That check is about *stray output*, and an exit-code
+  reading reports a false failure on the most common `conf.d` idiom in this repo. (`SKILL.md`'s own
+  "Verify a change" block already said "no stray output" and needed no change.)
+
 ### fish itself runs `fish_config theme choose` on **every** interactive startup, and there is no opt-out
 `2026-07-29` · chasing the largest startup line that is not in `conf.d/`
 - **Cause** — the embedded `config.fish` ends with
@@ -486,3 +502,13 @@ load-bearing for every libgit2-backed tool, not just delta.
 ```sh
 delta --show-config | rg plus-style     # must NOT say: syntax "#002800"
 ```
+
+### `fish_indent --check` follows completion symlinks
+`2026-08-08` · the pre-commit hook tried to format OrbStack/Homebrew-owned completions
+- **Cause** — `fish_indent` follows a path that is a symlink. The tracked `docker.fish`,
+  `kubectl.fish`, and `orbctl.fish` entries point at generated vendor files, so treating every
+  staged `*.fish` path as authored source makes the hook enforce this repo's format on another
+  package's files. Running `fish_indent -w` would mutate the symlink target outside the repo.
+- **Outcome** — `lefthook.yml` skips symlinks and validates each regular staged Fish file. Keep
+  generated completion links outside formatter write commands; validate or regenerate them at
+  their owner instead.

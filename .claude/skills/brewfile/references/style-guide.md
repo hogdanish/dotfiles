@@ -7,20 +7,20 @@ double quotes substituted so the file diffs cleanly against `brew bundle dump` o
 
 ## 1. Scope — what belongs in the file
 
-Track **`tap`, `brew`, `cask`, `mas`** and nothing else.
+Track **`tap`, `brew`, `npm`, `uv`, `cask`, and `mas`**.
 
 Deliberately excluded (all documented in [brew-bundle.md](brew-bundle.md) if this ever changes):
 
 | Type | Why excluded |
 | --- | --- |
 | `vscode` | Extension lists churn on every install and sync through VS Code's own Settings Sync. |
-| `cargo` / `uv` / `npm` / `go` | Language-toolchain globals, versioned by their own ecosystems. |
+| `cargo` / `go` | Language-toolchain globals, versioned by their own ecosystems. |
 | `krew` / `flatpak` / `winget` | Not applicable on this machine (Linux/WSL/k8s). |
 
 When dumping for comparison, suppress the excluded types explicitly:
 
 ```sh
-brew bundle dump --file=- --force --no-vscode --no-go --no-cargo --no-uv --no-npm
+brew bundle dump --file=- --force --no-vscode --no-go --no-cargo
 ```
 
 ## 2. File skeleton
@@ -49,6 +49,18 @@ brew "owner/tap/formula"        # purpose
 brew "name"                     # purpose
 
 # ===============================
+# 📦 javascript tools
+# ===============================
+
+npm "name"                     # purpose
+
+# ===============================
+# 🐍 uv tools
+# ===============================
+
+uv "name"                      # purpose
+
+# ===============================
 # 🛢️ casks
 # ===============================
 
@@ -64,7 +76,7 @@ mas "Name", id: 123456789       # purpose
 
 Rules:
 
-- Banner comments (`# ====`) separate the four **types**. Never reorder those four.
+- Banner comments (`# ====`) separate the six **types**. Never reorder them.
 - `##` subsections group by **category** within a type. Add or rename categories freely as the file grows;
   do not create a category for fewer than two entries.
 - One blank line between subsections, two around banners.
@@ -72,8 +84,7 @@ Rules:
 
 ## 3. Ordering
 
-- **Types**: taps → formulae → casks → app store. (Same order `brew bundle dump` uses; taps must precede
-  anything that needs them.)
+- **Types**: taps → formulae → npm → uv → casks → app store. Taps must precede anything that needs them.
 - **Categories**: most-used first, not alphabetical. `shell & terminal` before `multimedia`.
 - **Within a category**: group related tools adjacently (`git`, `git-lfs`, `git-delta`, `gh`), then order by
   importance. Alphabetical ordering inside a category is *not* required and usually hurts readability.
