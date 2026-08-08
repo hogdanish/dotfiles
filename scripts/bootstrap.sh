@@ -138,6 +138,41 @@ else
     say info 'pinned the npm cache out of ~/.npm'
 fi
 
+# Homebrew supplies rustup itself and the surrounding Cargo tools; rustup owns the Rust
+# toolchain. Cargo has no native XDG_CONFIG_HOME lookup, so its config in the mixed
+# state/cache CARGO_HOME is a link back to the authored config in this repo.
+step 'Rust toolchain'
+RUSTUP_BIN="$BREW_PREFIX/opt/rustup/bin/rustup"
+RUSTUP_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/rustup"
+CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
+SCCACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sccache"
+export RUSTUP_HOME CARGO_HOME SCCACHE_DIR
+mkdir -p "$RUSTUP_HOME" "$CARGO_HOME/bin" "$SCCACHE_DIR"
+
+CARGO_CONFIG="$CARGO_HOME/config.toml"
+if [ -L "$CARGO_CONFIG" ] && [ "$(readlink "$CARGO_CONFIG")" = "$CONFIG/cargo/config.toml" ]; then
+    say info 'Cargo config already linked'
+elif [ -e "$CARGO_CONFIG" ] || [ -L "$CARGO_CONFIG" ]; then
+    say warn "$CARGO_CONFIG exists and was not replaced — link it to $CONFIG/cargo/config.toml"
+else
+    ln -s "$CONFIG/cargo/config.toml" "$CARGO_CONFIG"
+    say info 'linked the Cargo config'
+fi
+
+if [ -x "$RUSTUP_BIN" ]; then
+    "$RUSTUP_BIN" set profile default
+    "$RUSTUP_BIN" toolchain install stable
+    "$RUSTUP_BIN" default stable
+    "$RUSTUP_BIN" component add rust-analyzer rust-src clippy rustfmt
+else
+    say warn 'rustup missing — rerun after brew bundle succeeds'
+fi
+
+if have code-insiders; then
+    code-insiders --install-extension rust-lang.rust-analyzer --force >/dev/null
+    say info 'rust-analyzer VS Code extension installed'
+fi
+
 # ── 5. git hooks ────────────────────────────────────────────────────────────────
 # ⚠ .git/hooks is never version-controlled and never arrives via clone. This is required
 #   once per clone or the secret gate silently does not exist.
@@ -148,12 +183,13 @@ else
     say warn 'lefthook missing — the pre-commit secret gate is NOT active'
 fi
 
-# ── 6. home-level dotfiles ─────────────────────────────────────────────────────
-step 'Link home-level dotfiles'
+# ── 6. authored config links ───────────────────────────────────────────────────
+step 'Link authored config'
 if have fish; then
     fish "$CONFIG/scripts/link-home.fish" || say warn 'some links need attention (--force to replace real files)'
+    fish "$CONFIG/scripts/link-codex.fish" || say warn 'some Codex links need attention (--force to replace real files)'
 else
-    say warn 'fish missing — skipping; re-run scripts/link-home.fish once fish is installed'
+    say warn 'fish missing — re-run link-home.fish and link-codex.fish once fish is installed'
 fi
 
 # ── 7. 1password ────────────────────────────────────────────────────────────────

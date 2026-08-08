@@ -20,6 +20,8 @@ home/               files that cannot live under ~/.config, symlinked into $HOME
 .claude/            agent context for this repo (rules, skills, hooks)
 .agents/            Codex project skills — symlinks to canonical .claude/skills
 claude-code/        authored Claude Code config — $CLAUDE_CONFIG_DIR symlinks back to it
+codex/              authored Codex config and user skills — live paths symlink back to it
+cargo/              authored Cargo config — $CARGO_HOME/config.toml symlinks back to it
 fish/ ghostty/ …    the actual configs
 ```
 
@@ -44,6 +46,21 @@ lands in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) and only the enable fl
 `enabledPlugins` is the tracked manifest of vendor tooling, and `claude-code/skills/` stays a clean
 list of things written here.
 
+Codex uses one `~/.codex` root for both authored configuration and mutable app state. The directory
+therefore stays outside the repo, while `~/.codex/AGENTS.md` and `~/.codex/config.toml` symlink to
+their tracked copies in `codex/`. User-authored skills live in `codex/skills/` and link individually
+into `~/.agents/skills/`, which keeps installer-owned skills out of the repo. Run
+`scripts/link-codex.fish` after adding one.
+
+Inside this dotfiles repo, Claude Code remains canonical: root `AGENTS.md` points to
+`.claude/CLAUDE.md`, and `.agents/skills/` contains one symlink per `.claude/skills/` directory.
+Codex therefore receives the same project-specific rules and workflows without duplicate files.
+
+Rust is installed through Homebrew's `rustup` formula; rustup owns the stable toolchain and standard
+components. Fish places `RUSTUP_HOME` and `CARGO_HOME` under `$XDG_DATA_HOME`, places the `sccache`
+cache under `$XDG_CACHE_HOME`, and exposes the keg-only rustup proxies plus Cargo's global-bin directory.
+The tracked `cargo/config.toml` enables `sccache`; bootstrap links it into `$CARGO_HOME`.
+
 ## Bootstrap a new machine
 
 ```sh
@@ -51,7 +68,7 @@ curl -fsSL https://raw.githubusercontent.com/hogdanish/dotfiles/main/scripts/boo
 ```
 
 Idempotent and safe to re-run. It installs Xcode CLT → Homebrew → seeds this repo into `~/.config`
-→ `brew bundle` → `lefthook install` → links `home/` → prompts for the manual 1Password steps →
+→ `brew bundle` → initializes Rust → `lefthook install` → links authored config → prompts for the manual 1Password steps →
 offers Touch ID for `sudo` and the unattended-update launch agent.
 
 ⚠ **You cannot `git clone` into `~/.config`** — it is never empty. The script uses
@@ -75,12 +92,14 @@ Two things the script *offers* but that live outside this repo, so a fresh clone
 Both are machine state by nature; the Brewfile carries their dependencies and `bootstrap.sh` carries
 the recipe.
 
-It also *writes* two files outside the repo, unconditionally:
-`/opt/homebrew/etc/homebrew/brew.env` and `/opt/homebrew/etc/npmrc`. They exist for one reason —
+It also writes two files and one symlink outside the repo:
+`/opt/homebrew/etc/homebrew/brew.env`, `/opt/homebrew/etc/npmrc`, and
+`$CARGO_HOME/config.toml` → `~/.config/cargo/config.toml`. The first two exist because
 only fish exports `XDG_CONFIG_HOME` and `NPM_CONFIG_USERCONFIG`, so brew and npm launched from
 launchd, a GUI app or Claude Code's zsh resolve their user config somewhere else entirely and fall
 back to defaults. Pinning each value where the launch context cannot matter is what stops brew
-silently distrusting every third-party tap, and npm scattering a cache into `~/.npm`.
+silently distrusting every third-party tap, and npm scattering a cache into `~/.npm`. The Cargo
+symlink compensates for Cargo not reading `$XDG_CONFIG_HOME` directly.
 
 ## The allowlist
 

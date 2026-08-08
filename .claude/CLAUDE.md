@@ -179,11 +179,11 @@ reference was wrong. Rediscovering a caveat is a documentation defect, not bad l
 fish 4.8.1 first — never correct a reference from memory.
 
 `~/.config/fish/config.fish` is intentionally empty (documentation only). Everything lives in
-`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Sixteen
+`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Seventeen
 snippets, one concern each, in load order:
 
 `_init` · `_shell` · `abbrs` · `brew` · `bun` · `colours` · `fzf` · `ghostty` · `git` · `gum` ·
-`java` · `keybindings` · `op` · `tools` · `uv` · `xdg-apps`
+`java` · `keybindings` · `op` · `rust` · `tools` · `uv` · `xdg-apps`
 
 ⚠ Six orderings are **load-bearing** and the skill explains each: `brew` first to touch `$PATH` ·
 `bun` and `uv` after `brew` (which resets `fish_user_paths`) · `colours` before `fzf` · `fzf` before `tools` ·

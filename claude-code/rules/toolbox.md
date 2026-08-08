@@ -4,11 +4,12 @@
 
 verify-present: fish starship atuin fzf zoxide eza bat fd rg sd yq gron sponge ts less micro btop
   fastfetch grc gum gls gdate gsort git git-lfs delta git-filter-repo difft ast-grep hyperfine tokei
-  gh act lefthook node bun uv gdformat gdlint make gmake scons shellcheck shfmt curl xh wget ssh
+  gh act lefthook node bun uv gdformat gdlint rustup rustc cargo rust-analyzer cargo-nextest
+  cargo-audit cargo-deny sccache make gmake scons shellcheck shfmt curl xh wget ssh
   nmap iperf3 dnsperf doge caddy ffmpeg ffprobe magick yt-dlp sox soxi gs rsvg-convert
   woff2_compress woff2_decompress betterleaks gpg pinentry-touchid pinentry-mac mas duti fswatch
   watchexec jq trash java python3 code-insiders godot blender op
-verify-absent: docker docker-compose podman cargo rustup go mvn gradle gsed prettier eslint tre
+verify-absent: docker docker-compose podman go mvn gradle gsed prettier eslint tre
   chafa AtomicParsley macos-defaults pip
 -->
 
@@ -174,6 +175,12 @@ extraction, these beat a shell command or the built-in web tools:
 - ⚠ **`uv tool` shims live in `~/.local/bin`**, which reaches `$PATH` only via
   `fish/conf.d/uv.fish` (added 2026-07-30). An installed uv tool is not automatically a reachable
   one, and a shell that did not inherit fish's environment will not see `gdformat`/`gdlint`.
+- **Rust** uses Homebrew's keg-only `rustup`, with the stable toolchain and `rust-analyzer`,
+  `rust-src`, Clippy, and rustfmt managed by rustup. `RUSTUP_HOME` and `CARGO_HOME` live under
+  `$XDG_DATA_HOME`; `SCCACHE_DIR` lives under `$XDG_CACHE_HOME`. Cargo reads the tracked
+  `cargo/config.toml` through `$CARGO_HOME/config.toml` and uses `sccache` as its compiler wrapper.
+  Prefer `cargo nextest run` for local suites; `cargo audit` and `cargo deny` cover vulnerability
+  and dependency-policy checks. Do not add global `RUSTFLAGS` or `CARGO_TARGET_DIR`.
 - ⚠ **`act` cannot run.** It needs a container runtime and none is installed. `pam-reattach` ships a
   PAM module with no binary — check that class of formula with `brew list --versions`, not
   `command -v`. `gnupg`'s `gpg` uses `pinentry-touchid` (`pinentry-mac` is the fallback).
@@ -183,8 +190,8 @@ extraction, these beat a shell command or the built-in web tools:
 ## Not installed
 
 Don't assume these are available, and don't write a command or example against one: `docker`/
-`docker-compose`, `podman`, `rustup`/`cargo`, `go`, `mvn`/`gradle`, `gsed`, `prettier`, `eslint`,
-`tre`, `chafa`, `AtomicParsley`, `macos-defaults`, `pip`. (`pip3` resolves only as an artefact of
+`docker-compose`, `podman`, `go`, `mvn`/`gradle`, `gsed`, `prettier`, `eslint`, `tre`,
+`chafa`, `AtomicParsley`, `macos-defaults`, `pip`. (`pip3` resolves only as an artefact of
 Homebrew's python — never use it to install anything.) If one of them genuinely *is* the right answer
 to something, say so and say it is not installed — this list is a fact about the machine, not a
 prohibition on the topic. Absence here is not evidence for deliberately untracked classes:

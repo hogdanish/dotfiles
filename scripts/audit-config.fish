@@ -202,6 +202,9 @@ function main
     __check_secrets
     __check_home_links
     __check_claude_links
+    __check_codex_links
+    __check_project_agent_links
+    __check_rust_links
     __check_permissions
     __check_universals
 
