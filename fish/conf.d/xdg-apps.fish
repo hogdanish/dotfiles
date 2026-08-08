@@ -39,6 +39,41 @@ if type -q npm
     set -q NPM_CONFIG_CACHE; or set -gx NPM_CONFIG_CACHE $XDG_CACHE_HOME/npm
 end
 
+if type -q emcc
+    # emscripten (installed 2026-08-06 for ~/Projects/hogdot's web export templates).
+    #
+    # ⚠ EM_CACHE is the one that matters. emscripten defaults its cache to
+    # $(brew --prefix emscripten)/libexec/cache — i.e. *inside the Cellar* — where the
+    # built sysroot (libc, libc++, and the emdawnwebgpu port) is destroyed by every
+    # `brew upgrade emscripten`. `brew autoupdate` runs every 12 h, so that is not a
+    # hypothetical. moving it out makes the cache survive upgrades; emscripten
+    # version-checks the cache itself (sanity.txt) and rebuilds on mismatch, so a
+    # persisting cache cannot go stale against a newer compiler.
+    #
+    # ⚠ EM_CONFIG is deliberately NOT set. brew's own libexec/.emscripten pins
+    # LLVM_ROOT, BINARYEN_ROOT and NODE_JS to Cellar paths that move on every upgrade;
+    # a hand-written copy at $XDG_CONFIG_HOME would silently rot the first time one
+    # changed. let brew own the config, own only the cache. (any config KEY can be
+    # overridden as EM_<KEY> if a single setting ever needs pinning.)
+    set -q EM_CACHE; or set -gx EM_CACHE $XDG_CACHE_HOME/emscripten
+end
+
+if type -q docker
+    # the docker cli ignores XDG_CONFIG_HOME outright and only honours this var (or
+    # --config) to relocate ~/.docker. orbstack's `docker` is the same upstream cli
+    # talking to a different daemon, so this still applies. config.json holds no secrets:
+    # orbstack's registry credential store is osxkeychain (the real macos keychain, not a
+    # vault proxy) — verified in the docker cli docs and orbstack's docs, not assumed.
+    #
+    # ⚠ orbstack.app itself is launched by launchd/finder, not fish, so it never sees this
+    # export — the same class of gap closed for HOMEBREW_XDG_CONFIG_HOME and
+    # NPM_CONFIG_USERCONFIG in the repo CLAUDE.md, except docker has no global-file
+    # equivalent to fall back to. orbstack's OWN settings (vm resources, rosetta, network)
+    # live under ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack — not xdg, not chased
+    # here, same bucket as raycast/'s untracked app state.
+    set -q DOCKER_CONFIG; or set -gx DOCKER_CONFIG $XDG_CONFIG_HOME/docker
+end
+
 if type -q rg
     set -q RIPGREP_CONFIG_PATH; or set -gx RIPGREP_CONFIG_PATH $XDG_CONFIG_HOME/ripgrep/config
 end

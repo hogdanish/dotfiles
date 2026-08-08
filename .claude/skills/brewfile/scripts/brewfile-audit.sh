@@ -74,6 +74,22 @@ while read -r f; do [[ -n "$f" ]] &&
   printf '  \033[33m~ %s\033[0m — listed unqualified as "%s"; use the full tap path\n' "$f" "${f##*/}"
 done <"$TMP/note-brew"
 
+# ------------------------------------------------------------ npm tools
+# upstream-supported global node clis that must resolve in every shell and agent. package names come
+# from npm's global dependency map; brew bundle owns the declared side through its npm entry type.
+section "npm tools"
+if command -v npm >/dev/null; then
+  npm list --global --depth=0 --json 2>/dev/null \
+    | jq -r '.dependencies // {} | keys[] | select(. != "npm")' | sort >"$TMP/have-npm"
+  brew bundle list --npm --file="$BREWFILE" 2>/dev/null | sort >"$TMP/want-npm"
+  comm -23 "$TMP/have-npm" "$TMP/want-npm" >"$TMP/miss-npm"
+  comm -13 "$TMP/have-npm" "$TMP/want-npm" >"$TMP/stale-npm"
+  report npm "$TMP/miss-npm" "$TMP/stale-npm"
+else
+  echo "  npm not installed — skipping"
+  : >"$TMP/want-npm"
+fi
+
 # ------------------------------------------------------------ uv tools
 # homebrew 6 installs these via `uv tool install`. they are real declared software, so they get the
 # same both-directions diff as formulae. `uv tool list` prints "name vX.Y.Z" then an indented line
@@ -142,7 +158,7 @@ fi
 section "unmanaged applications"
 jq -r '.casks[]? | (.artifacts[]? | .app? // empty | .[]? | select(type=="string"))' \
   <"$TMP/info.json" | sort -u >"$TMP/cask-artifacts"
-found=0; ios=0
+found=0; noted=0
 # a glob, not `ls | grep`: `ls` output is unparseable for names containing a
 # newline, and this needs no subshell. (spaces were already safe via `read -r`.)
 # ~/Applications is scanned too: casks land in /Applications, but steam, itch and
@@ -160,19 +176,29 @@ for path in /Applications/*.app "$HOME"/Applications/*.app; do
   # cask exists — so it is a note, never an action.
   if [[ -e "$path/Wrapper" && -e "$path/WrappedBundle" ]]; then
     printf '  \033[2m~ %s\033[0m  — ios app from the app store; not brew- or mas-manageable\n' "$app"
-    ios=1; continue
+    noted=1; continue
   fi
   # a steam "add to dock" shortcut is a 4-line bundle wrapping `open steam://run/<id>`
   # — no payload, nothing to install, and it multiplies with every game. the real
   # software is steam's, and steam is already a cask.
   if grep -qs 'steam://run/' "$path/Contents/MacOS/"* 2>/dev/null; then
     printf '  \033[2m~ %s\033[0m  — steam shortcut, not an install\n' "$app"
-    ios=1; continue
+    noted=1; continue
+  fi
+  # local development output and Claude Code's signed URL dispatcher are intentional
+  # app bundles, but neither is independently installable through brew or mas.
+  if [[ "$app" == "COMMONGROUNDS.app" ]]; then
+    printf '  \033[2m~ %s\033[0m  — local project build, not a package-manager install\n' "$app"
+    noted=1; continue
+  fi
+  if [[ "$app" == "Claude Code URL Handler.app" ]]; then
+    printf '  \033[2m~ %s\033[0m  — helper installed and managed by Claude Code\n' "$app"
+    noted=1; continue
   fi
   printf '  \033[33m? %s\033[0m  — installed outside brew/mas (%s)\n' "$app" "${path%/*}"; found=1
 done
-[[ $found -eq 0 && $ios -eq 0 ]] && printf '  none\n'
-[[ $found -eq 0 && $ios -eq 1 ]] && printf '  no actionable unmanaged apps\n'
+[[ $found -eq 0 && $noted -eq 0 ]] && printf '  none\n'
+[[ $found -eq 0 && $noted -eq 1 ]] && printf '  no actionable unmanaged apps\n'
 
 # ------------------------------------------------- claude toolbox digest
 # claude-code/rules/toolbox.md is the always-in-context summary of this file: a
@@ -225,13 +251,13 @@ else
     n=$((n + 1))
   done < <(manifest verify-absent)
   # coverage: a declared package nobody documented is a tool claude will not reach
-  # for. uv tools count — gdtoolkit is declared software like any formula.
+  # for. npm and uv tools count — both are declared software like any formula.
   while read -r f; do
     [[ -z "$f" ]] && continue
     grep -qwF -- "${f##*/}" "$TOOLBOX" && continue
     printf '  \033[33m~ %s\033[0m — declared, but unmentioned in toolbox.md\n' "${f##*/}"
     n=$((n + 1))
-  done < <(cat "$TMP/want-brew" "$TMP/want-uv")
+  done < <(cat "$TMP/want-brew" "$TMP/want-npm" "$TMP/want-uv")
   [[ $n -eq 0 ]] && printf '  in sync\n'
 fi
 
@@ -245,7 +271,7 @@ else
   # above are the authority on what is actually missing — if none of them found a
   # stale entry, everything `check` flagged is just an available upgrade.
   n=$(brew bundle check --file="$BREWFILE" --verbose 2>&1 | grep -c 'needs to be')
-  if [[ -s "$TMP/stale-brew" || -s "$TMP/stale-cask" || -s "$TMP/stale-mas" ]]; then
+  if [[ -s "$TMP/stale-brew" || -s "$TMP/stale-npm" || -s "$TMP/stale-cask" || -s "$TMP/stale-mas" ]]; then
     printf '  \033[31mbrew bundle check: unsatisfied\033[0m — %s entry(ies); see the diffs above\n' "$n"
   else
     printf '  brew bundle check: %s entry(ies) outdated, none missing — not drift\n' "$n"

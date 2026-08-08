@@ -50,11 +50,16 @@ pre-commit:
       glob: "*.fish"
       run: |
         command -v fish >/dev/null 2>&1 || { echo "✗ fish not found" >&2; exit 1; }
-        fish -n {staged_files} || exit 1
-        fish_indent --check {staged_files} || {
-          echo "✗ not canonically formatted — run: fish_indent -w {staged_files}" >&2
-          exit 1
-        }
+        for file in {staged_files}; do
+          # generated completions are tracked as symlinks into app/homebrew-owned files.
+          # validate authored files only; formatting a symlink would mutate its owner.
+          [ -L "$file" ] && continue
+          fish -n "$file" || exit 1
+          fish_indent --check "$file" || {
+            echo "✗ not canonically formatted — run: fish_indent -w $file" >&2
+            exit 1
+          }
+        done
 
     # 4. the Brewfile is ruby. a syntax error there breaks `brew bundle` on a fresh machine,
     #    which is the one moment you cannot afford it.

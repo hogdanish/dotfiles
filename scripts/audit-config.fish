@@ -22,7 +22,9 @@ set -g KNOWN_IGNORED \
     raycast \
     op \
     homebrew \
-    claude
+    claude \
+    .wrangler \
+    cagent
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]
@@ -120,7 +122,11 @@ function __check_claude_links --description 'authored claude config is still sym
 end
 
 function __check_codex_links --description 'authored codex config and skills are linked'
-    for f in AGENTS.md config.toml
+    set -l authored_config AGENTS.md config.toml
+    for profile in (path filter -f $REPO/codex/*.config.toml)
+        set -a authored_config (path basename $profile)
+    end
+    for f in $authored_config
         if not test -L $HOME/.codex/$f
             __fail "$HOME/.codex/$f is not a symlink — edits to it are NOT tracked"
         else if not test -e $HOME/.codex/$f

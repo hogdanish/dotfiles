@@ -67,21 +67,44 @@ brew "cargo-nextest"    # cargo: parallel test runner
 brew "cargo-audit"      # cargo: vulnerability scanner
 brew "cargo-deny"       # cargo: dependency policy checks
 brew "sccache"          # rustc: shared compilation cache
+brew "go"               # go toolchain — runtime for the COMMONGROUNDS webtransport relay (server/relay/)
 brew "make"             # build tool
 brew "scons"            # make: python-based build system
+brew "ccache"           # scons: compiler cache — godot's sconstruct picks it up automatically.
+#                         highest-leverage install for ~/Projects/hogdot, a godot fork rebuilt
+#                         after every ported hunk. xdg-native since 4.0; conf at ~/.config/ccache
+brew "pre-commit"       # lefthook: godot's own .pre-commit-config.yaml — the ONLY way to run its
+#                         gates. it vendors clang-format v21.1.7 itself, which is why no
+#                         clang-format formula is installed: brew's would be a different version
+#                         and would reformat the whole engine
+brew "emscripten"       # llvm: c/c++ -> wasm. builds hogdot's web export templates (webgpu=yes,
+#                         --use-port=emdawnwebgpu). 6.0.5; godotwebgpu shipped on 5.0.0 and its
+#                         floor is 4.0.10, so this is one unverified major ahead — if a web build
+#                         breaks, suspect the toolchain before the port
+brew "glslang"          # emscripten: khronos glsl->spir-v reference compiler. hard dependency of
+#                         hogdot's `webgpu=yes` builds ONLY: drivers/webgpu/wgsl_precompile.py
+#                         shells out to `glslangValidator` for 70 shader files to generate
+#                         wgsl_precompiled.gen.h. ⚠ unlike clang-format, the version skew is fine —
+#                         brew ships 16.5.0 and godot vendors 16.1.0, but they never meet in one
+#                         process; the precompiled table is keyed on a spir-v hash, so a mismatch
+#                         costs cache hits, never correctness
 brew "shellcheck"       # bash: static analysis for hook scripts
 brew "shfmt"            # shellcheck: the formatter half, for the same hook scripts
 
 ## networking
-brew "curl"     # data transfer
-brew "xh"       # curl: ergonomic http client
-brew "wget"     # recursive downloader
-brew "openssh"  # ssh client and server
-brew "nmap"     # port scanner
-brew "iperf3"   # bandwidth benchmark
-brew "dnsperf"  # dns benchmark
-brew "doge"     # dig: dns client
-brew "caddy"    # web server and reverse proxy
+brew "curl"         # data transfer
+brew "xh"           # curl: ergonomic http client
+brew "wget"         # recursive downloader
+brew "openssh"      # ssh client and server
+brew "nmap"         # port scanner
+brew "iperf3"       # bandwidth benchmark
+brew "dnsperf"      # dns benchmark
+brew "doge"         # dig: dns client
+brew "caddy"        # web server and reverse proxy
+brew "mkcert"       # locally-trusted dev certs — ⚠ NOT sufficient for browser WebTransport over QUIC
+brew "nss"          # mkcert: firefox/chromium trust-store support
+brew "cloudflared"  # cloudflare tunnel: real https/quic hostname for a local origin — mkcert's gap
+brew "linode-cli"   # linode: official cloud control-plane cli; credentials supplied by 1password
 
 ## multimedia & graphics
 brew "ffmpeg"       # video and audio processing
@@ -104,6 +127,16 @@ brew "mas"        # mac app store cli
 brew "duti"       # default app associations by file type
 brew "fswatch"    # file change monitor
 brew "watchexec"  # fswatch: runs a command on change, instead of just reporting it
+
+# ===============================
+# 📦 javascript tools
+# ===============================
+#
+# `npm` entries are reserved for upstream-supported global clis that need to resolve from every
+# shell and agent. project tools remain project-local and bun remains the default package manager.
+
+npm "cf"             # cloudflare: account-wide cli technical preview
+npm "firecrawl-cli"  # web extraction for the firecrawl agent plugin
 
 # ===============================
 # 🐍 uv tools
@@ -130,6 +163,8 @@ cask "godot"                        # game engine
 cask "claude-code@latest"           # terminal ai coding agent
 cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
+cask "orbstack"                     # docker desktop: containers/vms, lighter and faster on apple silicon
+cask "google-chrome"                # browser — driven by the claude-in-chrome extension for web/devtools work
 
 ## fonts
 cask "font-commit-mono"            # editor font
@@ -159,6 +194,7 @@ cask "chatgpt"             # openai assistant and codex desktop app
 
 ## media
 cask "iina"          # quicktime: media player
+cask "obs"           # screen recording and live streaming
 cask "transmission"  # bittorrent client
 
 ## communication & network
@@ -167,6 +203,7 @@ cask "protonvpn"  # vpn client
 
 ## games
 cask "steam"          # game distribution platform
+cask "epic-games"     # game distribution platform
 cask "prismlauncher"  # minecraft launcher
 
 # ===============================

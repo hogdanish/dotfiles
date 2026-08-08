@@ -28,8 +28,9 @@ Every entry is a Ruby method call: `keyword "name"[, option: value, ...]`.
 | `flatpak` | `flatpak install` — **Linux only** | `flatpak "com.visualstudio.code"` |
 | `winget` | `winget install` — **WSL only** | `winget "Steam", id: "Valve.Steam"` |
 
-**This repo tracks `tap`/`brew`/`cask`/`mas` only** — see [style-guide.md](style-guide.md) §1. The rest are
-documented here so the option is available, not because they are in use.
+**This repo tracks `tap`/`brew`/`npm`/`uv`/`cask`/`mas`** — see
+[style-guide.md](style-guide.md) §1. The rest are documented here so the option is available, not
+because they are in use.
 
 ### Global directives
 
