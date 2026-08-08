@@ -1,7 +1,8 @@
 # Context architecture
 
 How to organize what Claude reads — in this repository and any other. It is doctrine, not procedure:
-`skill-creator` (plugin) does the authoring, this decides what should exist and where content sits.
+authoring mechanics belong to each project's authoring skill (e.g. `skill-creator`, a project's
+`make-skill`); this decides what should exist and where content sits.
 
 ## The layers
 
@@ -9,12 +10,13 @@ How to organize what Claude reads — in this repository and any other. It is do
 | --- | --- | --- |
 | `CLAUDE.md` | **Router** — overview, always-on conventions, and one glossary *line* per scope pointing at its skill. Never paragraphs of subsystem detail. | every session, in full |
 | `.claude/rules/*.md` | **Law** — short imperative behaviour. Unscoped loads always; `paths:` frontmatter gates it to matching files. | every session / on matching file touch |
-| `.claude/skills/*/SKILL.md` | **Articles** — the source of truth for one scope; lean overview plus pointers. | description always, body on invocation |
+| `.claude/skills/*/SKILL.md` | **Articles** — the source of truth for one scope; lean overview plus pointers. `paths:` works here too, gating auto-invocation. | description always, body on invocation |
 | `.claude/skills/*/references/*.md` | **Depth** — API tables, catalogues, specs, append-only logs. | on demand, when its SKILL.md points at it |
 | memory store | Workflow and feedback learnings only. Project facts belong in a skill, where they are version-controlled. | index every session |
 
 **Precedence: the owning skill wins.** When CLAUDE.md, a rule, or a neighbouring skill contradicts it,
-fix every copy in the same change. Never write "CLAUDE.md is the source of truth" anywhere.
+fix every copy in the same change — by deleting the duplicate, not syncing it. Never write "CLAUDE.md
+is the source of truth" anywhere.
 
 ## Where new guidance goes
 
@@ -29,20 +31,20 @@ fix every copy in the same change. Never write "CLAUDE.md is the source of truth
 ⚠ CLAUDE.md is the tempting default and almost always the wrong one. Growing it past ~200 lines is how a
 router becomes a document nobody can afford to load.
 
-## Writing a skill
+## Skill frontmatter and bodies (the budget rules)
 
-- **Push depth into `references/`.** A SKILL.md body is a recurring cost once loaded; a reference file
-  is free until pointed at. Keep the body an overview — the scope in a paragraph, each seam and gotcha in
-  a line, a one-line what/when pointer per reference. ⚠ Don't split off a lone small reference: a single
-  file under ~250 lines that isn't a living log or a fork-injected index belongs inline.
-- **Name real artifacts** — classes, files, commands, constants. "The audio system" won't trigger;
-  naming the actual types and paths will.
-- **State the neighbour's boundary** ("sourcing clips is X, this is playback") so skills stop overlapping.
-- **Preserve ⚠ gotchas verbatim** from whatever you distil — those are the expensive-to-rediscover bits.
-- `description` = what it covers; `when_to_use` = when to load, trigger phrases, boundary. Combined
-  ≤1,536 chars, key case first, because it truncates there.
-- Picking one item out of a large index → `context: fork` + `agent: Explore`, with the index injected at
-  fork time so it reaches the subagent and never the main context.
+- **One `description` field per skill, ≤500 chars** — what it covers (real classes, files, commands) +
+  when to load + the one boundary with a neighbour, key use case first. Do not split into
+  `when_to_use`; Claude Code appends it to `description` and the twin fields drift. The skill listing
+  is budgeted (~1% of context); overflow silently drops least-invoked skills' descriptions — `/doctor`
+  reports the cost.
+- A loaded body persists all session — keep it a lean overview, push depth into `references/`. But
+  don't split off a lone small reference: a single file under ~250 lines that isn't a living log or a
+  fork-injected index belongs inline.
+- Background articles → `user-invocable: false`; user-triggered workflows →
+  `disable-model-invocation: true` (removes the description from the listing entirely).
+- Per-skill authoring mechanics (templates, substitutions, fork lookups) → the project's authoring
+  skill, not this rule.
 
 ## Self-improvement is mandatory
 
