@@ -90,6 +90,7 @@ brew "glslang"          # emscripten: khronos glsl->spir-v reference compiler. h
 #                         costs cache hits, never correctness
 brew "shellcheck"       # bash: static analysis for hook scripts
 brew "shfmt"            # shellcheck: the formatter half, for the same hook scripts
+brew "vale"             # prose style linter
 
 ## networking
 brew "curl"         # data transfer

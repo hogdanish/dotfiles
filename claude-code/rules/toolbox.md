@@ -5,7 +5,7 @@
 verify-present: fish starship atuin fzf zoxide eza bat fd rg sd yq gron sponge ts less micro btop
   fastfetch grc gum gls gdate gsort git git-lfs delta git-filter-repo difft ast-grep hyperfine tokei
   gh act lefthook node bun uv gdformat gdlint rustup rustc cargo rust-analyzer cargo-nextest
-  cargo-audit cargo-deny sccache make gmake scons ccache pre-commit emcc shellcheck shfmt
+  cargo-audit cargo-deny sccache make gmake scons ccache pre-commit emcc shellcheck shfmt vale
   curl xh wget ssh linode-cli cf
   nmap iperf3 dnsperf doge caddy cloudflared docker docker-compose orb orbctl go ffmpeg ffprobe
   magick yt-dlp sox soxi gs rsvg-convert
@@ -91,6 +91,7 @@ as needing to find a use for them.
   git and pages its line diffs; `difft` compares syntax trees.
 - **Run something on file change** → `watchexec`. `fswatch` reports changes; `watchexec` acts on them.
 - **Format or lint a shell script** → `shellcheck` *and* `shfmt` on every bash script you write.
+- **Lint prose** → `vale` when a project supplies Vale configuration and styles.
 - **Format or lint GDScript** → `gdformat` / `gdlint` (gdtoolkit, via uv). ⚠ These work **headless**;
   the `godot-lsp` MCP needs the editor open. Use both — the MCP has full project context, gdtoolkit
   does not, but gdtoolkit runs anywhere.
