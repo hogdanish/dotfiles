@@ -41,7 +41,8 @@ described a Godot project this machine does not contain). ⚠ Adding or removing
 updating `toolbox.md` in the same change. ⚠ Unlike skills, `rules/` is symlinked **as a directory**,
 so a new rule needs no `link-claude.fish` run.
 
-`claude-code/skills/` holds the **user-level** skills, added 2026-07-30 — currently just `godot`.
+`claude-code/skills/` holds the **user-level** skills — `godot`, `orbstack`, `prose`, and, since
+2026-08-08, `linode-cli` (the official Akamai Cloud control plane and its paid-resource guardrails).
 ⚠ Do not confuse them with `.claude/skills/`, which loads only inside this repo; these load
 everywhere on this machine. They are symlinked in **one directory at a time**, because
 `$CLAUDE_CONFIG_DIR/skills/` is a namespace any installer may write into and linking it wholesale
@@ -61,8 +62,8 @@ tells the agent to run `firecrawl init` / `setup skills` / `login`, all three of
 here, so that override lives in `claude-code/CLAUDE.md` instead.
 
 `codex/` holds the **authored** global Codex configuration. Codex does not separate config from
-state, so the live `~/.codex/` directory remains untracked and only `AGENTS.md` and `config.toml`
-symlink back into this repo. `codex/skills/` links one directory at a time into
+state, so the live `~/.codex/` directory remains untracked; `AGENTS.md`, `config.toml` and each
+`*.config.toml` opt-in profile symlink back into this repo. `codex/skills/` links one directory at a time into
 `~/.agents/skills/`, the documented user-skill namespace; vendor skills still belong in plugins.
 Run `scripts/link-codex.fish` after adding a skill, and keep `scripts/audit-config.fish` able to
 detect detached or dangling links.
@@ -179,11 +180,11 @@ reference was wrong. Rediscovering a caveat is a documentation defect, not bad l
 fish 4.8.1 first — never correct a reference from memory.
 
 `~/.config/fish/config.fish` is intentionally empty (documentation only). Everything lives in
-`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Seventeen
+`conf.d/`, which fish sources **before** `config.fish`, sorted `digits` → `_` → `letters`. Eighteen
 snippets, one concern each, in load order:
 
-`_init` · `_shell` · `abbrs` · `brew` · `bun` · `colours` · `fzf` · `ghostty` · `git` · `gum` ·
-`java` · `keybindings` · `op` · `rust` · `tools` · `uv` · `xdg-apps`
+`_init` · `_shell` · `abbrs` · `brew` · `bun` · `cloudflare` · `colours` · `fzf` · `ghostty` · `git` ·
+`gum` · `java` · `keybindings` · `op` · `rust` · `tools` · `uv` · `xdg-apps`
 
 ⚠ Six orderings are **load-bearing** and the skill explains each: `brew` first to touch `$PATH` ·
 `bun` and `uv` after `brew` (which resets `fish_user_paths`) · `colours` before `fzf` · `fzf` before `tools` ·
@@ -202,7 +203,7 @@ New tool config goes in its own `conf.d/<tool>.fish`, not into `config.fish`.
 
 `functions/` is filed **by caller**, reorganised 2026-07-30. The top level is reserved for commands a
 human types (`brewup` `cls` `extract` `fishprof` `funcfresh` `mcpkill` `reload` `up`); everything else
-goes to `wrappers/` (shadows a real binary — `claude` `firecrawl` `gh`), `internal/` (only `conf.d`,
+goes to `wrappers/` (shadows a real binary — `claude` `codex` `firecrawl` `gh` `linode-cli`), `internal/` (only `conf.d`,
 fish itself or another function calls it — `cachecmd` `fish_should_add_to_history`
 `__abbr_last_history_item`), or `grc/`. ⚠ There is no `alias/` and there should not be: `alias` means
 a specific banned thing in fish. ⚠ All four subdirectories are *prepended* to `$fish_function_path`,
@@ -272,9 +273,10 @@ than trusting paths.
 `ya29.`. `.betterleaks.toml` adds them; re-verify after `brew upgrade betterleaks`.
 
 Configured: the SSH agent (`IdentityAgent` + `SSH_AUTH_SOCK` from `conf.d/op.fish`), `agent.toml`
-scoped to `Development`, `op-ssh-sign` signing with a working `allowedSignersFile`, the `gh`
-shell plugin as `functions/wrappers/gh.fish`, `functions/wrappers/{claude,firecrawl}.fish` for `op run`, and
-`gpg-agent.conf` → `pinentry-touchid`.
+scoped to the `Development` vault, `op-ssh-sign` signing with a working `allowedSignersFile`, the
+`gh` and `linode-cli` shell plugins as fish wrappers,
+`functions/wrappers/{claude,codex,firecrawl}.fish` for `op run`, and `gpg-agent.conf` →
+`pinentry-touchid`.
 
 ⚠ **There is no `functions/brew.fish` any more** (removed 2026-07-30) and it should not come back.
 It wrapped every `brew` in `op plugin run --` to supply `HOMEBREW_GITHUB_API_TOKEN`, costing a
@@ -405,8 +407,8 @@ Ghostty reloads with `cmd+r`; fish with the `refresh` abbreviation (`exec fish`)
    `pam_reattach` (optional) then `pam_tid.so` (sufficient); verified with `sudo -k && sudo true`.
    ⚠ It does **not** help an unattended launchd job — see the `auth` skill's
    `touchid-system-auth.md` §3.1, which is why `brew autoupdate` runs without `--sudo`.
-2. **`act` cannot run** — it needs a container runtime and neither docker nor podman is installed.
-   `~/.config/act/actrc` is written and correct, waiting on that dependency.
+2. ~~**`act` cannot run**~~ — **closed 2026-08-06** by the OrbStack install, which supplies the
+   container runtime it was waiting on. `~/.config/act/actrc` was already written and correct.
 3. **fzf has no preview.** `FZF_DEFAULT_OPTS` is themed, but `FZF_CTRL_T_OPTS`/`FZF_ALT_C_OPTS` are
    unset, so `ctrl-t` and `alt-c` show bare filenames while `bat` and `eza` sit installed and themed.
 4. No completions for `claude`, `code-insiders`, `ffmpeg`, `fswatch`, `scons`, `woff2` —
