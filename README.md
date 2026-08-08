@@ -20,7 +20,7 @@ home/               files that cannot live under ~/.config, symlinked into $HOME
 .claude/            agent context for this repo (rules, skills, hooks)
 .agents/            Codex project skills — symlinks to canonical .claude/skills
 claude-code/        authored Claude Code config — $CLAUDE_CONFIG_DIR symlinks back to it
-codex/              authored Codex config and user skills — live paths symlink back to it
+codex/              Codex-specific TOML settings and opt-in profiles
 cargo/              authored Cargo config — $CARGO_HOME/config.toml symlinks back to it
 fish/ ghostty/ …    the actual configs
 ```
@@ -46,11 +46,11 @@ lands in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) and only the enable fl
 `enabledPlugins` is the tracked manifest of vendor tooling, and `claude-code/skills/` stays a clean
 list of things written here.
 
-Codex uses one `~/.codex` root for both authored configuration and mutable app state. The directory
-therefore stays outside the repo, while `~/.codex/AGENTS.md` and `~/.codex/config.toml` symlink to
-their tracked copies in `codex/`. User-authored skills live in `codex/skills/` and link individually
-into `~/.agents/skills/`, which keeps installer-owned skills out of the repo. Run
-`scripts/link-codex.fish` after adding one.
+Codex uses one `~/.codex` root for authored configuration and mutable app state. The directory stays
+outside the repo. Codex-specific TOML files live in `codex/`, while `~/.codex/AGENTS.md` links to
+`claude-code/CLAUDE.md` and each `~/.agents/skills/<name>` links to `claude-code/skills/<name>`.
+Claude Code and Codex therefore share one source for global instructions and skills; vendor skills
+remain installer-owned. Run `scripts/link-codex.fish` after adding a global skill.
 
 Inside this dotfiles repo, Claude Code remains canonical: root `AGENTS.md` points to
 `.claude/CLAUDE.md`, and `.agents/skills/` contains one symlink per `.claude/skills/` directory.

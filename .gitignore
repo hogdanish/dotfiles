@@ -89,9 +89,9 @@
 # and must stay ignored; nothing in it is config.
 !/claude-code/
 
-# codex: authored global instructions, settings, skills, and routing references. mutable
-# sessions, logs, auth, plugins, caches, and app databases remain under ~/.codex, outside
-# this repo. scripts/link-codex.fish owns the compatibility links.
+# codex: Codex-specific settings and profiles. Global instructions and user-authored skills
+# are shared from claude-code/. Mutable sessions, logs, auth, plugins, caches, and app databases
+# remain under ~/.codex, outside this repo. scripts/link-codex.fish owns the compatibility links.
 !/codex/
 
 # ── deliberately never re-included, so `/*` alone keeps them out ────────────

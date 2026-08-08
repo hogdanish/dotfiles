@@ -1,6 +1,6 @@
 ---
 name: orbstack
-description: OrbStack is this machine's Docker and Linux VM runtime — the `orb`/`orbctl` CLI, machine lifecycle (create/start/stop/delete/clone), the Docker engine it provides, Kubernetes, `.orb.local` networking, the multiplexed `orb` SSH host, macOS↔Linux file/command interop, and troubleshooting. Load whenever a task touches `orb`/`orbctl`, spins up a Linux VM, debugs `docker`/`docker-compose` on this Mac, needs a container-vs-VM call, or anything under `~/.orbstack`/`~/OrbStack`. Boundary — this owns OrbStack/orb/orbctl/Docker-engine usage; the fish PATH and `DOCKER_CONFIG` plumbing that makes `docker` resolve at all is the `fish` skill's (`conf.d/orbstack.fish`, `conf.d/xdg-apps.fish`), and the Brewfile entry is `brewfile`'s.
+description: "OrbStack as this Mac's Docker and Linux VM runtime: orb/orbctl, machine lifecycle, Docker Compose and engine troubleshooting, Kubernetes, .orb.local networking, the orb SSH host, and macOS-Linux interop. Load for OrbStack, local Docker problems, Linux VMs, container-versus-VM decisions, ~/.orbstack, or ~/OrbStack. Owns runtime use; fish owns PATH and DOCKER_CONFIG plumbing, and brewfile owns installation."
 ---
 
 # OrbStack
