@@ -1,0 +1,4 @@
+interface:
+  display_name: "Godot"
+  short_description: "Build and verify Godot projects"
+  default_prompt: "Use $godot to implement and verify this Godot change."

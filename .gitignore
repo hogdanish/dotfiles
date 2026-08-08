@@ -20,9 +20,11 @@
 !/.editorconfig
 !/README.md
 !/Brewfile
+!/AGENTS.md
 !/.betterleaks.toml
 !/lefthook.yml
 !/.claude/
+!/.agents/
 !/scripts/
 !/home/
 
@@ -75,6 +77,11 @@
 # public repo's working tree. `claude/` below is a compatibility symlink to that state dir
 # and must stay ignored; nothing in it is config.
 !/claude-code/
+
+# codex: authored global instructions, settings, skills, and routing references. mutable
+# sessions, logs, auth, plugins, caches, and app databases remain under ~/.codex, outside
+# this repo. scripts/link-codex.fish owns the compatibility links.
+!/codex/
 
 # ── deliberately never re-included, so `/*` alone keeps them out ────────────
 # raycast/   vendored extension build output — .exe binaries, sourcemaps, node_modules

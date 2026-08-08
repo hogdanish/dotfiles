@@ -22,6 +22,9 @@ set -gx DOTFILES $XDG_CONFIG_HOME
 # $XDG_STATE_HOME so it is not inside a public repo's working tree. the three hand-authored
 # files symlink back to $XDG_CONFIG_HOME/claude-code/, which is what gets tracked.
 set -gx CLAUDE_CONFIG_DIR $XDG_STATE_HOME/claude
+# codex does not split config from state. keep its desktop-compatible root at ~/.codex;
+# authored files inside it symlink back to $XDG_CONFIG_HOME/codex.
+test -n "$CODEX_HOME"; or set -gx CODEX_HOME $HOME/.codex
 
 # fish dirs
 # fish searches $fish_function_path and $fish_complete_path *non-recursively*, so these
@@ -36,7 +39,7 @@ set fish_complete_path (path resolve $__fish_config_dir/completions/*/) $fish_co
 # arguments that are *not* already directories, so the steady state costs zero forks.
 # this was 6.2 ms of a 63 ms startup, paid by every shell including non-interactive ones.
 set -l wanted $XDG_CONFIG_HOME $XDG_DATA_HOME $XDG_STATE_HOME $XDG_CACHE_HOME \
-    $PROJECTS $CLAUDE_CONFIG_DIR \
+    $PROJECTS $CLAUDE_CONFIG_DIR $CODEX_HOME \
     $__fish_config_dir $FISH_THEMES_DIR $XDG_CACHE_HOME/fish
 set -l missing (path filter -vd $wanted)
 test -n "$missing"; and mkdir -p $missing

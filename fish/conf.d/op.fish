@@ -18,3 +18,7 @@ test -S "$op_agent_sock"; and set -gx SSH_AUTH_SOCK "$op_agent_sock"
 # the "Claude Code" 1password environment, read by functions/wrappers/claude.fish. an environment id is an
 # opaque identifier, not a credential — safe to commit. -g, not -gx: only fish reads it.
 set -g __op_claude_env uiba73phjvsgnivopa7bujlpbq
+
+# codex inherits the same development-tool credentials as claude code. this does not
+# replace codex's chatgpt oauth login; the wrapper only supplies child-process variables.
+set -g __op_codex_env uiba73phjvsgnivopa7bujlpbq

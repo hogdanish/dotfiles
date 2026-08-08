@@ -15,9 +15,10 @@ macOS 27 · Apple Silicon · fish 4.8 · Ghostty · Homebrew · 1Password for ev
 .betterleaks.toml   secret-scanner rules and allowlist
 lefthook.yml        pre-commit / pre-push gates
 Brewfile            hand-maintained package manifest AND software inventory
-scripts/            bootstrap.sh · link-home.fish · link-claude.fish · audit-config.fish
+scripts/            bootstrap.sh · link-home.fish · link-{claude,codex}.fish · audit-config.fish
 home/               files that cannot live under ~/.config, symlinked into $HOME
 .claude/            agent context for this repo (rules, skills, hooks)
+.agents/            Codex project skills — symlinks to canonical .claude/skills
 claude-code/        authored Claude Code config — $CLAUDE_CONFIG_DIR symlinks back to it
 fish/ ghostty/ …    the actual configs
 ```
