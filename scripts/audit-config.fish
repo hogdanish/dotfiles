@@ -119,6 +119,70 @@ function __check_claude_links --description 'authored claude config is still sym
     __say info 'claude-code symlinks intact'
 end
 
+function __check_codex_links --description 'authored codex config and skills are linked'
+    for f in AGENTS.md config.toml
+        if not test -L $HOME/.codex/$f
+            __fail "$HOME/.codex/$f is not a symlink — edits to it are NOT tracked"
+        else if not test -e $HOME/.codex/$f
+            __fail "$HOME/.codex/$f is a broken symlink"
+        else if not string match -q -- "$REPO/codex/*" (path resolve $HOME/.codex/$f)
+            __fail "$HOME/.codex/$f points outside the repo: "(path resolve $HOME/.codex/$f)
+        end
+    end
+
+    for skill in (path filter -d $REPO/codex/skills/*)
+        set -l name (path basename $skill)
+        if not test -L $HOME/.agents/skills/$name
+            __fail "codex skill $name is authored but not linked — run scripts/link-codex.fish"
+        else if not test -e $HOME/.agents/skills/$name
+            __fail "$HOME/.agents/skills/$name is a broken symlink"
+        end
+    end
+
+    for entry in $HOME/.agents/skills/*
+        test -L $entry; and not test -e $entry
+        and __fail "dangling codex skill link: "(path basename $entry)" — it loads nothing"
+    end
+    __say info 'codex symlinks intact'
+end
+
+function __check_project_agent_links --description 'claude project guidance is shared with codex'
+    if not test -L $REPO/AGENTS.md
+        __fail "$REPO/AGENTS.md is not a symlink to the canonical Claude instructions"
+    else if not test -e $REPO/AGENTS.md
+        __fail "$REPO/AGENTS.md is a broken symlink"
+    else if not test (path resolve $REPO/AGENTS.md) = (path resolve $REPO/.claude/CLAUDE.md)
+        __fail "$REPO/AGENTS.md does not resolve to .claude/CLAUDE.md"
+    end
+
+    for skill in (path filter -d $REPO/.claude/skills/*)
+        set -l name (path basename $skill)
+        set -l link $REPO/.agents/skills/$name
+        if not test -L $link
+            __fail "project Codex skill $name is not linked from .claude/skills"
+        else if not test -e $link
+            __fail "$link is a broken symlink"
+        else if not test (path resolve $link) = (path resolve $skill)
+            __fail "$link does not resolve to the canonical Claude skill"
+        end
+    end
+    __say info 'project Claude/Codex symlinks intact'
+end
+
+function __check_rust_links --description 'cargo config is linked back into the repo'
+    set -l cargo_home $XDG_DATA_HOME/cargo
+    set -q CARGO_HOME; and set cargo_home $CARGO_HOME
+    set -l link $cargo_home/config.toml
+    if not test -L $link
+        __fail "$link is not a symlink to the tracked Cargo config"
+    else if not test -e $link
+        __fail "$link is a broken symlink"
+    else if not test (path resolve $link) = (path resolve $REPO/cargo/config.toml)
+        __fail "$link does not resolve to $REPO/cargo/config.toml"
+    end
+    __say info 'Cargo config symlink intact'
+end
+
 function __check_permissions --description 'sensitive untracked files are not world-readable'
     set -l cookies $REPO/yt-dlp/cookies.txt
     test -e $cookies; or return

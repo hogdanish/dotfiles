@@ -72,11 +72,11 @@ Three independent chains, in descending order of how much of the machine they ca
 | pinentry | ⚠ `gpgconf` resolves to `/opt/homebrew/opt/pinentry/bin/pinentry`, a **symlink to `pinentry-curses`** — a TTY prompt. Bypassed by the explicit `pinentry-program` |
 | Touch ID for sudo | ✅ **on** (2026-07-30). `/etc/pam.d/sudo_local` = `pam_reattach` optional, then `pam_tid.so` sufficient. ⚠ Interactive `sudo` only — see `touchid-system-auth.md` §3.1 |
 | `pam-reattach` | **installed** (1.3, `/opt/homebrew/lib/pam/pam_reattach.so`) — it is a PAM module, so `command -v` finds nothing |
-| Plaintext secrets | ⏳ `~/.config/fish/conf.d/secrets.fish` still holds live API tokens as `-gx` vars |
+| Plaintext secrets | ✅ `conf.d/secrets.fish` was retired; development tokens come from the 1Password Environment at agent launch |
 
 ⏳ = outstanding. Re-verify before relying on any row — this table is a snapshot, not a live check.
 
-## Claude Code credentials
+## Agent development credentials
 
 ⚠ **Per-MCP-server `op run` wrapping is impossible for plugin-bundled servers.** The `github` plugin
 ships an **HTTP** MCP server whose config interpolates `Authorization: Bearer
@@ -88,11 +88,18 @@ The mechanism is a **1Password Environment** resolved at launch by a fish wrappe
 
 ```fish
 # ~/.config/fish/functions/wrappers/claude.fish
-op run --environment $__op_claude_env -- claude $argv
+op run --no-masking --environment $__op_claude_env -- claude $argv
 ```
 
 One authorization prompt per session; nothing on disk; variables edited in the 1Password GUI. The
 Environment ID is an opaque identifier, not a secret, and lives in `conf.d/op.fish`.
+
+Codex uses the same Environment for tools it launches, while retaining its own ChatGPT OAuth login:
+
+```fish
+# ~/.config/fish/functions/wrappers/codex.fish
+op run --no-masking --environment $__op_codex_env -- codex $argv
+```
 
 ⚠ **`GH_TOKEN` and `GITHUB_PERSONAL_ACCESS_TOKEN` are both required** and must hold the same value:
 `gh` reads the former, the GitHub MCP plugin interpolates the latter. That is not a duplication bug.
@@ -110,7 +117,7 @@ prompt and reports `[ERROR] account is not signed in`. This is indistinguishable
 1Password CLI* being disabled, and it cost a wrong diagnosis on 2026-07-28. **Never conclude `op` is
 unconfigured from an agent-side check** — ask the user to run `op whoami` in their own terminal.
 
-**`op run` masking breaks any TUI child, including `claude`.** Masking scans the child's
+**`op run` masking breaks any TUI child, including `claude` and `codex`.** Masking scans the child's
 stdout/stderr for secret values, which means replacing those fds with pipes. Claude Code probes for a
 tty to decide whether it can draw a TUI; with a piped stdout it silently switches to `--print` mode
 and exits with:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "OrbStack"
+  short_description: "Operate OrbStack containers and VMs"
+  default_prompt: "Use $orbstack to handle this container or Linux VM task."

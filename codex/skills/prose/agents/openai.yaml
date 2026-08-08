@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prose"
+  short_description: "Write and revise clear, direct prose"
+  default_prompt: "Use $prose to revise this writing while preserving my voice."

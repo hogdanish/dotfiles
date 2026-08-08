@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code in this repository.
+Guidance for Claude Code and Codex in this repository.
 
 ⚠ Every `SKILL.md` links docs in an adjacent `references/`. Read **all** that could plausibly bear
 on the task — floors, not menus.
@@ -60,9 +60,22 @@ cannot carry is machine-specific contradiction of its own docs: Firecrawl's bund
 tells the agent to run `firecrawl init` / `setup skills` / `login`, all three of which are wrong
 here, so that override lives in `claude-code/CLAUDE.md` instead.
 
+`codex/` holds the **authored** global Codex configuration. Codex does not separate config from
+state, so the live `~/.codex/` directory remains untracked and only `AGENTS.md` and `config.toml`
+symlink back into this repo. `codex/skills/` links one directory at a time into
+`~/.agents/skills/`, the documented user-skill namespace; vendor skills still belong in plugins.
+Run `scripts/link-codex.fish` after adding a skill, and keep `scripts/audit-config.fish` able to
+detect detached or dangling links.
+
+Claude Code remains the canonical owner of this repository's project instructions and skills.
+Root `AGENTS.md` symlinks to `.claude/CLAUDE.md`, and `.agents/skills/<name>` links each directory
+from `.claude/skills/` individually. That gives Codex the same project-specific guidance without
+duplicating it or turning either shared skill namespace into a wholesale directory link.
+
 `scripts/` holds `bootstrap.sh` (POSIX sh — fish and gum may not exist when it runs),
-`link-home.fish`, `link-claude.fish`, and `audit-config.fish`. **Run the audit after anything
-installs a new tool**; it names every top-level entry that is neither tracked nor known junk.
+`link-home.fish`, `link-claude.fish`, `link-codex.fish`, and `audit-config.fish`. **Run the audit
+after anything installs a new tool**; it names every top-level entry that is neither tracked nor
+known junk.
 
 `home/` holds the files that cannot live under `~/.config` because their consumer hardcodes a
 `$HOME` path — `zshrc`, `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf` — symlinked into place.
