@@ -128,6 +128,7 @@ cask "visual-studio-code@insiders"  # main ide (insiders channel)
 cask "ghostty"                      # terminal emulator
 cask "godot"                        # game engine
 cask "claude-code@latest"           # terminal ai coding agent
+cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
 
 ## fonts
@@ -154,6 +155,7 @@ cask "keka"                # archive utility: file archiver
 cask "kekaexternalhelper"  # keka: registers it as the default archive handler
 cask "obsidian"            # markdown knowledge base
 cask "claude"              # ai assistant desktop app
+cask "chatgpt"             # openai assistant and codex desktop app
 
 ## media
 cask "iina"          # quicktime: media player
