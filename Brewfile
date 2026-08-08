@@ -62,6 +62,11 @@ brew "lefthook"         # git: hook manager — runs the pre-commit/pre-push gat
 brew "node"             # js runtime
 brew "bun"              # node: fast js runtime and package manager
 brew "uv"               # pip: python package manager
+brew "rustup"           # rust toolchain manager
+brew "cargo-nextest"    # cargo: parallel test runner
+brew "cargo-audit"      # cargo: vulnerability scanner
+brew "cargo-deny"       # cargo: dependency policy checks
+brew "sccache"          # rustc: shared compilation cache
 brew "make"             # build tool
 brew "scons"            # make: python-based build system
 brew "shellcheck"       # bash: static analysis for hook scripts

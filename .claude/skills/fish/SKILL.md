@@ -1,6 +1,6 @@
 ---
 name: fish
-description: Fish shell (4.8.1) for this dotfiles repo — the mandatory house style guide, the language (expansions, lists, control flow, $status), builtins (string/path/argparse/set/test/math), variable scoping and the special-variable catalogue, conf.d/functions/completions load order and autoloading, abbr/bind/commandline, prompt and fish_color_* theming for laramie, writing completions, startup-cost caching via cachecmd, the mattmc3/fishconf adoption record, and an append-only caveats log of verified 4.8.1 behaviour that contradicts common assumptions. Covers the live config at ~/.config/fish — the 16 conf.d snippets (_init, _shell, abbrs, brew, bun, colours, fzf, ghostty, git, gum, java, keybindings, op, tools, uv, xdg-apps), functions/ incl. cachecmd and the grc/ wrappers, completions/, and themes/laramie.
+description: Fish shell (4.8.1) for this dotfiles repo — the mandatory house style guide, the language (expansions, lists, control flow, $status), builtins (string/path/argparse/set/test/math), variable scoping and the special-variable catalogue, conf.d/functions/completions load order and autoloading, abbr/bind/commandline, prompt and fish_color_* theming for laramie, writing completions, startup-cost caching via cachecmd, the mattmc3/fishconf adoption record, and an append-only caveats log of verified 4.8.1 behaviour that contradicts common assumptions. Covers the live config at ~/.config/fish — the 17 conf.d snippets (_init, _shell, abbrs, brew, bun, colours, fzf, ghostty, git, gum, java, keybindings, op, rust, tools, uv, xdg-apps), functions/ incl. cachecmd and the grc/ wrappers, completions/, and themes/laramie.
 when_to_use: Load before writing or editing any .fish file, anything under ~/.config/fish, or a fish function, completion, abbreviation, key binding or prompt — and whenever fish behaviour, startup order, shell startup cost, or a bash idiom needing a fish translation is in question. Also for tool integrations (fzf/zoxide/atuin/starship/grc), fish theming, and before proposing a plugin manager or another fishconf pattern. Boundary- this owns the fish side only; git/delta/ghostty/micro configuration lives with those tools even though fish exports their variables.
 ---
 
@@ -38,11 +38,11 @@ writing fish, not after. Its five load-bearing rules, in brief — the guide has
 ## How this config loads
 
 `conf.d/*` sources **before** `config.fish`, sorted `digits` → `_` → `letters` (verified on 4.8.1). The
-`_` prefix is this config's ordering mechanism. Load order as of 2026-07-30 — **sixteen** snippets:
+`_` prefix is this config's ordering mechanism. Load order as of 2026-08-07 — **seventeen** snippets:
 
 | # | File | Role |
 | --- | --- | --- |
-| 1 | `_init.fish` | XDG dirs, `$PROJECTS`/`$DOTFILES`/`$CLAUDE_CONFIG_DIR`, the `functions/*/` + `completions/*/` autoload globs, core env (`PAGER`/`VISUAL`/`EDITOR`/`BROWSER`) |
+| 1 | `_init.fish` | XDG dirs, `$PROJECTS`/`$DOTFILES`/`$CLAUDE_CONFIG_DIR`/`$CODEX_HOME`, the `functions/*/` + `completions/*/` autoload globs, core env (`PAGER`/`VISUAL`/`EDITOR`/`BROWSER`) |
 | 2 | `_shell.fish` | interactive shell behaviour only — greeting, `~/.hushlogin` |
 | 3 | `abbrs.fish` | abbreviations |
 | 4 | `brew.fish` | `$HOMEBREW_PREFIX`, the whole base `$PATH`, `HOMEBREW_*` |
@@ -54,10 +54,11 @@ writing fish, not after. Its five load-bearing rules, in brief — the guide has
 | 10 | `gum.fish` | ~24 `GUM_*` laramie accents + `GUM_FORMAT_THEME` — ⚠ *not* interactive-guarded, scripts need it (`gum` skill) |
 | 11 | `java.fish` | `$JAVA_HOME` — ⚠ hardcoded, not `/usr/libexec/java_home` (a 5.7 ms fork) |
 | 12 | `keybindings.fish` | `bind` statements — ⚠ loses any key a tool init later binds |
-| 13 | `op.fish` | 1Password agent socket, Claude environment id |
-| 14 | `tools.fish` | cached inits: fzf, zoxide, starship, atuin |
-| 15 | `uv.fish` | `~/.local/bin` (uv's tool-shim dir) on `$PATH` — ⚠ must follow `brew.fish`, same as `bun.fish` |
-| 16 | `xdg-apps.fish` | per-tool XDG env incl. `GLAMOUR_STYLE` — ⚠ sorts last, so nothing earlier may read it |
+| 13 | `op.fish` | 1Password agent socket, Claude Code and Codex environment ids |
+| 14 | `rust.fish` | rustup/Cargo XDG homes, sccache cache, and rustup's keg-only paths |
+| 15 | `tools.fish` | cached inits: fzf, zoxide, starship, atuin |
+| 16 | `uv.fish` | `~/.local/bin` (uv's tool-shim dir) on `$PATH` — ⚠ must follow `brew.fish`, same as `bun.fish` |
+| 17 | `xdg-apps.fish` | per-tool XDG env incl. `GLAMOUR_STYLE` — ⚠ sorts last, so nothing earlier may read it |
 | last | `config.fish` | documentation only |
 
 Four ordering facts are **load-bearing**, not incidental: `bun` after `brew` (`brew.fish` resets

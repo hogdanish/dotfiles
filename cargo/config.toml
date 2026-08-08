@@ -1,0 +1,3 @@
+# Cargo reads this through $CARGO_HOME/config.toml, which bootstrap links here.
+[build]
+rustc-wrapper = "sccache"
