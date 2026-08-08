@@ -1,0 +1,6 @@
+[DEFAULT]
+default-user = pondethan
+
+[pondethan]
+region = us-ord
+image = linode/debian13

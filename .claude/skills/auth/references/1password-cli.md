@@ -154,7 +154,7 @@ op plugin clear gh [--all]        # remove a configuration
 
 ### ⚠ `plugins.sh` is POSIX shell and **cannot be sourced from fish**
 
-Verified 2026-07-28 after initializing `gh`, `brew` and `claude`. `op plugin init` writes
+Verified again 2026-08-08 after initializing `linode-cli`. `op plugin init` writes
 `<op-config-dir>/plugins.sh` — here `~/.config/op/plugins.sh` — containing **POSIX shell function
 definitions**, regardless of which shell invoked it:
 
@@ -182,6 +182,17 @@ function gh --wraps gh --description 'gh with a github pat supplied by the 1pass
 end
 ```
 
+`linode-cli` uses the same shape in `functions/wrappers/linode-cli.fish`. Its plugin injects
+`LINODE_CLI_TOKEN` for an interactive human command. Do not retain the token that `linode-cli`
+browser login writes to `~/.config/linode-cli`; the non-secret defaults file works with the injected
+environment token. The wrapper first reuses an already-resolved `LINODE_CLI_TOKEN`, which is how a
+Claude Code or Codex session avoids nested Touch ID prompts. It never treats an
+unresolved `op://` reference as a usable token.
+
+⚠ 1Password authorization is terminal-session-bound. A test such as `fish -ic 'linode-cli ...'`
+starts a fresh interactive shell each time and can therefore prompt each time; that is not the same
+as repeated commands inside one long-lived terminal or an agent launched through its fish wrapper.
+
 No recursion: `op plugin run` resolves the real binary from `$PATH` in a fresh process, where the
 fish function does not exist. Plugin *state* lives in `~/.config/op/plugins/*.json` and needs no
 shell wiring at all.
@@ -192,7 +203,7 @@ shell wiring at all.
 
 ⚠ **Aliases and functions from `plugins.sh` can never serve Claude Code.** Its Bash tool runs a
 *non-interactive login* zsh: `~/.zprofile` is read, `~/.zshrc` is not, and aliases do not expand.
-Claude Code gets its credentials from the process environment instead — see
+Claude Code and Codex get their credentials from the parent process environment instead — see
 [1password-environments.md](1password-environments.md) §6.
 
 ### ⚠ The `claude` plugin switches Claude Code to API billing

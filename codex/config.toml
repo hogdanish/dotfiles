@@ -52,10 +52,7 @@ enabled = true
 [plugins."slack@openai-curated"]
 enabled = true
 
-[plugins."anthropic-skills@claude-cowork"]
-enabled = true
-
-[plugins."cowork-plugin-management@claude-cowork"]
+[plugins."cloudflare@openai-curated"]
 enabled = true
 
 [features]
@@ -111,4 +108,7 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/ethan/Projects/commongrounds"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/.config"]
 trust_level = "trusted"

@@ -3,69 +3,12 @@
 ## Behaviour
 
 ### General rules
-- Generally prefer modern, efficient & performant tools and libraries over more stable ones within reason.
 - Always follow best practices and assume strict linting/warnings in any given language.
-- Keep comments concise, relevant, and written in all-lowercase. 
 - Consistently follow standards such as conventional commits / SemVer / Keep a Changelog / XDG Base Directory / etc.
 - If faced with gaps in your knowledge or understanding and are required to make assumptions to continue, be transparent and disclose them to the user. 
 - After any compaction (i.e `/compact`) while working on an active plan, ALWAYS re-read the active PLAN.md before continuing
 - When prompting the user with options in planning mode (i.e `/plan`), try to indicate which option you personally reccomend and why in the most concise manner possible within the prompt. 
-
-### Style
-- Use Canadian English spelling and grammar conventions
-- Don't sacrifice clarity for brevity, but avoid unnecessary verbosity—practice excellent word economy.
-- If you disagree with my approach, say so and explain why.
 - Practice radical candor by actively looking for opportunities to directly challenge my instructions if you think it will lead to a better outcome. I am capable of making mistakes and handling criticism, so don't be afraid to speak up if you think I'm guiding you in the wrong direction. Don't blindly take my prompts at face value.
-
-### Tools
-- Proactively research using tools whenever you're unsure about something, the topic may have changed recently, or a library/API version matters.
-- Don't solely rely on your knowledge and prefer fetching actual up-to-date documentation for anything that is version-sensitive or particularly obscure.
-- Use any tools at your disposal without asking permission when they are clearly appropriate and low-risk.
-- **Wondering whether this machine has a tool, or which of several to use? The `toolbox` rule is
-  already in your context — consult it instead of checking.** ⚠ It is an inventory, not a mandate:
-  it says which tool is best *if* a shell command is the right move, never that one is. Your native
-  capabilities — reading images, Read/Edit/Grep, reasoning — always come first.
-
-## Coding Guidelines
-
-### 1. Think Before Coding
-*Don't assume. Don't hide confusion. Surface tradeoffs.*
-- State assumptions explicitly before implementing. If uncertain, ask.
-- If multiple interpretations exist, present them — don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-### 2. Simplicity First
-*Minimum code that solves the problem. Nothing speculative.*
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-- Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 3. Surgical Changes
-*Touch only what you must. Clean up only your own mess.*
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it — don't delete it.
-- Remove imports/variables/functions that YOUR changes made unused; leave pre-existing dead code alone.
-- The test: every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-*Define success criteria. Loop until verified.*
-- Transform tasks into verifiable goals:
-  - "Add validation" → "Write tests for invalid inputs, then make them pass"
-  - "Fix the bug" → "Write a test that reproduces it, then make it pass"
-  - "Refactor X" → "Ensure tests pass before and after"
-- For multi-step tasks, state a brief plan:
-  ```
-  1. [Step] → verify: [check]
-  2. [Step] → verify: [check]
-  3. [Step] → verify: [check]
-  ```
-- Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ## System context
 
@@ -94,6 +37,10 @@
   Read it when you need something the `toolbox` rule does not cover, or before recommending a new tool.
 - Use `gum` for interactive prompts in shell scripts
 - `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`
+- Linode is a paid control plane. Never create, clone, resize, rebuild, or enable paid services for
+  a Linode or any other billable Akamai Cloud resource without Ethan's explicit permission in the
+  current request. Read-only inspection is allowed. Load the `linode-cli` skill before using the
+  official CLI; it owns the full command surface and safety workflow.
 
 **Notable system paths:**
 - `/Users/ethan/.config/`: system dotfiles — **and the dotfiles git repo itself**, tracked in place

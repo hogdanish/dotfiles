@@ -76,6 +76,10 @@ function main --description 'link codex config and user-authored skills'
 
     __link_one $SRC/AGENTS.md $CODEX_DEST/AGENTS.md codex/AGENTS.md
     __link_one $SRC/config.toml $CODEX_DEST/config.toml codex/config.toml
+    for profile in (path filter -f $SRC/*.config.toml)
+        set -l name (path basename $profile)
+        __link_one $profile $CODEX_DEST/$name codex/$name
+    end
 
     set -l skills (path filter -d $SRC/skills/*)
     if test -z "$skills"

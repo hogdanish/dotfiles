@@ -37,6 +37,10 @@
   Read it when you need something the `toolbox` rule does not cover, or before recommending a new tool.
 - Use `gum` for interactive prompts in shell scripts
 - `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`
+- Linode is a paid control plane. Never create, clone, resize, rebuild, or enable paid services for
+  a Linode or any other billable Akamai Cloud resource without Ethan's explicit permission in the
+  current request. Read-only inspection is allowed. Load the `linode-cli` skill before using the
+  official CLI; it owns the full command surface and safety workflow.
 
 **Notable system paths:**
 - `/Users/ethan/.config/`: system dotfiles — **and the dotfiles git repo itself**, tracked in place

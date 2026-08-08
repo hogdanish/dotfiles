@@ -3,11 +3,47 @@
     "defaultMode": "auto"
   },
   "model": "opus[1m]",
+  "deniedMcpServers": [
+    {
+      "serverName": "plugin:cloudflare:cloudflare-docs"
+    },
+    {
+      "serverName": "plugin:cloudflare:cloudflare-bindings"
+    },
+    {
+      "serverName": "plugin:cloudflare:cloudflare-builds"
+    },
+    {
+      "serverName": "plugin:cloudflare:cloudflare-observability"
+    }
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-notify attention \"$(jq -r '.message // \"Claude Code is waiting on you\"')\""
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
-    "github@claude-plugins-official": true,
-    "firecrawl@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "github@claude-plugins-official": false,
+    "firecrawl@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": false,
+    "cloudflare@cloudflare": true,
+    "clangd-lsp@claude-plugins-official": false
+  },
+  "extraKnownMarketplaces": {
+    "cloudflare": {
+      "source": {
+        "source": "github",
+        "repo": "cloudflare/skills"
+      }
+    }
   },
   "effortLevel": "medium",
   "showClearContextOnPlanAccept": true,
@@ -21,17 +57,5 @@
   "skipAutoPermissionPrompt": true,
   "additionalDirectories": [
     "/Users/ethan/.config"
-  ],
-  "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-notify attention \"$(jq -r '.message // \"Claude Code is waiting on you\"')\""
-          }
-        ]
-      }
-    ]
-  }
+  ]
 }
