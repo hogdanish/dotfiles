@@ -219,8 +219,12 @@ extraction, these beat a shell command or the built-in web tools:
   reinstall it. Use `resolve-library-id` then `query-docs` for **any** named library, framework, SDK,
   API, CLI tool or cloud service — including ones you think you know, because your training data
   lags. Version-sensitive or obscure makes it *mandatory*; for stable, well-known basics your own
-  knowledge is fine, and a lookup you would not have needed is just latency.
-  ⚠ Cap: 3 `resolve-library-id` and 3 `query-docs` per question; one concept per `query-docs` call.
+  knowledge is fine.
+  ⚠ **Running an experiment to learn how a documented API behaves — a probe script, a throwaway
+  test, a compile-and-see loop — means you skipped the lookup.** One query costs less than one
+  build. Experiment on *your* code's behaviour, not the library's.
+  Up to 3 `resolve-library-id` and 3 `query-docs` per question — a ceiling, not a budget to spend
+  down; one concept per `query-docs` call.
   Fall back to built-in search/fetch only when Context7 has no entry.
 - **GitHub → the GitHub MCP server first**, then `gh` CLI, then manual.
 - **Cloudflare account/API work → the official Cloudflare plugin is always enabled** in Claude Code
