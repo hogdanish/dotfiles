@@ -2,7 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "claude-fable-5[1m]",
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
@@ -47,7 +47,8 @@
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "cloudflare@cloudflare": true,
-    "clangd-lsp@claude-plugins-official": false
+    "clangd-lsp@claude-plugins-official": false,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "cloudflare": {
@@ -57,7 +58,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "showClearContextOnPlanAccept": true,
   "tui": "default",
   "skipDangerousModePermissionPrompt": true,
