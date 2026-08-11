@@ -17,8 +17,22 @@
 
 Host cg-test cg-test-ord-01
     HostName 172.234.197.254
-    User root
+    User agent
     Port 22
+    IdentityFile ~/.config/ssh/cg-test-ord-01-agent.pub
+    IdentitiesOnly yes
+    PreferredAuthentications publickey
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    ForwardAgent no
+
+Host cg-test-ord-01-admin
+    HostName 172.234.197.254
+    User ethan
+    Port 22
+    IdentityFile ~/.config/ssh/cg-test-ord-01-admin.pub
+    IdentitiesOnly yes
     PreferredAuthentications publickey
     PubkeyAuthentication yes
     PasswordAuthentication no
@@ -28,6 +42,8 @@ Host cg-test cg-test-ord-01
 Host cg-test-ord-01-lish
     HostName lish-us-ord.linode.com
     User pondethan
+    IdentityFile ~/.config/ssh/cg-test-ord-01-admin.pub
+    IdentitiesOnly yes
     RequestTTY force
     RemoteCommand cg-test-ord-01
 
