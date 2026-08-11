@@ -101,11 +101,25 @@ op run --no-masking --environment $__op_codex_env -- codex $argv
 ```
 
 The Linode PAT remains one 1Password item rather than being copied into that Environment.
-`conf.d/op.fish` stores only its `op://` reference. Every Claude Code and Codex launch exports it as
-`LINODE_CLI_TOKEN`, so the parent `op run` resolves it once and a bare `linode-cli` works inside the
-agent without loading an MCP. `claude --infra` and `codex --infra` additionally export the same
-reference as `LINODE_API_TOKEN` and opt the session into the pinned `instances` MCP server. Humans
-use `functions/wrappers/linode-cli.fish`, which delegates to the installed 1Password shell plugin.
+`conf.d/op.fish` stores only its `op://` reference. Both launch wrappers export it as
+`LINODE_CLI_TOKEN`, and Claude Code shells inherit the resolved value, so bare `linode-cli` works
+there without an MCP. Humans use `functions/wrappers/linode-cli.fish`, which delegates to the
+installed 1Password shell plugin.
+
+⚠ **Codex-only Linode CLI workaround, observed with Codex CLI 0.147.0 on 2026-08-08.** Codex tool
+subprocesses had no `LINODE_CLI_TOKEN`, even with `shell_environment_policy.inherit=all` and
+`shell_environment_policy.ignore_default_excludes=true`. Bare `linode-cli` returned `401 Invalid
+Token`. Run it through the existing plugin in interactive Fish and give the process a PTY so
+1Password can request Touch ID:
+
+```sh
+fish -ic 'op plugin run -- linode-cli linodes view 102470771 --json'
+```
+
+Replace only the Linode CLI arguments. Do not use this fallback in Claude Code, where bare
+`linode-cli` remains the normal path. `claude --infra` and `codex --infra` additionally export the
+same reference as `LINODE_API_TOKEN` for the pinned `instances` MCP server, but that separate path
+does not repair the Codex CLI subprocess environment.
 
 ⚠ **`GH_TOKEN` and `GITHUB_PERSONAL_ACCESS_TOKEN` are both required** and must hold the same value:
 `gh` reads the former, the GitHub MCP plugin interpolates the latter. That is not a duplication bug.

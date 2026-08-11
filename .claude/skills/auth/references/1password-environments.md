@@ -147,11 +147,14 @@ path — `/opt/homebrew/bin/op` on this machine — as `command`.
 The same shape works with `op://` references instead of an Environment
 (`op run -- <cmd>` with references exported), which is preferable for a single token.
 
-That is the Linode arrangement here: `conf.d/op.fish` stores the PAT's `op://` reference, and every
-Claude Code or Codex launch exports it as `LINODE_CLI_TOKEN` before the single parent `op run`.
-Agent shells inherit the resolved value, so the official CLI works without a nested `op` call or a
-token in config. `claude --infra` / `codex --infra` additionally export `LINODE_API_TOKEN` and load
-Linode's large MCP schema catalogue only for that session.
+That is the Linode arrangement here: `conf.d/op.fish` stores the PAT's `op://` reference, and both
+the Claude Code and Codex launch wrappers export it as `LINODE_CLI_TOKEN` before the single parent
+`op run`. Claude Code shells inherit the resolved value, so bare `linode-cli` works without a token
+in config. Codex CLI 0.147.0 was observed dropping the variable from tool subprocesses despite its
+environment-policy settings. In Codex only, use the PTY-based
+`fish -ic 'op plugin run -- linode-cli ...'` fallback documented in the parent `auth` skill.
+`claude --infra` / `codex --infra` additionally export `LINODE_API_TOKEN` for the optional Linode MCP;
+that is a separate authentication path.
 
 ## 7. The 1Password MCP Server (beta)
 

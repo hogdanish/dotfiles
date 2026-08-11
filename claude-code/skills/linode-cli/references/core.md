@@ -52,8 +52,11 @@ complex local selection, fetch JSON once and filter with `jq`.
 
 ## Configuration and authentication
 
-This machine does not store a PAT in the tracked CLI config. Agents receive `LINODE_CLI_TOKEN` from
-1Password at launch; interactive fish uses the 1Password shell plugin wrapper.
+This machine does not store a PAT in the tracked CLI config. Claude Code receives
+`LINODE_CLI_TOKEN` from 1Password at launch, and interactive Fish uses the 1Password shell plugin
+wrapper. Codex CLI 0.147.0 was observed dropping the variable from tool subprocesses. In Codex only,
+use the PTY-based `fish -ic 'op plugin run -- linode-cli ...'` fallback in the parent skill's
+**Machine-specific authentication** section.
 
 Supported environment variables:
 

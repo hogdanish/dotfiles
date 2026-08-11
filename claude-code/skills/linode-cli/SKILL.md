@@ -52,10 +52,25 @@ work inside an instance.
 
 ## Machine-specific authentication
 
-Normal Claude Code and Codex sessions inherit a resolved `LINODE_CLI_TOKEN` from their 1Password
-launch wrappers, so `linode-cli` works without loading the Linode MCP. `--infra` additionally loads
-the version-pinned MCP and exports its separate `LINODE_API_TOKEN` name. Interactive fish users call
-the `linode-cli` wrapper, which uses the 1Password shell plugin.
+Claude Code inherits the resolved `LINODE_CLI_TOKEN` from its 1Password launch wrapper. Use bare
+`linode-cli` commands there. Do not apply the following Codex workaround to Claude Code.
 
-If authentication fails inside an agent, report it. Do not run `configure`, request a PAT, or fall
-back to `--debug`. A normal session may have started without 1Password; Ethan must relaunch it.
+⚠ **Codex-only workaround, observed with Codex CLI 0.147.0 on 2026-08-08.** Codex tool subprocesses
+had no `LINODE_CLI_TOKEN`, even when Codex was launched with `shell_environment_policy.inherit=all`
+and `shell_environment_policy.ignore_default_excludes=true`. Bare `linode-cli` then used unusable
+local profile state and returned `401 Invalid Token`. Run the command through the installed
+1Password shell plugin in interactive Fish instead:
+
+```sh
+fish -ic 'op plugin run -- linode-cli linodes view 102470771 --json'
+```
+
+Give the process a PTY so 1Password can request Touch ID. Replace only the arguments after
+`linode-cli` for other commands. The plugin sends the PAT directly to the CLI; it does not print or
+persist it. This is an observed Codex defect, not the expected result of Codex's environment-policy
+settings. `codex --infra` does not fix it; the optional Linode MCP uses a separate variable and is
+not part of this fallback.
+
+Interactive Fish users call the normal `linode-cli` wrapper, which uses the same 1Password shell
+plugin. Never run `configure`, request a PAT, or use `--debug` to work around an authentication
+failure.
