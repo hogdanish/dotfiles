@@ -44,7 +44,7 @@ pre-commit:
           exit 1
         fi
 
-    # 3. fish must parse and be canonically formatted. mirrors .claude/hooks/fish-validate.sh
+    # 3. fish must parse and be canonically formatted. mirrors claude-code/hooks/fish-validate.sh
     #    so a human commit is held to the same bar as an agent edit.
     - name: fish-syntax
       glob: "*.fish"

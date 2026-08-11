@@ -41,7 +41,7 @@ apply meaning.
 
 ## fish/themes/laramie.theme
 
-**Generated — never hand-edit.** Regenerate with `.claude/skills/fish/scripts/gen-fish-theme.fish`.
+**Generated — never hand-edit.** Regenerate with `claude-code/skills/fish/scripts/gen-fish-theme.fish`.
 ⚠ **Bare hex, no `#`** — a `.theme` file is tokenised, so `#` starts a comment and the line silently
 does nothing. ⚠ It is a *superset* of `colours.fish`, harvesting fish's own defaults too.
 

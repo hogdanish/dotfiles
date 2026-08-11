@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # PostToolUse hook — validate any .fish file after a Write/Edit touches it.
 #
-# enforces the parts of .claude/rules/fish.md that are mechanically checkable.
+# enforces the parts of claude-code/rules/fish.md that are mechanically checkable.
 # prose is a request; a hook is a guarantee. silent on success.
+#
+# user-level: wired from claude-code/settings.json, so it fires on every .fish
+# write anywhere on this machine, not only inside the dotfiles repo.
 #
 # PostToolUse cannot block — the write already happened — so this reports back
 # to claude via stderr + exit 1 so it gets fixed in the same turn.
@@ -78,8 +81,8 @@ fi
 if [[ -n "$errors" ]]; then
   printf 'Fish validation failed for %s\n\n' "$file_path" >&2
   printf '%b' "$errors" >&2
-  printf 'Fix before continuing. Full law: .claude/rules/fish.md and\n' >&2
-  printf '.claude/skills/fish/references/style-guide.md\n' >&2
+  printf 'Fix before continuing. Full law: the fish rule, and the fish skill'"'"'s\n' >&2
+  printf 'references/style-guide.md\n' >&2
   exit 1
 fi
 

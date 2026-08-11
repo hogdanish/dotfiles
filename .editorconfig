@@ -10,7 +10,7 @@ indent_style = space
 indent_size = 4
 
 # fish_indent's output, made non-negotiable at save time.
-# see .claude/skills/fish/references/style-guide.md §1
+# see claude-code/skills/fish/references/style-guide.md §1
 [*.fish]
 indent_style = space
 indent_size = 4

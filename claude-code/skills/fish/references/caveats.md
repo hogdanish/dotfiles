@@ -4,7 +4,7 @@ Append-only record of fish behaviour that **surprised someone and cost a debuggi
 first when something is behaving impossibly. Every entry here was verified against fish **4.8.1** on
 this machine, not recalled from training data — several contradict what a model will confidently assert.
 
-## How to append (mandatory — see `.claude/rules/fish.md`)
+## How to append (mandatory — see `claude-code/rules/fish.md`)
 
 Found a new caveat? Add an entry in the same turn, newest at the top of its section, using this shape:
 
@@ -65,7 +65,7 @@ will get them wrong again.
   whitelist, so there is no warning and no non-zero status.
 - **Do** — `#`-prefixed hex in `themes/*.fish` (consumed by `set_color`), **bare** hex in
   `themes/*.theme`. Generate one from the other rather than hand-keeping both:
-  `.claude/skills/fish/scripts/gen-fish-theme.fish`.
+  `claude-code/skills/fish/scripts/gen-fish-theme.fish`.
 - **Verified** — `printf 'fish_color_normal #a9b1d6\n' | while read -lat t; count $t; end` → `1`;
   without the `#` → `2`. `fish -c "set_color '#f7768e'" | cat -v` → `^[[38;2;247;118;142m`.
 - Corrected [prompt-and-colours.md](prompt-and-colours.md) §4, which said hex must have "no `#`".

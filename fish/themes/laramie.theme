@@ -3,7 +3,7 @@
 #
 # GENERATED — do not hand-edit. the source of truth is themes/laramie.fish,
 # applied by conf.d/colours.fish. regenerate with:
-#   .claude/skills/fish/scripts/gen-fish-theme.fish
+#   claude-code/skills/fish/scripts/gen-fish-theme.fish
 #
 # ⚠ values are BARE hex, no leading '#'. a .theme file is parsed with fish tokenizer
 # rules, so '#a9b1d6' is read as a comment and the variable is set to nothing —

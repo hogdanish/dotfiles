@@ -2,7 +2,7 @@
 #
 # one concern: gum styling only. gum has no config file, so theming is environment variables,
 # one per style key — ~24 of them, which is why this is its own snippet rather than a stanza in
-# conf.d/colours.fish. the block is the one from .claude/skills/gum (references/recipes.md §6).
+# conf.d/colours.fish. the block is the one from claude-code/skills/gum (references/recipes.md §6).
 #
 # ⚠ NOT interactive-guarded. a script calling `gum choose` is exactly the case that needs these,
 # and functions/reload.fish is one such caller.

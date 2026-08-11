@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 #
 # gen-fish-theme — regenerate ~/.config/fish/themes/<name>.theme from the live palette.
-# usage: .claude/skills/fish/scripts/gen-fish-theme.fish [THEME_NAME]   (default: laramie)
+# usage: claude-code/skills/fish/scripts/gen-fish-theme.fish [THEME_NAME]   (default: laramie)
 #
 # the .theme file exists only so `fish_config theme list/show` works. conf.d/colours.fish is
 # the real source of truth at startup, because `fish_config theme choose` would autoload the
@@ -54,7 +54,7 @@ function main
         '#' \
         "# GENERATED — do not hand-edit. the source of truth is themes/$THEME_NAME.fish," \
         '# applied by conf.d/colours.fish. regenerate with:' \
-        '#   .claude/skills/fish/scripts/gen-fish-theme.fish' \
+        '#   claude-code/skills/fish/scripts/gen-fish-theme.fish' \
         '#' \
         "# ⚠ values are BARE hex, no leading '#'. a .theme file is parsed with fish tokenizer" \
         "# rules, so '#a9b1d6' is read as a comment and the variable is set to nothing —" \

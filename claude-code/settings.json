@@ -27,6 +27,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/claude-code/hooks/fish-validate.sh",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {

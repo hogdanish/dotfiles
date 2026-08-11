@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fish"
+  short_description: "Write and debug fish shell code to house style"
+  default_prompt: "Use $fish to write or review this fish code against the house style guide."

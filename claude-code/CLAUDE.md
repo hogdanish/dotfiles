@@ -35,7 +35,13 @@
 
 - `~/.config/Brewfile` — the full software inventory including GUI apps, one line of *why* per entry.
   Read it when you need something the `toolbox` rule does not cover, or before recommending a new tool.
-- Use `gum` for interactive prompts in shell scripts
+- Fish is the shell for interactive use and for scripts a human runs. Load the `fish` skill before
+  writing or editing any `.fish` file, in any directory, and before porting bash or zsh to fish; it
+  owns the house style guide and the language references. The `fish` rule is the always-on subset.
+- `gum` is the house toolkit for anything a script shows or asks a human, in fish and bash alike.
+  Load the `gum` skill before writing a prompt, confirmation, menu, spinner, banner, table or status
+  output — never hand-roll `read`, `select`, `tput` or raw ANSI. The `interactive-scripts` rule is the
+  always-on trigger.
 - `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`
 - Linode is a paid control plane. Never create, clone, resize, rebuild, or enable paid services for
   a Linode or any other billable Akamai Cloud resource without Ethan's explicit permission in the

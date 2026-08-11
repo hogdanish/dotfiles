@@ -145,7 +145,7 @@ file previously claimed hex must have "no `#`". `set_color '#7aa2f7'` emits the 
 rules, where `#` starts a **comment** — so `fish_color_normal #a9b1d6` sets the variable to nothing,
 silently, because the line still passes the name whitelist. Hence `themes/laramie.fish` keeps the `#`
 and `themes/laramie.theme` must not; generate the second from the first with
-`.claude/skills/fish/scripts/gen-fish-theme.fish`. See [caveats.md](caveats.md).
+`claude-code/skills/fish/scripts/gen-fish-theme.fish`. See [caveats.md](caveats.md).
 
 | Option | Short | Emits (verified) |
 | --- | --- | --- |
@@ -328,7 +328,7 @@ What belongs to *fish*, and is true regardless of the values:
 | | |
 | --- | --- |
 | `themes/laramie.fish` | the 28 `$theme_*` primitives, hex **with** `#`. Sourced by `conf.d/colours.fish` above its interactive guard, because `conf.d/fzf.fish` and `conf.d/gum.fish` read them too |
-| `themes/laramie.theme` | **generated** by `.claude/skills/fish/scripts/gen-fish-theme.fish`; exists only so `fish_config theme list/show` works. ⚠ bare hex, no `#` (§6) |
+| `themes/laramie.theme` | **generated** by `claude-code/skills/fish/scripts/gen-fish-theme.fish`; exists only so `fish_config theme list/show` works. ⚠ bare hex, no `#` (§6) |
 | `conf.d/colours.fish` | what actually applies the palette at startup — `fish_config theme choose` in `conf.d/` costs ~5.4 ms |
 
 ⚠ **The commandline is a syntax surface**, so laramie's three-colour syntax doctrine applies to it:

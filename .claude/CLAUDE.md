@@ -33,16 +33,28 @@ tree. The authored config lives in `claude-code/` and is symlinked back from the
 detach it from version control — `scripts/audit-config.fish` checks for exactly this.
 
 `claude-code/rules/` holds the **user-level** rules, which load in every project on this machine, not
-just here: `gdscript.md` (scoped to `**/*.gd`), `toolbox.md` (unscoped — the always-in-context digest
-of this machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it), and
+just here: `gdscript.md` (scoped to `**/*.gd`), `fish.md` (scoped to `**/*.fish`, moved out of
+`.claude/rules/` on 2026-08-11), `toolbox.md` (unscoped — the always-in-context digest of this
+machine's CLI toolbox, verified by `brewfile-audit.sh`; the `brewfile` skill owns it),
+`interactive-scripts.md` (unscoped — the always-on trigger for the `gum` skill, moved 2026-08-11), and
 `context-architecture.md` (unscoped — the doctrine for CLAUDE.md/rules/skills/references/memory in
 *any* repo; it replaced the project-scoped `claude-framework` skill on 2026-07-30, whose skill map
 described a Godot project this machine does not contain). ⚠ Adding or removing a CLI formula means
 updating `toolbox.md` in the same change. ⚠ Unlike skills, `rules/` is symlinked **as a directory**,
 so a new rule needs no `link-claude.fish` run.
 
-`claude-code/skills/` holds the **user-level** skills — `godot`, `orbstack`, `prose`, and, since
-2026-08-08, `linode-cli` (the official Akamai Cloud control plane and its paid-resource guardrails).
+`claude-code/hooks/` holds the **user-level** hooks. `fish-validate.sh` is the only one, wired from
+`claude-code/settings.json` by absolute path (`$HOME/.config/claude-code/hooks/…`), so it fires on
+every `.fish` write anywhere on this machine. ⚠ It is not symlinked and must not be — settings.json
+names the repo path directly, so there is no link to drift. `brewfile-validate.sh` and
+`toolbox-nudge.sh` stay project-scoped in `.claude/hooks/`.
+
+`claude-code/skills/` holds the **user-level** skills — `godot`, `orbstack`, `prose`, `linode-cli`
+(the official Akamai Cloud control plane and its paid-resource guardrails; 2026-08-08), and, since
+2026-08-11, `fish` and `gum`. ⚠ `fish` and `gum` moved out of `.claude/skills/` because neither is
+repo-specific: fish is the shell for every script on this machine and gum is the house toolkit for
+every interactive one. Their references still document `~/.config/fish` in depth — that is machine
+fact, reachable from any directory, not repo scope.
 ⚠ Do not confuse them with `.claude/skills/`, which loads only inside this repo; these load
 everywhere on this machine. They are symlinked in **one directory at a time**, because
 `$CLAUDE_CONFIG_DIR/skills/` is a namespace any installer may write into and linking it wholesale
@@ -172,11 +184,11 @@ here run under **zsh**, so fish abbreviations and functions are not available to
 **Writing or editing any `.fish` file? The `fish` skill is the source of truth** — the mandatory house
 style guide, the language and builtin references, load order, theming, and a bash→fish translation
 table. Load it before you start, not after, and read **every** reference in its Required-reading row —
-those rows are floors, not menus. `.claude/rules/fish.md` carries the always-on subset;
-`.claude/hooks/fish-validate.sh` checks every `.fish` write.
+those rows are floors, not menus. `claude-code/rules/fish.md` carries the always-on subset;
+`claude-code/hooks/fish-validate.sh` checks every `.fish` write.
 
 ⚠ **The fish skill is expected to grow.** When a fish behaviour surprises you or costs a debugging
-cycle, append it to `.claude/skills/fish/references/caveats.md` in the same turn and fix whichever
+cycle, append it to `claude-code/skills/fish/references/caveats.md` in the same turn and fix whichever
 reference was wrong. Rediscovering a caveat is a documentation defect, not bad luck. Verify against
 fish 4.8.1 first — never correct a reference from memory.
 
@@ -237,7 +249,7 @@ edits to the `.fish` side are the `fish` skill's job.
 with every flag and `GUM_*` variable, the contract (TUI on **stderr**, result on **stdout**, exit codes
 `0`/`1`/`124`/`130`), `style`+`join` layout, glamour markdown, and the fish idioms where command
 substitution shreds multi-line gum output. **Load it before writing anything that prompts, asks, lists,
-waits, or prints for a human.** `.claude/rules/interactive-scripts.md` carries the always-on subset and
+waits, or prints for a human.** `claude-code/rules/interactive-scripts.md` carries the always-on subset and
 the primitive→gum table (`read`→`gum input`, `echo`→`gum log`, `tput`→`gum style`, …).
 
 gum **0.17.0** (Brewfile line 36) is a hard dependency here — still guard it with `type -q gum`.
