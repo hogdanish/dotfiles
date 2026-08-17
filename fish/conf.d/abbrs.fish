@@ -59,7 +59,6 @@ abbr -a grs 'git restore'
 # claude code
 abbr -a cc claude
 abbr -a ccc 'claude --continue'
-abbr -a ccd 'claude --dangerously-skip-permissions'
 abbr -a ccr 'claude --resume'
 
 # projects and apps

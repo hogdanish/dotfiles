@@ -200,67 +200,6 @@ done
 [[ $found -eq 0 && $noted -eq 0 ]] && printf '  none\n'
 [[ $found -eq 0 && $noted -eq 1 ]] && printf '  no actionable unmanaged apps\n'
 
-# ------------------------------------------------- claude toolbox digest
-# claude-code/rules/toolbox.md is the always-in-context summary of this file: a
-# user-level claude rule, loaded into every session in every project. it is
-# hand-written on purpose — the usage guidance is the whole point, and no
-# generator produces it — so it is made *self-verifying* instead. an html comment
-# at the top carries the two name lists checked here; block comments are stripped
-# before the file reaches claude's context, so carrying them is free.
-#
-# the invariant this enforces, in both directions:
-#   every name it claims is present resolves, every name it claims is absent does
-#   not, and every declared formula is mentioned somewhere in it.
-# that is what makes it a verified view of the Brewfile rather than the kind of
-# hand-kept duplicate that drifted before.
-section "claude toolbox digest"
-TOOLBOX="$(dirname "$BREWFILE")/claude-code/rules/toolbox.md"
-if [[ ! -f "$TOOLBOX" ]]; then
-  printf '  \033[33m~ no toolbox.md at %s\033[0m — skipping\n' "$TOOLBOX"
-else
-  # a `verify-*:` key plus its two-space-indented continuation lines. awk, not
-  # sed: BSD sed has no portable multi-line range with this shape.
-  manifest() {
-    awk -v k="$1:" '$1==k {f=1; $1=""; print; next} f && /^  / {print; next} f {exit}' "$TOOLBOX" \
-      | tr -s '[:space:]' '\n' | grep -v '^$'
-  }
-  n=0
-  # present: `command -v` first, then `brew list` for formulae that put no
-  # same-named binary on $PATH (pam-reattach ships only a PAM module), then the
-  # uv shim directory.
-  # ⚠ the uv probe is not redundant with `command -v`: ~/.local/bin reaches $PATH
-  # only via fish/conf.d/uv.fish, so gdformat/gdlint resolve from a fish-launched
-  # shell and not from launchd, cron, or a Claude Code Bash call. without this the
-  # audit's verdict would depend on how it was invoked — the same failure class as
-  # the brew.env and npmrc fixes.
-  UV_BIN="$(uv tool dir --bin 2>/dev/null || echo "$HOME/.local/bin")"
-  while read -r c; do
-    [[ -z "$c" ]] && continue
-    command -v "$c" >/dev/null 2>&1 && continue
-    brew list --versions "$c" >/dev/null 2>&1 && continue
-    [[ -x "$UV_BIN/$c" ]] && continue
-    printf '  \033[31m- %s\033[0m  (toolbox.md claims it is present; it does not resolve)\n' "$c"
-    n=$((n + 1))
-  done < <(manifest verify-present)
-  # absent: the negative claims are load-bearing too — they stop an agent
-  # proposing a tool that is now installed, or avoiding one that is.
-  while read -r c; do
-    [[ -z "$c" ]] && continue
-    command -v "$c" >/dev/null 2>&1 || continue
-    printf '  \033[32m+ %s\033[0m  (toolbox.md claims it is absent; it is installed)\n' "$c"
-    n=$((n + 1))
-  done < <(manifest verify-absent)
-  # coverage: a declared package nobody documented is a tool claude will not reach
-  # for. npm and uv tools count — both are declared software like any formula.
-  while read -r f; do
-    [[ -z "$f" ]] && continue
-    grep -qwF -- "${f##*/}" "$TOOLBOX" && continue
-    printf '  \033[33m~ %s\033[0m — declared, but unmentioned in toolbox.md\n' "${f##*/}"
-    n=$((n + 1))
-  done < <(cat "$TMP/want-brew" "$TMP/want-npm" "$TMP/want-uv")
-  [[ $n -eq 0 ]] && printf '  in sync\n'
-fi
-
 # ------------------------------------------------------------ validation
 section "validation"
 if brew bundle check --file="$BREWFILE" >/dev/null 2>&1; then

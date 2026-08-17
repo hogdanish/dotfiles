@@ -31,8 +31,8 @@ a listed file to save tokens. Each is 287–613 lines; the cost is small and kno
 | **Anything behaving impossibly** | **`caveats.md` first** |
 
 Writing a `conf.d/<tool>.fish` snippet, or an abbr/function wrapping a command? **Confirm the tool is
-on this machine first** — the `toolbox` rule, then `~/.config/Brewfile`. Three abbreviations in
-`abbrs.fish` were dead for months because this was skipped.
+on this machine first** — check `~/.config/Brewfile`. Three abbreviations in `abbrs.fish` were dead
+for months because this was skipped.
 
 Does it prompt, ask, list, wait, or print for a human? **Read
 `~/.config/claude-code/skills/gum/SKILL.md` too** — see the `interactive-scripts` rule. ⚠ In fish, `(gum style …)` splits on newlines and shreds a multi-line

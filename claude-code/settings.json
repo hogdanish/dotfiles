@@ -2,7 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "sonnet",
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
@@ -18,16 +18,6 @@
     }
   ],
   "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-notify attention \"$(jq -r '.message // \"Claude Code is waiting on you\"')\""
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -39,6 +29,28 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/claude-code/hooks/caffeinate.sh start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/claude-code/hooks/caffeinate.sh end",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
@@ -46,7 +58,7 @@
     "firecrawl@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
-    "cloudflare@cloudflare": true,
+    "cloudflare@cloudflare": false,
     "clangd-lsp@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
@@ -68,6 +80,7 @@
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
+  "remoteControlAtStartup": true,
   "additionalDirectories": [
     "/Users/ethan/.config"
   ]

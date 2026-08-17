@@ -34,24 +34,21 @@ from version control — `scripts/audit-config.fish` checks for exactly this.
 
 **`rules/`** — user-level rules, loaded in every project on this machine. Path-scoped (cost
 nothing until a matching file is touched): `gdscript.md` (`**/*.gd`), `fish.md` (`**/*.fish`),
-`interactive-scripts.md` (script files — the gum trigger, scoped 2026-08-16). Unscoped
-(always loaded, kept lean on purpose): `toolbox.md` (the CLI-toolbox core: the manifest comment
-`brewfile-audit.sh` checks, the better-defaults table, the Context7 mandate, traps, not-installed
-list; per-domain depth moved to the `toolbox` skill 2026-08-16), `context-architecture.md` (the
-CLAUDE.md/rules/skills/references doctrine for any repo), `notify.md` (`cc-notify`). ⚠ Adding or
-removing a CLI formula means updating the `toolbox.md` manifest *and* the `toolbox` skill in the
-same change. ⚠ Unlike skills, `rules/` is symlinked **as a directory** — a new rule needs no
-`link-claude.fish` run.
+`interactive-scripts.md` (script files — the gum trigger, scoped 2026-08-16). Unscoped (always
+loaded, kept lean on purpose): `notify.md` (when to reach Ethan outside the terminal via the
+`PushNotification` tool). ⚠ Unlike skills, `rules/` is symlinked **as a directory** — a new rule
+needs no `link-claude.fish` run.
 
-**`hooks/`** — user-level hooks. `fish-validate.sh` is the only one, wired from
-`claude-code/settings.json` by absolute path, so it fires on every `.fish` write anywhere. ⚠ It is
-not symlinked and must not be. `brewfile-validate.sh` and `toolbox-nudge.sh` stay project-scoped in
-`.claude/hooks/`.
+**`hooks/`** — user-level hooks, wired from `claude-code/settings.json` by absolute path, so they
+fire in every project. `fish-validate.sh` fires on every `.fish` write anywhere; `caffeinate.sh`
+fires on `SessionStart`/`SessionEnd` to keep the machine awake for as long as any Claude Code
+session is running, and lets it sleep again once the last one ends. ⚠ Neither is symlinked and
+neither must be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`.
 
 **`skills/`** — user-level skills, loaded everywhere on this machine (unlike `.claude/skills/`,
-which loads only inside this repo): `godot`, `toolbox` (split out of the toolbox rule 2026-08-16),
-`fish`, `gum`, `linode-cli`, `orbstack`. The `prose` skill and rule were deleted 2026-08-16.
-⚠ **Five of these set `disable-model-invocation: true`** (all but `godot`), so they never appear in
+which loads only inside this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`. The `prose`
+skill and rule were deleted 2026-08-16; the `toolbox` skill and rule were deleted 2026-08-17.
+⚠ **Four of these set `disable-model-invocation: true`** (all but `godot`), so they never appear in
 the skill listing: the always-on CLAUDE.md/rule pointers instruct a direct Read of
 `claude-code/skills/<name>/SKILL.md` instead. Keep that scheme — it is the context-cost design, not
 an accident. `fish` and `gum` are user-level because neither is repo-specific, even though their
@@ -65,8 +62,7 @@ to appear the link is broken, not unsupported. `audit-config.fish` fails on a da
 plugin payload sits in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) and only the enable flag
 lands in the tracked `claude-code/settings.json` — `claude plugin install` writes that flag through
 the symlink, so the declaration version-controls itself. Hand-authoring a copy of a vendor skill
-goes stale (the brief `firecrawl` copy proved it). The one thing a plugin cannot carry is
-machine-specific contradiction of its own docs — those overrides live in the `toolbox` skill.
+goes stale (the brief `firecrawl` copy proved it).
 
 **`codex/`** holds only Codex-specific TOML. Codex does not separate config from state, so live
 `~/.codex/` stays untracked; its `config.toml` and `*.config.toml` profiles link back into

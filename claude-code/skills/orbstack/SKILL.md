@@ -9,8 +9,7 @@ disable-model-invocation: true
 OrbStack (cask `orbstack`, `Brewfile:130`) is the sole container/VM backend on this machine —
 Docker Desktop was uninstalled 2026-08-06 in its favor. It replaces Docker Desktop's daemon *and*
 adds something Docker Desktop never had: `orb create`, arbitrary full Linux VMs, not just
-containers. `claude-code/rules/toolbox.md`'s Containers entry is the always-loaded one-paragraph
-digest (why OrbStack over Docker Desktop / Apple's `container` CLI); this skill is the CLI depth.
+containers.
 
 ## Container vs. machine — pick the right primitive
 

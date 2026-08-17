@@ -25,7 +25,7 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
 
 ## Hidden skills — load by Reading the file
 
-`fish`, `gum`, `toolbox`, `linode-cli`, and `orbstack` set `disable-model-invocation`, so they never
+`fish`, `gum`, `linode-cli`, and `orbstack` set `disable-model-invocation`, so they never
 appear in your skill listing. When one applies, load it by **Reading
 `~/.config/claude-code/skills/<name>/SKILL.md`**:
 
@@ -35,7 +35,6 @@ appear in your skill listing. When one applies, load it by **Reading
   Load it before writing a prompt, menu, spinner, table, or status output; never hand-roll `read`,
   `select`, `tput`, or raw ANSI. The path-scoped `interactive-scripts` rule has the rules that hold
   even unloaded.
-- **toolbox** — per-domain depth behind the always-on `toolbox` rule.
 - **linode-cli** — before any Linode CLI use. ⚠ Linode is a paid control plane: never create,
   clone, resize, rebuild, or enable a billable Akamai Cloud resource without Ethan's explicit
   permission in the current request. Read-only inspection is allowed.
@@ -48,8 +47,7 @@ appear in your skill listing. When one applies, load it by **Reading
   allowlist: nothing is tracked until a `!` line names it. `~/.config/.claude/CLAUDE.md` (loads
   when working there) carries the full guidance — read it before changing anything under that path.
 - `~/.config/Brewfile` — the full software inventory, GUI apps included, one line of *why* per
-  entry. Read it before recommending a new tool or when the `toolbox` rule does not cover
-  something.
+  entry. Read it before recommending a new tool.
 - `/Users/ethan/.config/home/` — files whose consumers hardcode a `$HOME` path (`zshenv`, `zshrc`,
   `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf`), symlinked into `$HOME`. ⚠ Edit them here, not
   at the `$HOME` path.
