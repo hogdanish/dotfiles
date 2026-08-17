@@ -1,6 +1,6 @@
 ---
 name: godot
-description: Load whenever working with the Godot game engine or its files (.gd, .gdshader, .tscn, .scn, .tres, .res, .import, .godot, project.godot, .gdextension) — writing or editing GDScript, building/editing scenes & nodes, shaders, resources, project settings, autoloads, input maps, or driving the Godot editor via the Godot MCP. Activates on any mention of Godot, GDScript, scene trees, nodes, signals, or Godot addons.
+description: Godot engine work — GDScript, scenes and nodes, shaders, resources, project settings, and driving the editor through the Godot MCP servers. Load for any Godot file (.gd, .gdshader, .tscn, .tres, project.godot, .gdextension) or any mention of Godot, nodes, or signals.
 ---
 
 Apply these conventions to all Godot work. Be autonomous: make sound architectural calls on your own (inheritance, scene-tree shape, filesystem layout, component-based/DRY design) rather than dumping logic into the nearest script — then disclose the decisions and reasoning in your reply.

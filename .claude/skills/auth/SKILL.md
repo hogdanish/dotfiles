@@ -1,6 +1,6 @@
 ---
 name: auth
-description: "Authentication, secrets, and credentials on this machine: 1Password and op, op:// references, Environments, shell plugins, SSH agent and signing, GnuPG, keychain, Touch ID, sudo, and PAM. Load for any secret, token, .env, SSH/GPG config, commit signing, authentication prompt, plaintext-secret audit, or config that consumes a credential. Owns credential storage and retrieval; fish syntax belongs to fish and package installation to brewfile."
+description: "Credentials on this machine: 1Password and op, op:// references, Environments, shell plugins, SSH agent and commit signing, GnuPG, Touch ID, sudo, and PAM. Load for any secret, token, .env, SSH/GPG config, or config that consumes a credential."
 user-invocable: false
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash(op*), Bash(gpg*), Bash(gpgconf*), Bash(ssh*), Bash(ssh-add*), Bash(ssh-keygen*), Bash(security find-generic-password*), Bash(defaults read*), Bash(git config*), Bash(ls*), Bash(type*), Bash(command -v*)
 ---
@@ -79,15 +79,18 @@ Three independent chains, in descending order of how much of the machine they ca
 
 ⚠ **Per-MCP-server `op run` wrapping is impossible for plugin-bundled servers.** The `github` plugin
 ships an **HTTP** MCP server whose config interpolates `Authorization: Bearer
-${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *claude process environment*; the `context7` plugin's stdio
-server reads `CONTEXT7_API_KEY` the same way. Neither config is ours to rewrite. So the `claude`
-process itself must carry the values.
+${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *Claude process environment*. Codex's direct Context7 MCP
+server reads `CONTEXT7_API_KEY` from the Codex process environment. Claude's Context7 connector is
+authenticated server-side and needs no local token. The agent process must carry any locally consumed
+values because the relevant server config is not ours to wrap.
 
 The mechanism is a **1Password Environment** resolved at launch by a fish wrapper:
 
 ```fish
 # ~/.config/fish/functions/wrappers/claude.fish
-op run --no-masking --environment $__op_claude_env -- claude $argv
+op run --no-masking --environment $__op_claude_env -- \
+    /opt/homebrew/bin/bun "$XDG_CONFIG_HOME/scripts/internal/agent-credential-broker.mjs" \
+    supervise claude $argv
 ```
 
 One authorization prompt per session; nothing on disk; variables edited in the 1Password GUI. The
@@ -97,29 +100,47 @@ Codex uses the same Environment for tools it launches, while retaining its own C
 
 ```fish
 # ~/.config/fish/functions/wrappers/codex.fish
-op run --no-masking --environment $__op_codex_env -- codex $argv
+op run --no-masking --environment $__op_codex_env -- \
+    /opt/homebrew/bin/bun "$XDG_CONFIG_HOME/scripts/internal/agent-credential-broker.mjs" \
+    supervise codex $argv
 ```
 
 The Linode PAT remains one 1Password item rather than being copied into that Environment.
 `conf.d/op.fish` stores only its `op://` reference. Both launch wrappers export it as
-`LINODE_CLI_TOKEN`, and Claude Code shells inherit the resolved value, so bare `linode-cli` works
-there without an MCP. Humans use `functions/wrappers/linode-cli.fish`, which delegates to the
-installed 1Password shell plugin.
+`LINODE_CLI_TOKEN`. Humans use `functions/wrappers/linode-cli.fish`, which delegates to the installed
+1Password shell plugin.
 
-⚠ **Codex-only Linode CLI workaround, observed with Codex CLI 0.147.0 on 2026-08-08.** Codex tool
-subprocesses had no `LINODE_CLI_TOKEN`, even with `shell_environment_policy.inherit=all` and
-`shell_environment_policy.ignore_default_excludes=true`. Bare `linode-cli` returned `401 Invalid
-Token`. Run it through the existing plugin in interactive Fish and give the process a PTY so
-1Password can request Touch ID:
+⚠ **Agent CLI authentication, verified with Codex CLI 0.147.0 and Claude Code 2.1.232 on
+2026-08-14.** The launch wrappers start `scripts/internal/agent-credential-broker.mjs` inside the
+initial `op run`. The broker keeps the resolved Linode and scoped Cloudflare tokens in memory,
+removes them from the agent environment, and exposes only a mode-0600 Unix socket. Session-local
+`linode-cli` and `cf` shims forward arguments to the official binaries through that socket.
 
 ```sh
-fish -ic 'op plugin run -- linode-cli linodes view 102470771 --json'
+linode-cli linodes view 102470771 --json
+cf zones list --name hogdani.sh
 ```
 
-Replace only the Linode CLI arguments. Do not use this fallback in Claude Code, where bare
-`linode-cli` remains the normal path. `claude --infra` and `codex --infra` additionally export the
-same reference as `LINODE_API_TOKEN` for the pinned `instances` MCP server, but that separate path
-does not repair the Codex CLI subprocess environment.
+The one launch-time `op run` may request Touch ID. Neither CLI calls `op` again during that agent
+session, so 1Password's ten-minute CLI idle expiry does not interrupt long work. The socket and
+broker disappear when the agent exits; no resolved credential is written to disk or exposed to the
+agent environment. The third-party Linode MCP and its `LINODE_API_TOKEN` path were removed.
+
+The two `cg-test-ord-01` SSH hosts use a mode-0600 OpenSSH control socket under
+`$XDG_CACHE_HOME/ssh/control` with `ControlPersist 12h`. The first connection may need 1Password SSH
+approval; later connections reuse that authenticated transport without another key-signing request.
+
+The Cloudflare MCP uses its own OAuth login. Inside a wrapped agent session, bare `cf` uses the
+in-memory broker. Outside one, inject the scoped DNS token from 1Password for one command only:
+
+```sh
+env CLOUDFLARE_API_TOKEN='op://Development/cloudflare commongrounds acme/credential' \
+  op run -- cf zones list --name hogdani.sh
+```
+
+Do not export the resolved token into shell state. With `cf` 0.6.0, `cf auth whoami` reports
+`tokenValid: false` for this scoped token even though token verification and an authenticated zone
+read succeed. Test the intended read operation instead of treating `whoami` as authoritative.
 
 ⚠ **`GH_TOKEN` and `GITHUB_PERSONAL_ACCESS_TOKEN` are both required** and must hold the same value:
 `gh` reads the former, the GitHub MCP plugin interpolates the latter. That is not a duplication bug.

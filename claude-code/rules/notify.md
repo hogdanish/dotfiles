@@ -1,35 +1,24 @@
 # Reaching Ethan outside the terminal (`cc-notify`)
 
-Ethan multitasks while you work, so the terminal is often not on screen. `cc-notify` is the one
-channel that reaches him anyway: a banner **plus** an `afplay` chime that no Focus mode can suppress.
+Ethan multitasks while you work. `cc-notify` (self-authored, `~/.config/claude-code/bin/`, on
+`$PATH`) reaches him anyway: a banner plus an `afplay` chime no Focus mode can suppress. Do not
+hand-roll `osascript display notification`.
 
 ```bash
 cc-notify hold      "Running a benchmark sweep" "~4 min"   # before: don't touch the machine
 cc-notify clear     "Benchmark done"                        # after: free to multitask again
-cc-notify attention "Godot editor needs a manual restart"   # I'm stuck and only you can unstick me
+cc-notify attention "Godot editor needs a manual restart"   # blocked on a physical act only he can do
 ```
 
-`hold` and `clear` are a **pair** — every `hold` gets a `clear`, including on the failure path, or he
-stays frozen waiting for an all-clear that never comes. Keep messages to one short line; put duration
-or the specific ask in the optional third argument.
+- `hold` fires before work that ordinary use of the machine would corrupt: benchmarks and
+  frame-timing runs, focused-window or input injection, screen/audio capture, a long
+  uninterruptible build. `hold`/`clear` are a **pair** — every `hold` gets a `clear`, on the
+  failure path too, or he stays frozen waiting. One `hold` covers a whole batch, not one per run.
+- `attention` fires when the session is blocked on a physical act only he can perform (restart an
+  app, plug something in, approve out-of-band). Say the same thing in the terminal as well.
+- Keep messages to one short line; duration or the specific ask goes in the third argument.
 
-## When it fires
-
-- **`hold` / `clear`** — you are about to start something whose result is corrupted by ordinary use of
-  the machine: benchmarks and frame-timing runs, anything needing a window focused or input injected,
-  screen/audio capture, a long uninterruptible build. Announce *before*, all-clear *after*.
-- **`attention`** — the session is blocked on a physical act only he can perform (restart an app, fix a
-  dead MCP server, plug something in, approve out-of-band). Fire it, then keep going if you can; do
-  **not** treat the notification as a substitute for saying the same thing in the terminal.
-
-## When it does NOT fire
-
-⚠ **The default is silence.** This is an interrupt, and an interrupt that arrives when nothing was at
-stake trains him to ignore the one that mattered. Never send one for: finishing a normal task, asking a
-question you could equally ask in the terminal, progress updates, a summary, a "heads up" about
-something that will still be true in ten minutes, or anything he'd learn by simply scrolling up.
-
-The test is not *"is this important?"* — it's **"does he lose something real if he reads this five
-minutes late?"** If no, it belongs in the terminal like everything else.
-
-Do not stack notifications: one `hold` covers a whole batch of runs, not one per run.
+⚠ **The default is silence.** An interrupt that arrives when nothing was at stake trains him to
+ignore the one that matters. Never notify for: a finished task, a question, progress, a summary, or
+anything he can learn by scrolling up. The test is not "is this important?" — it is **"does he lose
+something real if he reads this five minutes late?"** If no, it belongs in the terminal.

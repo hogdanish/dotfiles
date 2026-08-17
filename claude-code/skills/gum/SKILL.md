@@ -1,15 +1,15 @@
 ---
 name: gum
-description: "Gum 0.17.0 for interactive and formatted terminal scripts in fish, bash or zsh: all 13 commands with every flag, GUM_* variables, the stdout/stderr and exit-code contract, TTY behaviour, layout, glamour Markdown, laramie theming, and shell piping traps. Load before writing any prompt, confirmation, menu, file picker, spinner, banner, table, or human-facing status output, and for gum theming or pipeline failures. Owns gum usage and styling; fish owns shell syntax, auth owns credentials."
-user-invocable: false
+description: "Gum 0.17.0 for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human; the interactive-scripts rule is the trigger."
+disable-model-invocation: true
 ---
 
 # gum — glamorous shell scripts
 
 **gum 0.17.0** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal formatting
 on this machine, in **any** directory and in **any** shell — fish, bash or zsh. It is a hard
-dependency here, not a nicety: `claude-code/rules/interactive-scripts.md` is the always-on rule that
-makes it the default for anything a human reads or answers.
+dependency here, not a nicety: `claude-code/rules/interactive-scripts.md` is the path-scoped rule
+that makes it the default for anything a human reads or answers.
 
 **Reading floor.** Writing a gum command you have not written before → read
 [commands.md](references/commands.md). Composing more than one gum call into a script or a layout →

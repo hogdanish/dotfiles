@@ -1,4 +1,0 @@
-interface:
-  display_name: "Prose"
-  short_description: "Write and audit clear Markdown documentation"
-  default_prompt: "Use $prose to revise this Markdown documentation without losing facts."

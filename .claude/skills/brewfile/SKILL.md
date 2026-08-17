@@ -1,6 +1,6 @@
 ---
 name: brewfile
-description: "Maintain the repo-root Brewfile: audit installed formulae, casks, taps, and mas apps; classify drift; write entries in the house layout; use brew bundle options; and validate changes. Load when adding or removing software, syncing or auditing the Brewfile, fixing bundle checks, or choosing tap, trusted, greedy, args, or versioned-token settings. Owns Brewfile content and brew bundle; fish owns Homebrew shell setup."
+description: "Maintain the repo-root Brewfile, the software inventory: audit drift, write entries in the house layout, brew bundle options, validation. Load when installing or removing software or auditing the Brewfile."
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash(brew*), Bash(mas*), Bash(jq*), Bash(ruby*), Bash(.claude/skills/brewfile/scripts/*), Bash(ls*), Bash(comm*), Bash(sort*), Bash(grep*)
 ---
 

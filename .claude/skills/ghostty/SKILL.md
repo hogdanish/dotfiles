@@ -1,6 +1,6 @@
 ---
 name: ghostty
-description: "Ghostty 1.3.2-main on this machine: configuration, keybinds and actions, CLI, shell integration, xterm-ghostty terminfo, themes, AppleScript, shaders, and VT control sequences. Load for ~/.config/ghostty, terminal appearance, fonts, windows, splits, tabs, clipboard, scrollback, keybinds, Ghostty CLI, TERM/terminfo, TUI rendering, prompt marking, or cwd inheritance. Owns Ghostty; fish syntax belongs to fish and credential handling to auth."
+description: "Ghostty 1.3.2-main: configuration, keybinds and actions, CLI, shell integration, xterm-ghostty terminfo, themes, AppleScript, and VT sequences. Load for ~/.config/ghostty, terminal appearance, fonts, keybinds, splits, or TERM/terminfo issues."
 ---
 
 # Ghostty

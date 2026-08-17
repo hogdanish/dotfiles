@@ -1,6 +1,7 @@
 ---
 name: fish
-description: "Fish 4.8.1 on this machine: house style, language, builtins, variables, functions, scripts, completions, abbreviations, key bindings, prompt, theming, startup cost, and verified caveats. Load before writing or editing any .fish file in any directory, translating bash or zsh to fish, debugging fish behaviour or startup time, or changing ~/.config/fish. Owns fish syntax and style everywhere; gum owns human-facing prompts and output, laramie owns colour values."
+description: "Fish 4.8.1 on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work; the path-scoped fish rule is the trigger."
+disable-model-invocation: true
 ---
 
 # Fish shell
@@ -40,8 +41,9 @@ completion and a standalone script.
 ⚠ Quote for **arity**, not safety: `test -n "$x"`. Unquoted, an unset variable makes `test` see a lone
 `-n` and silently return **true**.
 
-⚠ Does it prompt, ask, list, wait, or print for a human? **Load the `gum` skill** — gum is the house
-default for every one of those, and `interactive-scripts.md` is the always-on rule that says so. ⚠ In
+⚠ Does it prompt, ask, list, wait, or print for a human? **Read
+`~/.config/claude-code/skills/gum/SKILL.md`** — gum is the house default for every one of those, and
+the path-scoped `interactive-scripts.md` rule says so. ⚠ In
 fish, `(gum style …)` splits on newlines and shreds a multi-line block; pipe through `string collect`
 *inside* the substitution.
 

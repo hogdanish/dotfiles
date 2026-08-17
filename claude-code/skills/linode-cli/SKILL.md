@@ -1,13 +1,13 @@
 ---
 name: linode-cli
-description: Operate Akamai Cloud through the official linode-cli, including Linodes, networking, firewalls, VPCs, LKE, databases, Object Storage, DNS, NodeBalancers, volumes, account, billing, users, monitoring, and bundled plugins. Use for any Linode/Akamai Cloud inspection or CLI task when the Linode MCP is absent or unnecessary. Treat paid-resource operations as explicit-consent-only.
+description: "Operate Akamai Cloud through the official linode-cli: the full command surface, safety workflow, and paid-resource guardrails. Load before any Linode/Akamai Cloud CLI task."
+disable-model-invocation: true
 ---
 
 # Operate Linode safely
 
-Use `linode-cli` for the complete Akamai Cloud control plane. Prefer it over the third-party Linode
-MCP for quick inspection, unsupported MCP categories, scripts, and exact API coverage. Use SSH for
-work inside an instance.
+Use `linode-cli` for the complete Akamai Cloud control plane. It is the only Linode control-plane
+client exposed to agents on this machine. Use SSH for work inside an instance.
 
 ## Non-negotiable safety rules
 
@@ -52,25 +52,24 @@ work inside an instance.
 
 ## Machine-specific authentication
 
-Claude Code inherits the resolved `LINODE_CLI_TOKEN` from its 1Password launch wrapper. Use bare
-`linode-cli` commands there. Do not apply the following Codex workaround to Claude Code.
-
-⚠ **Codex-only workaround, observed with Codex CLI 0.147.0 on 2026-08-08.** Codex tool subprocesses
-had no `LINODE_CLI_TOKEN`, even when Codex was launched with `shell_environment_policy.inherit=all`
-and `shell_environment_policy.ignore_default_excludes=true`. Bare `linode-cli` then used unusable
-local profile state and returned `401 Invalid Token`. Run the command through the installed
-1Password shell plugin in interactive Fish instead:
+⚠ **Agent authentication path, verified with Codex CLI 0.147.0 and Claude Code 2.1.232 on
+2026-08-14.** The Fish launch wrappers start a session-scoped credential broker: one launch-time
+`op run` resolves the PAT, the broker keeps it only in memory, and a session-local `linode-cli` shim
+forwards arguments to `/opt/homebrew/bin/linode-cli` over a mode-0600 Unix socket. The wrapper removes
+the resolved credential from the agent environment before it starts.
 
 ```sh
-fish -ic 'op plugin run -- linode-cli linodes view 102470771 --json'
+linode-cli linodes view 102470771 --json
 ```
 
-Give the process a PTY so 1Password can request Touch ID. Replace only the arguments after
-`linode-cli` for other commands. The plugin sends the PAT directly to the CLI; it does not print or
-persist it. This is an observed Codex defect, not the expected result of Codex's environment-policy
-settings. `codex --infra` does not fix it; the optional Linode MCP uses a separate variable and is
-not part of this fallback.
+Use bare `linode-cli` inside a normally wrapped Claude Code or Codex session. It does not call `op`
+again, so 1Password's CLI-session expiry cannot interrupt the agent. If the shim reports that its
+session socket is unavailable, restart the agent through its Fish wrapper; do not bypass the broker
+or run `configure`. The third-party Linode MCP was removed.
 
 Interactive Fish users call the normal `linode-cli` wrapper, which uses the same 1Password shell
 plugin. Never run `configure`, request a PAT, or use `--debug` to work around an authentication
 failure.
+
+SSH to `cg-test-ord-01` uses a host-scoped OpenSSH control connection that persists for 12 hours.
+The first connection can require 1Password SSH approval; later commands reuse the existing transport.

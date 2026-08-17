@@ -11,8 +11,9 @@ depend on the skill having been loaded.
 
 ## Load the skill, and read enough of it
 
-Writing or editing fish without reading the skill's `references/style-guide.md` is not acceptable. It
-is 388 lines and it is law.
+The skill is hidden from the skill listing — load it by **Reading
+`~/.config/claude-code/skills/fish/SKILL.md`**. Writing or editing fish without reading its
+`references/style-guide.md` is not acceptable. It is 388 lines and it is law.
 
 **Then read every reference in the row matching your task.** These are floors, not menus — do not skip
 a listed file to save tokens. Each is 287–613 lines; the cost is small and known.
@@ -33,8 +34,8 @@ Writing a `conf.d/<tool>.fish` snippet, or an abbr/function wrapping a command? 
 on this machine first** — the `toolbox` rule, then `~/.config/Brewfile`. Three abbreviations in
 `abbrs.fish` were dead for months because this was skipped.
 
-Does it prompt, ask, list, wait, or print for a human? **Load the `gum` skill too** — see the
-`interactive-scripts` rule. ⚠ In fish, `(gum style …)` splits on newlines and shreds a multi-line
+Does it prompt, ask, list, wait, or print for a human? **Read
+`~/.config/claude-code/skills/gum/SKILL.md` too** — see the `interactive-scripts` rule. ⚠ In fish, `(gum style …)` splits on newlines and shreds a multi-line
 block; pipe through `string collect` inside the substitution.
 
 ## Non-negotiable
