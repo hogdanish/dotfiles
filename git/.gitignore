@@ -27,3 +27,6 @@ Icon?
 *.p12
 id_*
 !id_*.pub
+
+**/.claude/settings.local.json
+
