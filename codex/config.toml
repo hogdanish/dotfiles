@@ -131,7 +131,7 @@ preventSleepWhileRunning = true
 show-context-window-usage = true
 followUpQueueMode = "queue"
 enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "max"]
-git-commit-instructions = "Use the conventional commits specification"
+git-commit-instructions = "Use the conventional commits specification. Never add attribution: no Co-Authored-By trailer, no 'Generated with' footer, and no agent or model name in a commit message, branch name, PR title or body."
 
 [memories]
 generate_memories = true

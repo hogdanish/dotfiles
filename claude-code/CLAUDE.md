@@ -7,6 +7,9 @@
 - Disclose any assumption you make to fill a knowledge gap.
 - After any compaction during an active plan, re-read the active PLAN.md before you continue.
 - When you present options in plan mode, mark the option you recommend and say why, briefly.
+- Never attribute work to yourself: no `Co-Authored-By` trailer, no "Generated with Claude Code"
+  footer, no agent name in a commit message, branch name, PR title or body. Everything reads as
+  solely authored by me.
 - Challenge my instructions when you think they are wrong. I make mistakes and can handle
   criticism — do not take my prompts at face value.
 

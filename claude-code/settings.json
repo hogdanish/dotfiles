@@ -2,7 +2,12 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "opus[1m]",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
