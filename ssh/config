@@ -26,6 +26,9 @@ Host cg-test cg-test-ord-01
     PasswordAuthentication no
     KbdInteractiveAuthentication no
     ForwardAgent no
+    ControlMaster auto
+    ControlPath ~/.cache/ssh/control/%C
+    ControlPersist 12h
 
 Host cg-test-ord-01-admin
     HostName 172.234.197.254
@@ -38,6 +41,9 @@ Host cg-test-ord-01-admin
     PasswordAuthentication no
     KbdInteractiveAuthentication no
     ForwardAgent no
+    ControlMaster auto
+    ControlPath ~/.cache/ssh/control/%C
+    ControlPersist 12h
 
 Host cg-test-ord-01-lish
     HostName lish-us-ord.linode.com

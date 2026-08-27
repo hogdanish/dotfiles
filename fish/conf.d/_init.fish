@@ -44,6 +44,10 @@ set -l wanted $XDG_CONFIG_HOME $XDG_DATA_HOME $XDG_STATE_HOME $XDG_CACHE_HOME \
 set -l missing (path filter -vd $wanted)
 test -n "$missing"; and mkdir -p $missing
 
+# authenticated multiplexed ssh connections live here; keep other local users out of the directory.
+set -l ssh_control_dir $XDG_CACHE_HOME/ssh/control
+test -d $ssh_control_dir; or mkdir -m 700 -p $ssh_control_dir
+
 # core environment
 # ⚠ VISUAL's `--wait` is load-bearing: `edit_command_buffer` (alt-e) and `funced` return
 # immediately without it, and the buffer is never updated.
