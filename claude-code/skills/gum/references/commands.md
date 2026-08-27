@@ -1,6 +1,6 @@
 # gum — complete command and flag reference
 
-Every flag, default, environment variable and enum for **gum 0.17.0** (`/opt/homebrew/bin/gum`, the
+Every flag, default, environment variable and enum for **gum 0.17.x** (`/opt/homebrew/bin/gum`, the
 current upstream release). Dumped from `gum <cmd> --help` on this machine and cross-checked against the
 `v0.17.0` source, so the defaults below are the ones you will actually get.
 

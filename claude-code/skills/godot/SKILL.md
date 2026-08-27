@@ -7,7 +7,7 @@ Apply these conventions to all Godot work. Be autonomous: make sound architectur
 
 ## Rules
 
-- **Versioning**: We run the current **release build** — `4.7.1.stable` as of 2026-08-10 — and the 4.x surface moves fast. Pin lookups to the engine: Context7 **`/websites/godotengine_en_4_7`**. ⚠ Bump that ID when the engine's minor version changes; `/godotengine/godot-docs` tracks `master` and describes a build we do not run. Do NOT trust training data for 4.x — it skews to 3.x and early 4.x.
+- **Versioning**: We run the current **4.7.x release build** (`godot --version` for the exact one) and the 4.x surface moves fast. Pin lookups to the engine: Context7 **`/websites/godotengine_en_4_7`**. ⚠ Bump that ID when the engine's minor version changes; `/godotengine/godot-docs` tracks `master` and describes a build we do not run. Do NOT trust training data for 4.x — it skews to 3.x and early 4.x.
 - **When to look something up** — do not gauge your own confidence; it is not reliable, and it is highest exactly where the training data is oldest. Use the split instead:
   - **Shape** (does this method exist, what arguments, what return type) — the LSP catches this for free, so do not look it up first. **Guess at most once.** The first `get_diagnostics` rejection of an engine symbol spends a Context7 query, never a second guess and never a third.
   - **Semantics** (when a signal fires, node lifecycle and `_ready`/`_process` order, what a subsystem actually does) — query **before** you design around it, once per subsystem per session. Nothing catches a wrong mental model here: the code compiles, runs, and is still wrong. Physics and interpolation, navigation, multiplayer sync, rendering and input are the recurring cases.

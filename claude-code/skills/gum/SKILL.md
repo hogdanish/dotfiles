@@ -1,11 +1,11 @@
 ---
 name: gum
-description: "Gum 0.17.0 for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human; the interactive-scripts rule is the trigger."
+description: "Gum 0.17.x for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human; the interactive-scripts rule is the trigger."
 ---
 
 # gum — glamorous shell scripts
 
-**gum 0.17.0** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal formatting
+**gum 0.17.x** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal formatting
 on this machine, in **any** directory and in **any** shell — fish, bash or zsh. It is a hard
 dependency here, not a nicety: `claude-code/rules/interactive-scripts.md` is the path-scoped rule
 that makes it the default for anything a human reads or answers.
@@ -169,7 +169,7 @@ the current values; [recipes.md](references/recipes.md) §6 covers the rationale
 After `brew upgrade gum`, re-verify before trusting this skill:
 
 ```sh
-gum --version                                    # expected: 0.17.0
+gum --version                                    # expected: 0.17.x
 gum <cmd> --help                                 # flags/defaults for any command you doubt
 gum version-check '>= 0.17'                      # exit 0
 gum style --border double --padding '1 2' ok     # renders without a tty

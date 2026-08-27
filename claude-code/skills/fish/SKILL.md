@@ -1,11 +1,11 @@
 ---
 name: fish
-description: "Fish 4.8.1 on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work; the path-scoped fish rule is the trigger."
+description: "Fish 4.8.x on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work; the path-scoped fish rule is the trigger."
 ---
 
 # Fish shell
 
-fish **4.8.1** (`/opt/homebrew/bin/fish`) is the interactive shell on this machine and the default for
+fish **4.8.x** (`/opt/homebrew/bin/fish`) is the interactive shell on this machine and the default for
 any script a human runs. This skill covers **all** fish work in **any** directory — a script in a
 project, a one-off function, a port from bash, a debugging session — not only `~/.config/fish`.
 

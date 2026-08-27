@@ -1,6 +1,6 @@
 ---
 name: ghostty
-description: "Ghostty 1.3.2-main: configuration, keybinds and actions, CLI, shell integration, xterm-ghostty terminfo, themes, AppleScript, and VT sequences. Load for ~/.config/ghostty, terminal appearance, fonts, keybinds, splits, or TERM/terminfo issues."
+description: "Ghostty 1.3.x-main: configuration, keybinds and actions, CLI, shell integration, xterm-ghostty terminfo, themes, AppleScript, and VT sequences. Load for ~/.config/ghostty, terminal appearance, fonts, keybinds, splits, or TERM/terminfo issues."
 ---
 
 # Ghostty
