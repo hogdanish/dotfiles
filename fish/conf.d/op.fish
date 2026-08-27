@@ -24,7 +24,10 @@ set -g __op_claude_env uiba73phjvsgnivopa7bujlpbq
 set -g __op_codex_env uiba73phjvsgnivopa7bujlpbq
 
 # the linode shell plugin serves humans. agents cannot inherit fish functions, so their parent
-# wrappers export this reference for `op run` to resolve as the cli token. `--infra` additionally
-# exposes the same value to the mcp, whose large tool catalogue remains opt-in.
+# wrappers export this reference for `op run` to resolve as the cli token. there is no linode mcp;
+# the official cli is the only linode control-plane client exposed to agents.
 # the reference is a locator, not a credential; keep the resolved value out of shell state and files.
 set -g __op_linode_pat_ref 'op://Development/Linode PAT/token'
+
+# a zone-scoped dns token for the cloudflare cli fallback. the mcp keeps its own oauth login.
+set -g __op_cloudflare_api_ref 'op://Development/cloudflare commongrounds acme/credential'

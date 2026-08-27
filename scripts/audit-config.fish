@@ -73,7 +73,7 @@ function __check_secrets --description 'scan committed history for credentials'
 end
 
 function __check_home_links --description 'home/ files are still symlinks into the repo'
-    for link in ~/.zshrc ~/.zprofile ~/.ssh/config ~/.gnupg/gpg-agent.conf
+    for link in ~/.zshenv ~/.zshrc ~/.zprofile ~/.ssh/config ~/.gnupg/gpg-agent.conf
         if not test -e $link
             __fail "missing: $link — run scripts/link-home.fish"
         else if not test -L $link

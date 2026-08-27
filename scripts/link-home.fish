@@ -3,9 +3,10 @@
 # link-home.fish — symlink home/* into $HOME.
 #
 # a few configs cannot live under ~/.config because their consumer hardcodes a $HOME path
-# and has no XDG support: zsh reads ~/.zshrc, openssh reads ~/.ssh/config, gpg-agent reads
-# ~/.gnupg/gpg-agent.conf. they are tracked here as home/… and linked into place, so the
-# repo is a complete description of the machine rather than "everything except four files".
+# and has no XDG support: zsh reads ~/.zshenv and ~/.zshrc, openssh reads ~/.ssh/config,
+# and gpg-agent reads ~/.gnupg/gpg-agent.conf. they are tracked here as home/… and linked into
+# place, so the repo is a complete description of the machine rather than "everything except a few
+# files".
 #
 # idempotent: an existing correct link is left alone, a wrong one is reported, and a real
 # file is never overwritten without --force.
@@ -24,6 +25,7 @@ set -g DRY_RUN 0
 
 # source (relative to home/) → destination under $HOME
 set -g LINKS \
+    zshenv:.zshenv \
     zshrc:.zshrc \
     zprofile:.zprofile \
     ssh/config:.ssh/config \

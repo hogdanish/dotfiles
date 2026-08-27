@@ -1,14 +1,4 @@
 function claude --wraps claude --description 'claude code, with secrets from a 1password environment'
-    set -l claude_args
-    set -l infra_mode 0
-    for arg in $argv
-        if test "$arg" = --infra
-            set infra_mode 1
-        else
-            set -a claude_args "$arg"
-        end
-    end
-
     # why the whole process is wrapped rather than each mcp server:
     # the github plugin ships an HTTP mcp server whose config interpolates
     # `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *claude process environment*.
@@ -27,45 +17,40 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     #
     # both guards warn and fall through rather than refusing to run. launching claude without the
     # environment is degraded, but refusing to launch it at all would be worse.
-    if not type -q op
-        if test $infra_mode -eq 1
-            echo >&2 'claude: --infra requires op; refusing to start an unauthenticated infrastructure session'
-            return 127
+    #
+    # --infra re-enables the cloudflare plugin (skills + cloudflare-api mcp), which
+    # claude-code/settings.json disables by default to keep its weight out of ordinary
+    # sessions. a cli settings overlay outranks user settings. the credential broker
+    # below serves `cf` and `linode-cli` in every session either way.
+    set -l args
+    set -l overlay
+    for a in $argv
+        if test "$a" = --infra
+            set overlay --settings '{"enabledPlugins":{"cloudflare@cloudflare":true}}'
+        else
+            set -a args $a
         end
+    end
+
+    if not type -q op
         echo >&2 'claude: op is not installed — starting without 1password-provided secrets'
-        command claude $claude_args
+        command claude $overlay $args
         return
     end
     if not set -q __op_claude_env; or test -z "$__op_claude_env"
         echo >&2 'claude: $__op_claude_env is unset — starting WITHOUT the 1password environment.'
         echo >&2 '        set it in conf.d/op.fish: 1Password > Developer > View Environments >'
         echo >&2 '        Manage environment > Copy environment ID'
-        if test $infra_mode -eq 1
-            return 1
-        end
-        command claude $claude_args
+        command claude $overlay $args
         return
     end
 
-    # make the official cli available without loading linode's large mcp schema catalogue.
+    # resolve cli credentials once. the broker keeps them out of the agent and in memory.
     if set -q __op_linode_pat_ref; and test -n "$__op_linode_pat_ref"
-        set -lx LINODE_CLI_TOKEN "$__op_linode_pat_ref"
+        set -fx LINODE_CLI_TOKEN "$__op_linode_pat_ref"
     end
-
-    if test $infra_mode -eq 1
-        if not set -q __op_linode_pat_ref; or test -z "$__op_linode_pat_ref"
-            echo >&2 'claude: --infra requested, but $__op_linode_pat_ref is unset'
-            return 1
-        end
-        set -l linode_mcp_config "$XDG_CONFIG_HOME/claude-code/mcp/linode.json"
-        if not test -f "$linode_mcp_config"
-            echo >&2 "claude: linode mcp config is missing: $linode_mcp_config"
-            return 1
-        end
-        set -lx LINODE_API_TOKEN "$__op_linode_pat_ref"
-        # --mcp-config accepts multiple values greedily, so keep it last or it consumes the prompt
-        # and subcommand as more config paths.
-        set -a claude_args --mcp-config "$linode_mcp_config"
+    if set -q __op_cloudflare_api_ref; and test -n "$__op_cloudflare_api_ref"
+        set -fx CLOUDFLARE_API_TOKEN "$__op_cloudflare_api_ref"
     end
 
     # ⚠ --no-masking is REQUIRED here, not an optimization.
@@ -75,5 +60,7 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     #   "Input must be provided either through stdin or as a prompt argument when using --print"
     # stdin is left alone, which is why `op run -- /usr/bin/tty` reports a real device and looks
     # like a passing test. masking buys nothing here: claude never echoes these tokens.
-    op run --no-masking --environment $__op_claude_env -- claude $claude_args
+    op run --no-masking --environment $__op_claude_env -- \
+        /opt/homebrew/bin/bun "$XDG_CONFIG_HOME/scripts/internal/agent-credential-broker.mjs" \
+        supervise claude $overlay $args
 end

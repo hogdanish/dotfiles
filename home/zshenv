@@ -1,0 +1,11 @@
+# Codex and Claude Code strip or reorder PATH for tool shells. A wrapped agent session exports only
+# this broker socket, never its resolved credentials; functions beat zsh's cached binary lookup.
+if [[ -n "${AGENT_INFRA_BROKER_SOCKET:-}" ]]; then
+    linode-cli() {
+        command /Users/ethan/.config/scripts/agent-bin/linode-cli "$@"
+    }
+
+    cf() {
+        command /Users/ethan/.config/scripts/agent-bin/cf "$@"
+    }
+fi

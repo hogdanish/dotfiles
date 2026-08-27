@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /opt/homebrew/bin/bun /Users/ethan/.config/scripts/internal/agent-credential-broker.mjs call cf "$@"
