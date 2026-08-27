@@ -58,7 +58,7 @@ mouse-hide-while-typing = false
 cursor-style = bar
 cursor-click-to-move = true
 cursor-opacity = 0.8
-copy-on-select = clipboard
+copy-on-select = false
 undo-timeout = 30s
 
 # security
