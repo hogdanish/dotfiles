@@ -36,7 +36,11 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
   allowlist: nothing is tracked until a `!` line names it. `~/.config/.claude/CLAUDE.md` (loads
   when working there) carries the full guidance — read it before changing anything under that path.
 - `~/.config/Brewfile` — the full software inventory, GUI apps included, one line of *why* per
-  entry. Read it before recommending a new tool.
+  entry. **It is kept current and is authoritative**: every install and removal updates it in the
+  same change, and `.claude/skills/brewfile/scripts/brewfile-audit.sh` diffs it against the machine
+  in *both* directions, so nothing is installed-but-undeclared or declared-but-gone. Read it before
+  recommending a new tool, and trust it for what exists rather than surveying `brew list` yourself.
+  The one gap is by design: VS Code extensions and `bun`/`npm` project globals are tracked nowhere.
 - `/Users/ethan/.config/home/` — files whose consumers hardcode a `$HOME` path (`zshenv`, `zshrc`,
   `zprofile`, `ssh/config`, `gnupg/gpg-agent.conf`), symlinked into `$HOME`. ⚠ Edit them here, not
   at the `$HOME` path.

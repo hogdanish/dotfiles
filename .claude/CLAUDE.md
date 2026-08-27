@@ -88,8 +88,11 @@ tool**; it names every top-level entry that is neither tracked nor known junk.
 `Brewfile` is the **hand-maintained** software inventory, one terse line of *why* per entry.
 **Read it before configuring, recommending, or diagnosing a missing command.** ⚠ Never run
 `brew bundle dump --force` over it. The `brewfile` skill owns the file, the comment rules and
-Homebrew's own runtime config; `.claude/rules/machine-inventory.md` has the protocol and the ⚠ that
-it records *declared intent*, not verified state.
+Homebrew's own runtime config. **It is kept current in both directions** — installs and removals
+update it in the same change, and `brewfile-audit.sh` proves nothing is installed-but-undeclared or
+declared-but-gone — so trust it for what exists rather than surveying `brew list`.
+`.claude/rules/machine-inventory.md` has the protocol and the ⚠ that being *declared* still is not
+proof a given binary resolves today.
 
 **Homebrew updates itself unattended** — the `domt4/autoupdate` tap on a launchd timer, every 12 h,
 AC power only, notifying only on failure (`brew autoupdate logs`). ⚠ It runs **without `--sudo`**,
