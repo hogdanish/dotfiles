@@ -20,7 +20,10 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
   hardcoded.
 - Global installs: `brew` → `mas` → `bun`/`uv`/language-specific → manual. Never `pip` for global
   Python packages.
-- Scripts a human runs are fish; bash when more appropriate; zsh as last resort.
+- **Shell** scripts a human runs are fish; bash when more appropriate; zsh as last resort. This
+  ranks shell dialects — it is not a preference for shell over a real program. A project's own
+  CLI, TUI, or utility is written in that project's language (Rust, Go, whatever it already
+  uses); reach for a shell script for glue, not for a tool.
 - ⚠ Akamai Cloud is a **paid** control plane: never create, clone, resize, rebuild, or enable a
   billable resource without my explicit permission in the current request. Read-only inspection is
   fine. The `linode-cli` skill has the full rules.

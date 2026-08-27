@@ -10,9 +10,12 @@ paths:
 
 # Interactive scripts use gum
 
-Applies to every script, function, abbreviation, or command wrapper a human will run, in any
-directory — gum is not a dotfiles-repo convention. **Before writing or editing anything that
-prompts, asks, lists, waits, or prints for a human — a menu, yes/no, text prompt, file picker,
+Applies to every **shell** script, function, abbreviation, or command wrapper a human will run, in
+any directory — gum is not a dotfiles-repo convention. It does **not** apply to a compiled or
+project-language CLI or TUI (Rust, Go, …), which uses its own ecosystem's libraries; gum is the
+answer for shell, not a mandate to shell out.
+
+**Before writing or editing anything that prompts, asks, lists, waits, or prints for a human — a menu, yes/no, text prompt, file picker,
 spinner, banner, table, rendered document, or status/error output — invoke the `gum` skill** (or
 Read `~/.config/claude-code/skills/gum/SKILL.md`). Read its `references/commands.md` for any gum
 command you have not written before, and `references/recipes.md` before composing more than one
