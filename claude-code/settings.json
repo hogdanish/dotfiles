@@ -2,7 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opus[1m]",
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
@@ -54,12 +54,12 @@
     ]
   },
   "enabledPlugins": {
-    "github@claude-plugins-official": false,
+    "github@claude-plugins-official": true,
     "firecrawl@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "cloudflare@cloudflare": false,
-    "clangd-lsp@claude-plugins-official": false,
+    "clangd-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
@@ -71,6 +71,14 @@
     }
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    }
+  },
   "showClearContextOnPlanAccept": true,
   "tui": "default",
   "skipDangerousModePermissionPrompt": true,
@@ -79,8 +87,41 @@
   "preferredNotifChannel": "ghostty",
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true,
-  "remoteControlAtStartup": true,
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Bash(linode-cli create:*) / Bash(linode-cli clone:*) / Bash(linode-cli resize:*) / Bash(linode-cli rebuild:*) — billable Akamai resource creation/mutation without explicit per-request permission, per ~/.claude/CLAUDE.md",
+      "Bash(brew bundle dump --force:*) / Bash(brew bundle cleanup --force:*) — destroys hand-maintained Brewfile categorization or uninstalls everything undeclared, per .claude/skills/brewfile/SKILL.md"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Primary use of Claude Code**: software development",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: PUBLIC — hogdanish/dotfiles (github.com) is public; any push there is publishing",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: 1Password (`op` CLI, `op://` references, `op run`/`op plugin run`, 1Password Environments) is the root of trust on this machine; no credential literals are ever written to disk — see `.claude/rules/security.md` and the `auth` skill",
+      "**Default / protected branches**: `main` (default). No rulesets or classic branch protection listed via gh — repo is public, so treat `main` as sensitive to force-push/history-rewrite despite the absence of a technical block",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Source control**: The trusted repo (github.com/hogdanish/dotfiles) and its remote only — no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: `~/.config/yt-dlp/cookies.txt` (live session cookies), `~/.gnupg/private-keys-v1.d/` and any `id_*` private key (existence/path/variable names in scope, values never), any `.env`/`*.pem`/`*.key` file (repo `.gitignore` blocks these except `.env.tpl`), `scripts/internal/agent-credential-broker.mjs` (in-memory credential broker — code itself is not secret but its design/tokens are sensitive); share only with the repo owner (Ethan)",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development — personal dotfiles/macOS configuration management for this repo",
+      "**Trusted repo**: `/Users/ethan/.config` (github.com/hogdanish/dotfiles, PUBLIC) — the repo IS `~/.config` tracked in place; confidential material (secrets, credentials, personal/entrusted sensitive data) is never cleared into it by virtue of its visibility; only the repo's own work belongs in it, and content ported in from outside this session's repo is not its own work",
+      "**Org-specific CLIs**: `op` (1Password), `gh` (GitHub CLI via 1Password shell plugin), `linode-cli` (paid control plane — never create/clone/resize/rebuild/enable a billable resource without explicit per-request permission; read-only inspection is fine), `cf` (Cloudflare, via in-session credential broker socket), `mas`, `brew`",
+      "routine under `~/.config/` prefix: editing dotfiles, fish config, Brewfile, Claude/Codex config, ghostty/laramie theme files is this repo's routine, ordinary work"
+    ]
+  },
+  "allowDangerouslySkipPermissions": true,
   "additionalDirectories": [
     "/Users/ethan/.config"
   ]
