@@ -40,19 +40,19 @@ loaded, kept lean on purpose): `notify.md` (when to reach Ethan outside the term
 needs no `link-claude.fish` run.
 
 **`hooks/`** — user-level hooks, wired from `claude-code/settings.json` by absolute path, so they
-fire in every project. `fish-validate.sh` fires on every `.fish` write anywhere; `caffeinate.sh`
-fires on `SessionStart`/`SessionEnd` to keep the machine awake for as long as any Claude Code
-session is running, and lets it sleep again once the last one ends. ⚠ Neither is symlinked and
-neither must be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`.
+fire in every project. `fish-validate.sh` fires on every `.fish` write anywhere. ⚠ It is not
+symlinked and must not be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`.
+A `caffeinate.sh` `SessionStart`/`SessionEnd` keep-awake hook lived here briefly and was **deleted
+2026-08-27** — do not reintroduce it.
 
 **`skills/`** — user-level skills, loaded everywhere on this machine (unlike `.claude/skills/`,
 which loads only inside this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`. The `prose`
 skill and rule were deleted 2026-08-16; the `toolbox` skill and rule were deleted 2026-08-17.
-⚠ **Four of these set `disable-model-invocation: true`** (all but `godot`), so they never appear in
-the skill listing: the always-on CLAUDE.md/rule pointers instruct a direct Read of
-`claude-code/skills/<name>/SKILL.md` instead. Keep that scheme — it is the context-cost design, not
-an accident. `fish` and `gum` are user-level because neither is repo-specific, even though their
-references document `~/.config/fish` in depth.
+All five are listed and model-invocable: `fish`, `gum`, `linode-cli`, and `orbstack` carried
+`disable-model-invocation: true` until **2026-08-27**, when it was dropped — their descriptions are
+short enough that listing them costs little, and hiding them meant relying on always-on CLAUDE.md
+pointers to get them read at all. `fish` and `gum` are user-level because neither is repo-specific,
+even though their references document `~/.config/fish` in depth.
 Skills are symlinked into `$CLAUDE_CONFIG_DIR/skills/` **one directory at a time**, because that
 namespace is one any installer may write into — linking it wholesale would drag foreign output into
 a public repo. ⚠ Symlinked skills **do** load (verified against Claude Code 2.1.220); if one fails
@@ -164,7 +164,7 @@ abbreviations and functions are not available to you.
 
 ## The fish config
 
-**Writing or editing any `.fish` file? Read `claude-code/skills/fish/SKILL.md` first** — the house
+**Writing or editing any `.fish` file? Invoke the `fish` skill first** — the house
 style guide, references, load order, theming, and the bash→fish table. Its Required-reading rows
 are floors, not menus. The `fish` rule carries the always-on subset;
 `claude-code/hooks/fish-validate.sh` checks every `.fish` write.

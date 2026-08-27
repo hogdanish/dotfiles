@@ -1,7 +1,6 @@
 ---
 name: fish
 description: "Fish 4.8.1 on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work; the path-scoped fish rule is the trigger."
-disable-model-invocation: true
 ---
 
 # Fish shell

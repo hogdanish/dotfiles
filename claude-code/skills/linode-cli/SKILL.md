@@ -1,7 +1,6 @@
 ---
 name: linode-cli
 description: "Operate Akamai Cloud through the official linode-cli: the full command surface, safety workflow, and paid-resource guardrails. Load before any Linode/Akamai Cloud CLI task."
-disable-model-invocation: true
 ---
 
 # Operate Linode safely

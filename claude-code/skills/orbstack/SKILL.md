@@ -1,7 +1,6 @@
 ---
 name: orbstack
 description: "OrbStack, this Mac's Docker and Linux VM runtime: orb/orbctl, machine lifecycle, .orb.local networking, Docker troubleshooting, and container-versus-VM decisions. Load for OrbStack, local Docker problems, or Linux VMs."
-disable-model-invocation: true
 ---
 
 # OrbStack

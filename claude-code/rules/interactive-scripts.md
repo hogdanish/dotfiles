@@ -13,8 +13,8 @@ paths:
 Applies to every script, function, abbreviation, or command wrapper a human will run, in any
 directory — gum is not a dotfiles-repo convention. **Before writing or editing anything that
 prompts, asks, lists, waits, or prints for a human — a menu, yes/no, text prompt, file picker,
-spinner, banner, table, rendered document, or status/error output — Read
-`~/.config/claude-code/skills/gum/SKILL.md`.** Read its `references/commands.md` for any gum
+spinner, banner, table, rendered document, or status/error output — invoke the `gum` skill** (or
+Read `~/.config/claude-code/skills/gum/SKILL.md`). Read its `references/commands.md` for any gum
 command you have not written before, and `references/recipes.md` before composing more than one
 call. Do not skip it because the script "only has one prompt" — the defaults are the trap.
 
