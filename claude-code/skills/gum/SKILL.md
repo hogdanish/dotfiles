@@ -1,7 +1,6 @@
 ---
 name: gum
 description: "Gum 0.17.0 for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human; the interactive-scripts rule is the trigger."
-disable-model-invocation: true
 ---
 
 # gum — glamorous shell scripts

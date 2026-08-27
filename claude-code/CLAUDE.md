@@ -23,22 +23,17 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
 - Scripts a human runs are fish; bash when more appropriate; zsh as last resort.
 - `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`.
 
-## Hidden skills — load by Reading the file
+## Global skills
 
-`fish`, `gum`, `linode-cli`, and `orbstack` set `disable-model-invocation`, so they never
-appear in your skill listing. When one applies, load it by **Reading
-`~/.config/claude-code/skills/<name>/SKILL.md`**:
+`fish`, `gum`, `godot`, `linode-cli`, and `orbstack` are user-level skills, listed and invokable in
+every project on this machine. Invoke the one that applies — the descriptions carry the triggers.
+Two guardrails that hold whether or not the skill is loaded:
 
-- **fish** — before writing or editing any `.fish` file, in any directory, or porting bash/zsh to
-  fish. The path-scoped `fish` rule is the trigger and always-on subset.
-- **gum** — the house toolkit for anything a script shows or asks a human, fish and bash alike.
-  Load it before writing a prompt, menu, spinner, table, or status output; never hand-roll `read`,
-  `select`, `tput`, or raw ANSI. The path-scoped `interactive-scripts` rule has the rules that hold
-  even unloaded.
-- **linode-cli** — before any Linode CLI use. ⚠ Linode is a paid control plane: never create,
-  clone, resize, rebuild, or enable a billable Akamai Cloud resource without Ethan's explicit
-  permission in the current request. Read-only inspection is allowed.
-- **orbstack** — Docker and Linux VMs on this machine.
+- **gum** is the house toolkit for anything a script shows or asks a human, fish and bash alike —
+  never hand-roll `read`, `select`, `tput`, or raw ANSI.
+- ⚠ **Linode is a paid control plane**: never create, clone, resize, rebuild, or enable a billable
+  Akamai Cloud resource without Ethan's explicit permission in the current request. Read-only
+  inspection is allowed.
 
 ## Paths
 

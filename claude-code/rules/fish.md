@@ -11,8 +11,8 @@ depend on the skill having been loaded.
 
 ## Load the skill, and read enough of it
 
-The skill is hidden from the skill listing — load it by **Reading
-`~/.config/claude-code/skills/fish/SKILL.md`**. Writing or editing fish without reading its
+**Invoke the `fish` skill** (or Read `~/.config/claude-code/skills/fish/SKILL.md`). Writing or
+editing fish without reading its
 `references/style-guide.md` is not acceptable. It is 388 lines and it is law.
 
 **Then read every reference in the row matching your task.** These are floors, not menus — do not skip
