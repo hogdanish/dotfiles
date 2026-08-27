@@ -24,7 +24,8 @@ set -g KNOWN_IGNORED \
     homebrew \
     claude \
     .wrangler \
-    cagent
+    cagent \
+    caddy
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]
