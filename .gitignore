@@ -24,6 +24,8 @@
 !/.betterleaks.toml
 !/lefthook.yml
 !/.claude/
+# transient agent worktrees; git tracks them via .git/worktrees, not here
+/.claude/worktrees/
 !/.agents/
 !/scripts/
 !/home/
