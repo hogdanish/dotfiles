@@ -35,7 +35,12 @@ case "$mode" in
 start)
     touch "$sessions_dir/$session_id"
     if [[ ! -s "$pidfile" ]] || ! kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; then
-        /usr/bin/caffeinate -disu &
+        # ⚠ the stdio redirections are load-bearing: the hook's stdout/stderr are pipes claude code
+        # reads until EOF, and a background child inheriting them holds the write end open for its
+        # whole lifetime — the hook then never counts as finished and the session wedges at startup
+        # (input accepted, nothing executes). detach all three fds so the pipes close when this
+        # script exits.
+        /usr/bin/caffeinate -disu </dev/null >/dev/null 2>&1 &
         disown
         echo $! >"$pidfile"
     fi
