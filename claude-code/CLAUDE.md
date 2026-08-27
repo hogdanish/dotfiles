@@ -21,19 +21,10 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
 - Global installs: `brew` → `mas` → `bun`/`uv`/language-specific → manual. Never `pip` for global
   Python packages.
 - Scripts a human runs are fish; bash when more appropriate; zsh as last resort.
+- ⚠ Akamai Cloud is a **paid** control plane: never create, clone, resize, rebuild, or enable a
+  billable resource without my explicit permission in the current request. Read-only inspection is
+  fine. The `linode-cli` skill has the full rules.
 - `$JAVA_HOME` is set in `~/.config/fish/conf.d/java.fish`.
-
-## Global skills
-
-`fish`, `gum`, `godot`, `linode-cli`, and `orbstack` are user-level skills, listed and invokable in
-every project on this machine. Invoke the one that applies — the descriptions carry the triggers.
-Two guardrails that hold whether or not the skill is loaded:
-
-- **gum** is the house toolkit for anything a script shows or asks a human, fish and bash alike —
-  never hand-roll `read`, `select`, `tput`, or raw ANSI.
-- ⚠ **Linode is a paid control plane**: never create, clone, resize, rebuild, or enable a billable
-  Akamai Cloud resource without Ethan's explicit permission in the current request. Read-only
-  inspection is allowed.
 
 ## Paths
 
