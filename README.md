@@ -1,183 +1,24 @@
 # dotfiles
 
-Personal macOS configuration. **The repository is `~/.config` itself** — the configs are tracked
-in place, not mirrored, symlinked or templated from somewhere else. Editing `~/.config/fish/conf.d/git.fish`
-*is* editing the repo.
+My simple macOS config.  No GNU Stow, chezmoi, or anything else. This repo is `~/.config`.
 
-```
-macOS 27 · Apple Silicon · fish 4.8 · Ghostty · Homebrew · 1Password for every credential
-```
+- **OS**: macOS Golden Gate 27.x
+- **Hardware**: MacBook Pro (M5, 14-inch, 24 GB)
+- **Shell**: fish
+- **Terminal**: Ghostty
+- **Package manager**: Homebrew
+- **Credential manager**: 1Password
 
-## Layout
+## How it works
 
-```
-.gitignore          allowlist — nothing is tracked unless named (see below)
-.betterleaks.toml   secret-scanner rules and allowlist
-lefthook.yml        pre-commit / pre-push gates
-Brewfile            hand-maintained package manifest AND software inventory
-scripts/            bootstrap/link/audit scripts · memory-only agent credential broker and shims
-home/               files that cannot live under ~/.config, symlinked into $HOME
-.claude/            agent context for this repo (rules, skills, hooks)
-.agents/            Codex project skills — symlinks to canonical .claude/skills
-claude-code/        authored Claude Code config — $CLAUDE_CONFIG_DIR symlinks back to it
-codex/              Codex-specific TOML settings
-cargo/              authored Cargo config — $CARGO_HOME/config.toml symlinks back to it
-fish/ ghostty/ …    the actual configs
-```
+- `.gitignore` is the allowlist, everything is ignored by default
+- `Brewfile` acts as an automatically updated software inventory for everything (CLI tools, GUI apps, NPM packages, app store apps, etc)
+- `home/` holds files that have to be in `$HOME`, symlinked via `scripts/link-home.fish`.
+- `claude-code/` and `codex/` are custom global system agent configs and are symlinked via `scripts/link-claude.fish` & `link-codex.fish`
+- All secrets are managed via 1Password and resolved at use time via `op run`, never stored on disk.
 
-⚠ `$CLAUDE_CONFIG_DIR` is `$XDG_STATE_HOME/claude`, **not** `~/.config/claude`. Transcripts, prompt
-history and vendored plugins are ~48 MB of state, not config, and they have held plaintext
-credentials that were read into a session — so they are kept out of this repo's working tree
-entirely. Only `CLAUDE.md`, `settings.json`, `rules/` and `skills/` are authored, and they live in
-`claude-code/` with symlinks pointing back from the state directory, created by
-`scripts/link-claude.fish`. `~/.config/claude` remains as an ignored compatibility symlink to that
-state directory.
-
-`claude-code/skills/` holds the **user-level** skills — the ones that load in every project on this
-machine, as opposed to `.claude/skills/`, which loads only inside this repo. They are linked in
-**one directory at a time**, deliberately: `$CLAUDE_CONFIG_DIR/skills/` is a shared namespace that
-any tool may write into, and linking the whole directory would either drag installer output into the
-repo or bury it. Adding a global skill is: write it under `claude-code/skills/<name>/`, run
-`scripts/link-claude.fish`, done — the `.gitignore` already re-includes `claude-code/` whole.
-
-⚠ Only **hand-authored** skills live there. A third party's skills come in as a *plugin*: the payload
-lands in `$CLAUDE_CONFIG_DIR/plugins/` (state, untracked) and only the enable flag lands in
-`claude-code/settings.json`, which `claude plugin install` writes straight through the symlink. So
-`enabledPlugins` is the tracked manifest of vendor tooling, and `claude-code/skills/` stays a clean
-list of things written here.
-
-Codex uses one `~/.codex` root for authored configuration and mutable app state. The directory stays
-outside the repo. Codex-specific TOML files live in `codex/`, while `~/.codex/AGENTS.md` links to
-`claude-code/CLAUDE.md` and each `~/.agents/skills/<name>` links to `claude-code/skills/<name>`.
-Claude Code and Codex therefore share one source for global instructions and skills; vendor skills
-remain installer-owned. Run `scripts/link-codex.fish` after adding a global skill.
-
-Inside this dotfiles repo, Claude Code remains canonical: root `AGENTS.md` points to
-`.claude/CLAUDE.md`, and `.agents/skills/` contains one symlink per `.claude/skills/` directory.
-Codex therefore receives the same project-specific rules and workflows without duplicate files.
-
-Rust is installed through Homebrew's `rustup` formula; rustup owns the stable toolchain and standard
-components. Fish places `RUSTUP_HOME` and `CARGO_HOME` under `$XDG_DATA_HOME`, places the `sccache`
-cache under `$XDG_CACHE_HOME`, and exposes the keg-only rustup proxies plus Cargo's global-bin directory.
-The tracked `cargo/config.toml` enables `sccache`; bootstrap links it into `$CARGO_HOME`.
-
-## Bootstrap a new machine
+## New machine
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hogdanish/dotfiles/main/scripts/bootstrap.sh | sh
 ```
-
-Idempotent and safe to re-run. It installs Xcode CLT → Homebrew → seeds this repo into `~/.config`
-→ `brew bundle` → initializes Rust → `lefthook install` → links authored config → prompts for the manual 1Password steps →
-offers Touch ID for `sudo` and the unattended-update launch agent.
-
-⚠ **You cannot `git clone` into `~/.config`** — it is never empty. The script uses
-`git init` + `fetch` + `reset --mixed`, which sets HEAD and the index from the remote while leaving
-the working tree untouched, then shows you exactly what differs *before* overwriting anything.
-`git checkout -f` would clobber silently with no recovery.
-
-Manual steps it cannot do for you:
-
-- `op signin`, then `op plugin init gh` — `~/.config/op/` is machine state and is not tracked
-- `npm i -g firecrawl-cli` — the Firecrawl CLI is an npm global, so the Brewfile does not carry it.
-  The Claude Code side is the official `firecrawl` plugin, already declared in
-  `claude-code/settings.json`, so it re-installs itself; the CLI it drives does not. ⚠ Do **not** run
-  `firecrawl init`, `firecrawl setup skills` or `firecrawl login` afterwards — they write 31 skill
-  bundles into `~/.agents/`, linked with a relative path that assumes `~/.claude/skills` so every one
-  dangles, copy themselves into every other agent and IDE they detect, and open a second credential
-  store. That directory was deleted on 2026-07-30
-
-Two things the script *offers* but that live outside this repo, so a fresh clone does not carry them:
-`/etc/pam.d/sudo_local` (Touch ID for `sudo`) and `~/Library/LaunchAgents/…homebrew-autoupdate.plist`.
-Both are machine state by nature; the Brewfile carries their dependencies and `bootstrap.sh` carries
-the recipe.
-
-It also writes two files and one symlink outside the repo:
-`/opt/homebrew/etc/homebrew/brew.env`, `/opt/homebrew/etc/npmrc`, and
-`$CARGO_HOME/config.toml` → `~/.config/cargo/config.toml`. The first two exist because
-only fish exports `XDG_CONFIG_HOME` and `NPM_CONFIG_USERCONFIG`, so brew and npm launched from
-launchd, a GUI app or Claude Code's zsh resolve their user config somewhere else entirely and fall
-back to defaults. Pinning each value where the launch context cannot matter is what stops brew
-silently distrusting every third-party tap, and npm scattering a cache into `~/.npm`. The Cargo
-symlink compensates for Cargo not reading `$XDG_CONFIG_HOME` directly.
-
-## The allowlist
-
-`.gitignore` starts with an anchored `/*` and re-includes only what is named. **The default for
-anything new is *ignored*.** That is deliberate: 836 of the ~1,040 files under `~/.config` are Claude
-Code runtime state, another 107 are Raycast build output, and the real config surface is about 150
-files. A denylist would have to anticipate every tool that ever writes here; an allowlist does not.
-
-⚠ The leading slash matters. A bare `*` matches directory entries at every depth, and git *"doesn't
-list excluded directories for performance reasons, so any patterns on contained files have no
-effect"* — every `!foo/**` below it would silently never fire.
-
-⚠ **`.gitignore` has no trailing comments.** `#` only opens a comment at the start of a line, so
-`/fish/fish_variables  # note` is one literal pattern that matches nothing.
-
-Adding a config: add one `!` line. `git check-ignore -v <path>` tells you which rule decided.
-
-Deliberately untracked, and why:
-
-| Path | Reason |
-| --- | --- |
-| `raycast/` | vendored extension build output — binaries, sourcemaps, `node_modules` |
-| `op/` | machine state; `op plugin init` regenerates it, and `op/config` holds a device id that would be wrong elsewhere |
-| `homebrew/` | `trust.json` is regenerated by brew |
-| `yt-dlp/cookies.txt` | live session cookies |
-| `fish/fish_variables` | fish-managed universal state; must stay empty |
-| `claude/` | compatibility symlink to `$XDG_STATE_HOME/claude` — 48 MB of transcripts and history |
-
-## Guardrails
-
-Three independent layers, because any one can be defeated:
-
-1. **The allowlist** — catches anything unknown, by default. Cannot help if a secret is written
-   *into* an already-tracked file.
-2. **`betterleaks`** (pre-commit, staged content; pre-push, full history) — catches that.
-   ⚠ The 412 built-in rules do **not** cover `fc-` (Firecrawl), `ctx7sk-` (Context7) or `ya29.`;
-   `.betterleaks.toml` adds them. Re-verify after upgrading betterleaks.
-3. **GitHub push protection** — free on public repos, but pattern-based and high-confidence only.
-   A generic `api_key = "…"` is only caught by paid Secret Protection. Treat it as a backstop.
-
-Plus a pre-commit assertion that no staged path is one `.gitignore` excludes, which catches `git add -f`.
-
-⚠ **Hooks do not arrive via clone.** `.git/hooks` is never version-controlled — run `lefthook install`
-once per clone (bootstrap does it). Without it the secret gate silently does not exist.
-
-## Routine checks
-
-```sh
-scripts/audit-config.fish                  # new arrivals, secret scan, symlink and permission drift
-brew bundle check --file=Brewfile          # everything declared is installed
-.claude/skills/brewfile/scripts/brewfile-audit.sh   # ...and everything installed is declared
-fish -c fishprof                           # shell startup cost (~10 ms interactive)
-```
-
-`audit-config.fish` is the answer to *"a tool wrote something into `~/.config` and I missed it"*:
-it names every top-level entry that is neither tracked nor on its known-junk list, so the decision
-gets made once rather than never.
-
-## Things that will bite you
-
-- **Git does not preserve permissions** beyond the executable bit. `~/.ssh` and `~/.gnupg` must be
-  `0700` or their tools refuse to read anything inside; `link-home.fish` re-applies this.
-- **The `Brewfile` is hand-maintained** and doubles as the machine's software inventory — every entry
-  carries a one-line *why*. ⚠ Never run `brew bundle dump --force` over it; that destroys all of it.
-- **`btop` rewrites `btop.conf` on exit**, so expect churn in that file.
-- **`bat cache --build`** must be re-run after editing `bat/themes/laramie.tmTheme`, or bat falls
-  back silently and `delta.syntax-theme = laramie` breaks with it.
-- **The `laramie` palette is duplicated by hand across eleven tools** — none share a format. The full
-  list is in `.claude/CLAUDE.md`.
-- `$DOTFILES` and `$XDG_CONFIG_HOME` are deliberately the same path.
-
-## Secrets
-
-No plaintext credential is ever committed, and none is written to disk at bootstrap. Credentials live
-in 1Password and are resolved at use time by `op run` / `op://` references — the `.tpl` + `op inject`
-pattern is deliberately **not** used here, because it writes a resolved plaintext file back to disk.
-
-Opaque identifiers that look credential-shaped but are not, and are safe to publish: 1Password
-account/vault/item ids (26-char Crockford base32, useless without a biometrically-unlocked local
-1Password app), the Environment id in `fish/conf.d/op.fish`, SSH **public** keys in
-`git/allowed_signers`, and OpenPGP key fingerprints.
