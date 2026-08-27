@@ -185,9 +185,11 @@ end
 `linode-cli` uses the same shape in `functions/wrappers/linode-cli.fish`. Its plugin injects
 `LINODE_CLI_TOKEN` for an interactive human command. Do not retain the token that `linode-cli`
 browser login writes to `~/.config/linode-cli`; the non-secret defaults file works with the injected
-environment token. The wrapper first reuses an already-resolved `LINODE_CLI_TOKEN`, which is how a
-Claude Code or Codex session avoids nested Touch ID prompts. It never treats an
-unresolved `op://` reference as a usable token.
+environment token. The wrapper first reuses an already-resolved `LINODE_CLI_TOKEN` when one survives
+into its process. The agent launch wrappers move that token into a session-scoped, in-memory broker
+and remove it from the agent environment before starting Claude Code or Codex. Agent commands reach
+the official CLI through a Unix-socket shim and never treat an unresolved `op://` reference as a
+usable token.
 
 ⚠ 1Password authorization is terminal-session-bound. A test such as `fish -ic 'linode-cli ...'`
 starts a fresh interactive shell each time and can therefore prompt each time; that is not the same
@@ -201,9 +203,11 @@ shell wiring at all.
 `conf.d` sourcing. Any startup snippet that calls `brew` (e.g. a cached `brew shellenv`) must use
 `command brew`, or every shell start becomes a 1Password authorization prompt.
 
-⚠ **Aliases and functions from `plugins.sh` can never serve Claude Code.** Its Bash tool runs a
-*non-interactive login* zsh: `~/.zprofile` is read, `~/.zshrc` is not, and aliases do not expand.
-Claude Code and Codex get their credentials from the parent process environment instead — see
+⚠ **Aliases and functions from `plugins.sh` can never serve agent shell tools.** Claude Code's Bash
+tool and Codex commands run non-interactive shells where Fish functions do not exist. Both current
+agents receive only `AGENT_INFRA_BROKER_SOCKET`, not the resolved infrastructure tokens. A conditional
+`~/.zshenv` bridge and the Fish launch wrappers connect them to the session credential broker
+documented above and in
 [1password-environments.md](1password-environments.md) §6.
 
 ### ⚠ The `claude` plugin switches Claude Code to API billing

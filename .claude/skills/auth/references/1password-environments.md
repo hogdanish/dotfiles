@@ -149,12 +149,10 @@ The same shape works with `op://` references instead of an Environment
 
 That is the Linode arrangement here: `conf.d/op.fish` stores the PAT's `op://` reference, and both
 the Claude Code and Codex launch wrappers export it as `LINODE_CLI_TOKEN` before the single parent
-`op run`. Claude Code shells inherit the resolved value, so bare `linode-cli` works without a token
-in config. Codex CLI 0.147.0 was observed dropping the variable from tool subprocesses despite its
-environment-policy settings. In Codex only, use the PTY-based
-`fish -ic 'op plugin run -- linode-cli ...'` fallback documented in the parent `auth` skill.
-`claude --infra` / `codex --infra` additionally export `LINODE_API_TOKEN` for the optional Linode MCP;
-that is a separate authentication path.
+`op run`. The wrappers start a session-scoped credential broker inside that parent process, then
+remove the resolved token from the agent environment. Agent CLI shims use the broker's mode-0600
+socket, while resolved tokens stay only in broker memory. The third-party Linode MCP and its separate
+`LINODE_API_TOKEN` path were removed.
 
 ## 7. The 1Password MCP Server (beta)
 

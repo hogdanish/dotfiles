@@ -142,6 +142,18 @@ will get them wrong again.
 
 ## Language and builtin surprises
 
+### a background job whose redirection names an unpaired fifo blocks the whole script
+`2026-08-11` · commongrounds `./cg play` — `godot <fifo &` froze the launcher before its fifo holder line ran
+- **Cause** — fish sets up a job's redirections before the `&` takes effect, and `open(2)` on a fifo
+  blocks until the other end exists. Backgrounding does not defer the open, so the *script* hangs, no
+  child is created, and signal handlers do not run (the shell is inside open, not at a safe point).
+- **Do** — before any `cmd <fifo &` or `cmd >fifo &`, hold both ends open with a non-blocking O_RDWR
+  open from a helper (fish has no `<>` redirection):
+  `bash -c 'exec 3<>"$1"; exec sleep 2147483647' holder $fifo &`
+- **Verified** — `fish --no-config -c 'sleep 3 </tmp/f &; echo after'` (with `/tmp/f` a fifo) prints
+  nothing and never returns — `echo` is unreached. With the bash holder started first, it returns
+  immediately and a later `printf >>/tmp/f` is delivered.
+
 ### every `fish_add_path` call rebuilds the whole of `$PATH` — batch them
 `2026-07-29` · `conf.d/brew.fish` made two calls where one would do
 - **Cause** — fish's embedded init registers `__fish_reconstruct_path` as an
@@ -512,3 +524,14 @@ delta --show-config | rg plus-style     # must NOT say: syntax "#002800"
 - **Outcome** — `lefthook.yml` skips symlinks and validates each regular staged Fish file. Keep
   generated completion links outside formatter write commands; validate or regenerate them at
   their owner instead.
+
+### `set -l` inside an `if` block does not survive the block
+`2026-08-14` · agent launch wrappers silently lost 1Password references before `op run`
+- **Cause** — Fish local scope is the current block. `set -lx TOKEN ...` inside `if ... end` erases
+  `TOKEN` at that `end`; the later command in the same function does not inherit it.
+- **Do** — use `set -fx TOKEN ...` when a conditional must assign a function-scoped variable for a
+  command after the block, or declare the local before entering the block and assign it without a
+  scope flag inside.
+- **Verified** — the Claude Code and Codex wrappers now pass both infrastructure references to their
+  trailing `op run`, and the session broker validates both resolved values before launching either
+  agent.

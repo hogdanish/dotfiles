@@ -52,11 +52,12 @@ complex local selection, fetch JSON once and filter with `jq`.
 
 ## Configuration and authentication
 
-This machine does not store a PAT in the tracked CLI config. Claude Code receives
-`LINODE_CLI_TOKEN` from 1Password at launch, and interactive Fish uses the 1Password shell plugin
-wrapper. Codex CLI 0.147.0 was observed dropping the variable from tool subprocesses. In Codex only,
-use the PTY-based `fish -ic 'op plugin run -- linode-cli ...'` fallback in the parent skill's
-**Machine-specific authentication** section.
+This machine does not store a PAT in the tracked CLI config. Interactive Fish uses the 1Password
+shell plugin wrapper. Codex CLI 0.147.0 and Claude Code 2.1.232 both strip the launch wrapper's
+resolved `LINODE_CLI_TOKEN` before their shell tools. Their launch wrappers compensate with the
+session-scoped, in-memory broker in the parent skill's **Machine-specific authentication** section.
+Inside a wrapped agent session, use bare `linode-cli`; the session-local shim calls the official
+binary through that broker.
 
 Supported environment variables:
 
