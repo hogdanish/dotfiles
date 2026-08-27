@@ -1,6 +1,6 @@
 ---
 name: brewfile
-description: "Maintain the repo-root Brewfile, the software inventory: audit drift, write entries in the house layout, brew bundle options, validation. Load when installing or removing software or auditing the Brewfile."
+description: "Maintain the repo-root Brewfile, the software inventory: audit drift, write entries in the house layout, brew bundle options, validation, and how Homebrew itself is configured to run. Load when installing or removing software, auditing the Brewfile, or diagnosing brew's unattended updates, tap trust or environment."
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash(brew*), Bash(mas*), Bash(jq*), Bash(ruby*), Bash(.claude/skills/brewfile/scripts/*), Bash(ls*), Bash(comm*), Bash(sort*), Bash(grep*)
 ---
 
@@ -25,6 +25,10 @@ here and is the real artifact.
 - [auditing.md](references/auditing.md) — how to derive the intentionally-installed set, the verified
   commands and their traps, drift classification, and validation. Read when the audit script's output
   needs interpreting or the script needs changing.
+- [homebrew-runtime.md](references/homebrew-runtime.md) — how brew is configured to *run*, as opposed
+  to what the file declares: the unattended-update launchd agent, why it has no `--sudo`, the App
+  Store carve-out, `brew.env` / `npmrc` and the two "only fish exports it" failures, and the
+  `HOMEBREW_*` boolean trap. Read before changing anything about brew's own behaviour.
 
 ## Scope
 
@@ -74,6 +78,12 @@ does not depend on which shell launched it.
 The comment answers *why this is on the machine*, not what upstream calls it. `brew desc` is a starting
 point, never the answer — see [style-guide.md](references/style-guide.md) §4.
 
+⚠ **Two to five words; one sentence at the most; never wrapped onto a second line.** If the
+rationale does not fit, it does not belong in the Brewfile — project-specific detail (build flags,
+version skew, which repo needs it) goes in that project's docs, and cross-cutting policy goes in
+this skill. Multi-line entry comments and paragraph-length section preambles were removed on
+2026-08-27; do not let them grow back.
+
 A tool that replaces, extends, or serves another is written `<original>: <purpose>` — the convention that
 makes the file readable on a fresh machine:
 
@@ -112,7 +122,8 @@ For macOS built-ins with no command, describe the feature. When both tools stay 
 
 ## Standing decisions
 
-- All taps are **trusted** (`trusted: true` on the `tap` line only, never repeated on the entry).
+- Taps carry trust on the `tap` line only, never repeated on the entry — and at the **narrowest**
+  scope that works (`trusted: {command: "autoupdate"}` over a blanket `trusted: true`).
 - Tapped formulae are always **fully qualified**: `jorgelbg/tap/pinentry-touchid`.
 - Apple's pre-bundled App Store apps (GarageBand, iMovie, Keynote, Numbers, Pages) are **excluded**; the
   id denylist lives in `scripts/brewfile-audit.sh`.

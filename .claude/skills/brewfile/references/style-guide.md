@@ -49,13 +49,13 @@ brew "owner/tap/formula"        # purpose
 brew "name"                     # purpose
 
 # ===============================
-# 📦 javascript tools
+# 📦 node
 # ===============================
 
 npm "name"                     # purpose
 
 # ===============================
-# 🐍 uv tools
+# 🐍 python
 # ===============================
 
 uv "name"                      # purpose
@@ -96,6 +96,11 @@ replace.
 
 Every entry gets **one trailing comment**. Lowercase, no trailing period, terse.
 
+⚠ **Never wrap a comment onto a second line.** A comment that will not fit on the entry's own line
+is a comment that is saying too much — cut it, do not continue it with `#` on the following line.
+The same ceiling applies to section preambles: a banner may carry one short line, never a
+paragraph. There is no exception for a package with an interesting story.
+
 The comment answers *"why is this on my machine"*, not *"what does upstream say it is"*. `brew desc` output
 is a starting point, never a final answer — it is written for strangers browsing a package index.
 
@@ -108,7 +113,11 @@ is a starting point, never a final answer — it is written for strangers browsi
 
 Guidelines:
 
-- **Aim for 2–5 words.** Hard ceiling: the comment must not push the line past ~100 columns.
+- **Aim for 2–5 words**, one sentence at the absolute most. Hard ceiling: the comment must not
+  push the line past ~100 columns, and must not wrap.
+- **No project-specific rationale.** The Brewfile is the *machine's* inventory, not a design doc.
+  Version skew, build flags, which of `~/Projects/*` needs a package, and why an alternative was
+  rejected all belong in that project's own docs or in this skill — never in an entry comment.
 - **Don't restate the package name.** `brew "ffmpeg" # ffmpeg video tool` is noise; `# video processing` is not.
 - **Name the consumer when a package exists only for another package**: `# yt-dlp: mp4 metadata`,
   `# gnupg: touch id pinentry`. This is what stops a future audit from deleting it as unrecognised.
@@ -126,7 +135,7 @@ aligned like a live one, with the comment saying *what it is waiting on*:
 
 This survives every check — ruby ignores it, `brew bundle` never sees it, and the audit's mas-id regex
 is anchored `^[^#]*` so a commented line cannot match. ⚠ **A commented entry is not drift; never
-"clean it up".** The file header says so, which is what stops the next audit deleting it. Drop the `#`
+"clean it up"** — this skill is what stops the next audit deleting it. Drop the `#`
 to install; delete the line only when the decision is reversed.
 
 ### 4.1 The replacement convention
@@ -179,8 +188,9 @@ brew "jorgelbg/tap/pinentry-touchid"   # gnupg: touch id pinentry
 
 - **Always fully qualify tapped formulae** (`owner/tap/name`). Bare names work but break name-based
   auditing — see [auditing.md](auditing.md) §4.
-- **All taps in this repo are trusted** (`trusted: true` on the `tap` line). This is the standing decision;
-  a tap that is not trusted cannot install unattended.
+- **Every tap carries trust on the `tap` line**, because a tap that is not trusted cannot install
+  unattended. Prefer the **narrowest** form that works: `trusted: {command: "autoupdate"}` for a tap
+  used for one command, `trusted: true` only when the whole tap is in play.
 - **Do not repeat `trusted:` on the `brew`/`cask` line** when the tap already carries it. `brew bundle dump`
   emits tap-level trust only, so repeating it creates permanent diff noise.
 - Never add a tap that nothing uses. If the last formula from a tap is removed, remove the tap.
