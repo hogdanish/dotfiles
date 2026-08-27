@@ -29,28 +29,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.config/claude-code/hooks/caffeinate.sh start",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.config/claude-code/hooks/caffeinate.sh end",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   },
   "enabledPlugins": {
