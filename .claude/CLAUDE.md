@@ -80,6 +80,15 @@ MCP or infrastructure profile; agents use `linode-cli` and SSH. In every session
 infrastructure credentials once and a session-scoped broker holds the Linode and Cloudflare CLI
 tokens in memory for the agent's lifetime.
 
+**Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
+*names* go into context up front and a schema is fetched only when it is first needed, rather than
+every MCP and plugin schema being inlined every turn. ⚠ This is already Claude Code's default (unset
+=> mode `tst` in 2.1.250); the pin exists so the default cannot flip under us. `false`/`0`/`no`/`off`
+turns it off, as does `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS`. It is process-wide and endpoint-wide,
+not per-project — there is no per-repo setting and none is needed. Skills are separate and already
+lazy by construction: only each `SKILL.md`'s name and description sit in context until the skill is
+invoked.
+
 **`scripts/`** — `bootstrap.sh` (POSIX sh; fish and gum may not exist when it runs),
 `link-home.fish`, `link-claude.fish`, `link-codex.fish`, `audit-config.fish`, and the agent session
 credential broker with its private `agent-bin/` shims. **Run the audit after anything installs a new

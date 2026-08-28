@@ -32,6 +32,13 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
         end
     end
 
+    # deferred tools: tool names go into context up front and a schema is fetched only when it is
+    # actually needed, instead of every mcp/plugin schema being inlined every turn. this is claude
+    # code's default as of 2.1.250 (unset => mode "tst"), so the pin only guards the default from
+    # flipping under us — `false`/`0`/`no`/`off` is what turns it off, and so does
+    # CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS.
+    set -fx ENABLE_TOOL_SEARCH true
+
     if not type -q op
         echo >&2 'claude: op is not installed — starting without 1password-provided secrets'
         command claude $args
