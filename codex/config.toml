@@ -5,7 +5,7 @@ web_search = "live"
 model_reasoning_summary = "auto"
 personality = "pragmatic"
 model = "gpt-5.6-sol"
-model_reasoning_effort = "low"
+model_reasoning_effort = "xhigh"
 service_tier = "default"
 
 [marketplaces.openai-bundled]
@@ -81,8 +81,8 @@ NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunc
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.820.71523"
-NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.820.71523/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+BROWSER_USE_CODEX_APP_VERSION = "26.825.32147"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.825.32147/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
 [mcp_servers.context7]
@@ -118,6 +118,10 @@ GODOT_MCP_USAGE_LOG = "0"
 command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
 args = [ "mcp" ]
 cwd = "."
+enabled = false
+
+[mcp_servers.cua_repl]
+command = "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
 enabled = false
 
 [shell_environment_policy.set]
