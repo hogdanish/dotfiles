@@ -34,8 +34,10 @@ file and silently detach it from version control — `scripts/audit-config.fish`
 **`rules/`** — user-level, loaded in every project on this machine. Path-scoped (free until a
 matching file is touched): `gdscript.md` (`**/*.gd`), `fish.md` (`**/*.fish`),
 `interactive-scripts.md` (script files — the gum trigger, scoped 2026-08-16). Unscoped and kept lean
-on purpose: `notify.md` (when to reach Ethan via `PushNotification`). ⚠ Unlike skills, `rules/` is
-symlinked **as a directory** — a new rule needs no `link-claude.fish` run.
+on purpose: `notify.md` (when to reach Ethan via `PushNotification`) and `tool-selection.md` (which
+of the overlapping web/docs/Cloudflare tools to reach for, and in what order — the counterweight to
+plugin skills that advertise themselves over the built-ins). ⚠ Unlike skills, `rules/` is symlinked
+**as a directory** — a new rule needs no `link-claude.fish` run.
 
 **`hooks/`** — user-level, wired from `claude-code/settings.json` by absolute path, so they fire in
 every project. `fish-validate.sh` fires on every `.fish` write anywhere. ⚠ It is not symlinked and
@@ -91,8 +93,9 @@ and never reaches an agent (Bash tool calls are non-interactive zsh). `FIRECRAWL
 the `Claude Code` 1Password Environment that `wrappers/claude.fish` mounts, and the Bash tool
 inherits it; launch claude any other way and every firecrawl skill fails on a missing key. ⚠ The
 skills advertise themselves over the built-in `WebFetch`/`WebSearch` ("use this instead of
-WebFetch"), and the Firecrawl API is metered — enabling it globally moves routine web reads onto
-paid credits.
+WebFetch"), and the Firecrawl API is metered — enabling it globally would move routine web reads
+onto paid credits, so `rules/tool-selection.md` is the always-on counterweight that keeps the
+built-ins the default and firecrawl the step-up.
 
 **Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
 *names* go into context up front and a schema is fetched only when it is first needed, rather than
