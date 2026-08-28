@@ -1,13 +1,13 @@
 {
-  "permissions": {
-    "defaultMode": "auto"
-  },
-  "model": "opus[1m]",
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "claude-fable-5[1m]",
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
@@ -56,7 +56,7 @@
   "effortLevel": "high",
   "modelSettings": {
     "claude-fable-5": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-opus-5": {
       "effortLevel": "medium"
