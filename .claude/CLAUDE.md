@@ -80,6 +80,20 @@ MCP or infrastructure profile; agents use `linode-cli` and SSH. In every session
 infrastructure credentials once and a session-scoped broker holds the Linode and Cloudflare CLI
 tokens in memory for the agent's lifetime.
 
+**Firecrawl: on by default for Claude Code as of 2026-08-28.** `settings.json` sets
+`firecrawl@claude-plugins-official: true`, so its ten skills and the `/skill-gen` command load in
+every project, `~/Projects/commongrounds` included (nothing there overrides `enabledPlugins`).
+⚠ It ships **no MCP server** — the skills are wrappers over the `firecrawl` CLI (`npm
+"firecrawl-cli"`, in the Brewfile), which is why the deferred-tool pin below buys it nothing: the
+standing cost is ten skill descriptions in every system prompt, not tool schemas. ⚠ Auth reaches it
+through the *process environment*, not `functions/wrappers/firecrawl.fish` — that function is fish's
+and never reaches an agent (Bash tool calls are non-interactive zsh). `FIRECRAWL_API_KEY` lives in
+the `Claude Code` 1Password Environment that `wrappers/claude.fish` mounts, and the Bash tool
+inherits it; launch claude any other way and every firecrawl skill fails on a missing key. ⚠ The
+skills advertise themselves over the built-in `WebFetch`/`WebSearch` ("use this instead of
+WebFetch"), and the Firecrawl API is metered — enabling it globally moves routine web reads onto
+paid credits.
+
 **Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
 *names* go into context up front and a schema is fetched only when it is first needed, rather than
 every MCP and plugin schema being inlined every turn. ⚠ This is already Claude Code's default (unset

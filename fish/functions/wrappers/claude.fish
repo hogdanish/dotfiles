@@ -15,6 +15,11 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     # a session; fish functions and `op plugin` aliases never reach it (non-interactive zsh). linode
     # uses the direct item reference below because its pat is not duplicated into the environment.
     #
+    # ⚠ the firecrawl plugin (enabled for every session as of 2026-08-28) rests on that
+    # inheritance: its ten skills shell out to `firecrawl`, which reads FIRECRAWL_API_KEY off this
+    # process. the fish wrapper of the same name is invisible to an agent, so without the
+    # environment every one of them fails on a missing key.
+    #
     # both guards warn and fall through rather than refusing to run. launching claude without the
     # environment is degraded, but refusing to launch it at all would be worse.
     #

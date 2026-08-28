@@ -38,7 +38,7 @@
   },
   "enabledPlugins": {
     "github@claude-plugins-official": true,
-    "firecrawl@claude-plugins-official": false,
+    "firecrawl@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "cloudflare@cloudflare": true,
