@@ -69,22 +69,22 @@ brew "emscripten"       # llvm: c/c++ -> wasm
 brew "glslang"          # emscripten: glsl -> spir-v shader compiler
 brew "shellcheck"       # bash: static analysis for hook scripts
 brew "shfmt"            # shellcheck: the formatter half
-brew "vale"             # prose style linter
 
 ## networking
-brew "curl"         # data transfer
-brew "xh"           # curl: ergonomic http client
-brew "wget"         # recursive downloader
-brew "openssh"      # ssh client and server
-brew "nmap"         # port scanner
-brew "iperf3"       # bandwidth benchmark
-brew "dnsperf"      # dns benchmark
-brew "doge"         # dig: dns client
-brew "caddy"        # web server and reverse proxy
-brew "mkcert"       # locally-trusted dev certs
-brew "nss"          # mkcert: firefox/chromium trust-store support
-brew "cloudflared"  # cloudflare tunnel: https/quic hostname for a local origin
-brew "linode-cli"   # linode: official cloud control-plane cli
+brew "curl"                 # data transfer
+brew "xh"                   # curl: ergonomic http client
+brew "wget"                 # recursive downloader
+brew "openssh"              # ssh client and server
+brew "nmap"                 # port scanner
+brew "iperf3"               # bandwidth benchmark
+brew "dnsperf"              # dns benchmark
+brew "doge"                 # dig: dns client
+brew "caddy"                # web server and reverse proxy
+brew "mkcert"               # locally-trusted dev certs
+brew "nss"                  # mkcert: firefox/chromium trust-store support
+brew "cloudflared"          # cloudflare tunnel: https/quic hostname for a local origin
+brew "cloudflare-wrangler"  # wrangler: cloudflare workers cli
+brew "linode-cli"           # linode: official cloud control-plane cli
 
 ## multimedia & graphics
 brew "ffmpeg"       # video and audio processing
