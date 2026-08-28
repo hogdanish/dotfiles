@@ -18,15 +18,15 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     # both guards warn and fall through rather than refusing to run. launching claude without the
     # environment is degraded, but refusing to launch it at all would be worse.
     #
-    # --infra re-enables the cloudflare plugin (skills + cloudflare-api mcp), which
-    # claude-code/settings.json disables by default to keep its weight out of ordinary
-    # sessions. a cli settings overlay outranks user settings. the credential broker
-    # below serves `cf` and `linode-cli` in every session either way.
+    # the cloudflare plugin (skills + cloudflare-api mcp) is enabled for every session in
+    # claude-code/settings.json as of 2026-08-28 and is no longer gated. --infra is still
+    # swallowed here so muscle memory — and the codex wrapper, where the flag still means
+    # something — never reaches claude as an unknown option. the credential broker below
+    # serves `cf` and `linode-cli` in every session either way.
     set -l args
-    set -l overlay
     for a in $argv
         if test "$a" = --infra
-            set overlay --settings '{"enabledPlugins":{"cloudflare@cloudflare":true}}'
+            echo >&2 'claude: --infra is a no-op — the cloudflare plugin is enabled by default'
         else
             set -a args $a
         end
@@ -34,14 +34,14 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
 
     if not type -q op
         echo >&2 'claude: op is not installed — starting without 1password-provided secrets'
-        command claude $overlay $args
+        command claude $args
         return
     end
     if not set -q __op_claude_env; or test -z "$__op_claude_env"
         echo >&2 'claude: $__op_claude_env is unset — starting WITHOUT the 1password environment.'
         echo >&2 '        set it in conf.d/op.fish: 1Password > Developer > View Environments >'
         echo >&2 '        Manage environment > Copy environment ID'
-        command claude $overlay $args
+        command claude $args
         return
     end
 
@@ -62,5 +62,5 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     # like a passing test. masking buys nothing here: claude never echoes these tokens.
     op run --no-masking --environment $__op_claude_env -- \
         /opt/homebrew/bin/bun "$XDG_CONFIG_HOME/scripts/internal/agent-credential-broker.mjs" \
-        supervise claude $overlay $args
+        supervise claude $args
 end

@@ -67,11 +67,16 @@ config exposes Context7 and the Godot LSP/editor MCP in every session (editor ca
 open project). Symmetrically, Claude Code owns this repo's project instructions and skills: root
 `AGENTS.md` symlinks to `.claude/CLAUDE.md`, `.agents/skills/<name>` to each `.claude/skills/` dir.
 
-**Cloudflare tooling is gated behind `--infra`** (2026-08-16, both agents): the launch wrappers
-intercept the flag and re-enable the cloudflare plugin — Claude Code via a `--settings` overlay on
-`enabledPlugins`, Codex via `-c` overrides — while the base configs keep it off to spare ordinary
-sessions the context weight. There is deliberately **no** Linode MCP or infrastructure profile;
-agents use `linode-cli` and SSH. In every session, `--infra` or not, the wrapper resolves
+**Cloudflare tooling: on by default for Claude Code, still `--infra`-gated for Codex.** It was gated
+for both agents 2026-08-16 and **ungated for Claude Code 2026-08-28** — `settings.json` sets
+`cloudflare@cloudflare: true`, so the skills and the `cloudflare-api` MCP server load in every
+project, `~/Projects/commongrounds` included (nothing there overrides `enabledPlugins`). ⚠ The
+context weight is trimmed by `deniedMcpServers`, which blocks the plugin's other four servers
+(`cloudflare-docs`, `-bindings`, `-builds`, `-observability`) — remove an entry there to gain one
+back. `functions/wrappers/claude.fish` still swallows `--infra` as a no-op so the flag never reaches
+claude as an unknown option; `functions/wrappers/codex.fish` keeps the real gate, since Codex's base
+config still disables the plugin and its `cloudflare-api` server. There is deliberately **no** Linode
+MCP or infrastructure profile; agents use `linode-cli` and SSH. In every session the wrapper resolves
 infrastructure credentials once and a session-scoped broker holds the Linode and Cloudflare CLI
 tokens in memory for the agent's lifetime.
 

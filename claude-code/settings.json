@@ -41,7 +41,7 @@
     "firecrawl@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
-    "cloudflare@cloudflare": false,
+    "cloudflare@cloudflare": true,
     "clangd-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
