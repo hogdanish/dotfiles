@@ -175,6 +175,7 @@ cask "protonvpn"  # vpn client
 cask "steam"          # game distribution platform
 cask "epic-games"     # game distribution platform
 cask "prismlauncher"  # minecraft launcher
+cask "crossover"      # wine: runs windows apps and games
 
 # ===============================
 # 🍎 app store
