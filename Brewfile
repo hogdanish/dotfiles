@@ -127,6 +127,7 @@ uv "gdtoolkit"  # gdformat/gdlint: headless gdscript formatter and linter
 
 ## development
 cask "visual-studio-code@insiders"  # main ide (insiders channel)
+cask "rider"                        # .net ide: c# and unity
 cask "ghostty"                      # terminal emulator
 cask "godot"                        # game engine
 cask "claude-code@latest"           # terminal ai coding agent
@@ -134,6 +135,7 @@ cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
 cask "orbstack"                     # docker desktop: containers and linux vms
 cask "google-chrome"                # browser: driven by the claude-in-chrome extension
+cask "perforce"                     # perforce cli (p4): version control
 cask "p4v"                          # perforce gui client (with p4merge)
 
 ## fonts
