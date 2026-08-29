@@ -47,6 +47,7 @@ brew "git-delta"        # less: git diff pager
 brew "git-filter-repo"  # git: history rewriting
 brew "difftastic"       # diff: structural, ast-aware diff
 brew "ast-grep"         # rg: structural search and rewrite by syntax tree
+brew "age"              # gpg: file encryption; decrypts the commongrounds db backups
 brew "hyperfine"        # time: statistical benchmarking
 brew "tokei"            # wc: language and loc breakdown
 brew "gh"               # git: github cli
