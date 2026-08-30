@@ -136,6 +136,7 @@ cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
 cask "orbstack"                     # docker desktop: containers and linux vms
 cask "google-chrome"                # browser: driven by the claude-in-chrome extension
+cask "google-chrome@canary"         # browser (canary channel)
 cask "perforce"                     # perforce cli (p4): version control
 cask "p4v"                          # perforce gui client (with p4merge)
 
