@@ -39,6 +39,7 @@ brew "grc"        # command output colouriser
 brew "gum"        # interactive prompts in shell scripts
 brew "coreutils"  # gnu versions of the bsd core utils
 brew "moreutils"  # coreutils: sponge, ts, errno, ifne
+brew "bash"       # bash: gnu 5.x — macos ships 3.2, which mis-runs `set -u` array refs
 
 ## development
 brew "git"              # source control
