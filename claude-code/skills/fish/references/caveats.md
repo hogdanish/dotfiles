@@ -142,6 +142,20 @@ will get them wrong again.
 
 ## Language and builtin surprises
 
+### a *quoted* glob stored in a variable silently matches nothing
+`2026-08-28` · `scripts/relink-metal-toolchain.fish`; the script reported "no cryptex mounted" while the identical pattern written inline matched
+- **Cause** — fish globs during tokenisation and **never re-globs an expanded variable**. Quoting at
+  assignment suppresses that one chance: `set -l g '/a/*/b'` stores the literal one-element string,
+  and `$g` later passes `/a/*/b` verbatim to the command. Unquoted (`set -l g /a/*/b`) it expands at
+  `set` time instead — so the two forms differ in *when* they glob, not merely in quoting style. The
+  failure is silent because an unmatched pattern in this position is not an error: `count` is 0 and
+  `$status` is 0, so a guard on either reads as "genuinely absent" rather than "wrong pattern".
+- **Do** — write the glob inline at the point of use (wrap with `\` for line length). If a pattern
+  must be stored, store it unquoted so it expands at assignment, and accept that it is then a *result*
+  list, not a reusable pattern.
+- **Verified** — `fish --no-config -c 'set -l g "/etc/*"; count $g'` → `1` (the literal) and
+  `count (path filter -- $g)` → `0`; unquoted `set -l g /etc/*; count $g` → the real file count.
+
 ### a background job whose redirection names an unpaired fifo blocks the whole script
 `2026-08-11` · commongrounds `./cg play` — `godot <fifo &` froze the launcher before its fifo holder line ran
 - **Cause** — fish sets up a job's redirections before the `&` takes effect, and `open(2)` on a fifo
