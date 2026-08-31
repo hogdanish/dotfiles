@@ -90,6 +90,7 @@ brew "linode-cli"           # linode: official cloud control-plane cli
 
 ## multimedia & graphics
 brew "ffmpeg"       # video and audio processing
+brew "vorbis-tools" # audio encoding
 brew "imagemagick"  # image processing
 brew "yt-dlp"       # media downloader
 brew "sox"          # audio sample conversion
