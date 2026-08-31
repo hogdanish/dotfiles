@@ -54,6 +54,7 @@ brew "tokei"            # wc: language and loc breakdown
 brew "gh"               # git: github cli
 brew "act"              # gh: run github actions locally
 brew "lefthook"         # git: hook manager
+brew "rumdl"            # markdown linter/formatter; aligns tables (commongrounds .rumdl.toml)
 brew "node"             # js runtime
 brew "bun"              # node: fast js runtime and package manager
 brew "uv"               # pip: python package manager
