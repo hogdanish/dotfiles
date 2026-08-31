@@ -177,11 +177,14 @@ trusted_hash = "sha256:abc5d0f6282a43ea8f9e3b363a493e020df037bc248823bb9930cd273
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:session_start:0:0"]
 trusted_hash = "sha256:cfa5383b5b0905ada45a9be46edf0d188462c8f255ff17bc6ce66f27f9db990a"
 
-[hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:pre_tool_use:0:0"]
-trusted_hash = "sha256:7aefc290ac0a2202a7fc15eabeb5c88062567615cabff5b860a3256026586eb1"
-
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:1"]
 trusted_hash = "sha256:597076289e605442477f79f111f0bf69c729a9792d7a09af7d5fa629604950bd"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:2"]
 trusted_hash = "sha256:abef831ebbbf5c3e97be25af0e466a13b92f2bc84db596f0d49e1ae021c43111"
+
+[hooks.state."/Users/ethan/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:621af96a79bd80805cd902235300b2b00e30960359f49db53458a9a78f7956fd"
+
+[hooks.state."/Users/ethan/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:14463f6b68a0d2bfa9faa4effee00476a146ed19b74662801e8ce29e7b730111"

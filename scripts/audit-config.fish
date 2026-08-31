@@ -198,6 +198,12 @@ function __check_commongrounds_codex --description 'COMMONGROUNDS Codex adapters
     if string match -qr '\[mcp_servers\.godot-(lsp|mcp)\]' <$REPO/codex/config.toml
         __fail 'project Godot MCPs leaked into the global Codex config'
     end
+    set -l structure_errors (python3 $REPO/scripts/internal/codex-parity-audit.py $REPO $project 2>&1)
+    if test $status -ne 0
+        for message in $structure_errors
+            __fail "Codex structure: $message"
+        end
+    end
 
     for hook in check-gdscript.sh format-gdscript.sh format-markdown.sh
         string match -q "*$hook*" <$project/.codex/hooks.json
