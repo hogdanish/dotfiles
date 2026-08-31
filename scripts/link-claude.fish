@@ -35,7 +35,7 @@ set -g DRY_RUN 0
 # the fixed entries. skills are discovered instead, below.
 # ⚠ themes/ is linked as a whole directory, unlike skills/: it is a user-only namespace (plugin
 # themes ship inside the plugin, not here), so nothing else writes into it.
-set -g LINKS CLAUDE.md rules settings.json themes
+set -g LINKS CLAUDE.md settings.json themes
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]
@@ -95,7 +95,7 @@ function __prune_broken_skills --description 'report dangling symlinks left by o
     __say warn 'these load nothing. remove them, or fix whatever installed them.'
 end
 
-function main
+function main --description 'link authored Claude config and skills'
     argparse f/force n/dry-run h/help -- $argv; or return
     set -q _flag_force; and set -g FORCE 1
     set -q _flag_dry_run; and set -g DRY_RUN 1

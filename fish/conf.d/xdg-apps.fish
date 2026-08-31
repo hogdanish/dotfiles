@@ -16,7 +16,7 @@
 # and Claude Code's zsh would each create a second, empty ~/.gnupg. see the repo CLAUDE.md.
 #
 # each block is `set -q`-guarded so an already-exported value wins. adding a tool: check it
-# is actually installed first (.claude/rules/machine-inventory.md), and see the fishconf
+# is actually installed first (.claude/CLAUDE.md), and see the fishconf
 # crib sheet in the fish skill for the variable names of ~26 more.
 
 if type -q less

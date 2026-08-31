@@ -19,6 +19,7 @@ set -g ISSUES 0
 set -g KNOWN_IGNORED \
     .git \
     .DS_Store \
+    .rumdl_cache \
     raycast \
     op \
     homebrew \
@@ -94,12 +95,16 @@ function __check_claude_links --description 'authored claude config is still sym
     end
     # claude code rewrites settings.json when you use /config. if it replaces the symlink
     # with a regular file, edits silently stop being tracked — this is the check for that.
-    for f in CLAUDE.md settings.json rules
+    for f in CLAUDE.md settings.json
         if not test -L $state/$f
             __fail "$state/$f is not a symlink — edits to it are NOT tracked"
         else if not test -e $state/$f
             __fail "$state/$f is a broken symlink"
         end
+    end
+
+    if test -L $state/rules
+        __fail "$state/rules is an obsolete rules symlink — remove it"
     end
 
     # every authored skill must be linked in, or it is written but never loaded.
@@ -122,8 +127,8 @@ function __check_claude_links --description 'authored claude config is still sym
     __say info 'claude-code symlinks intact'
 end
 
-function __check_codex_links --description 'Codex config and shared global skills are linked'
-    set -l authored_config config.toml
+function __check_codex_links --description 'Codex config, hooks and shared global skills are linked'
+    set -l authored_config config.toml hooks.json
     for profile in (path filter -f $REPO/codex/*.config.toml)
         set -a authored_config (path basename $profile)
     end
@@ -161,6 +166,136 @@ function __check_codex_links --description 'Codex config and shared global skill
         and __fail "dangling Codex skill link: "(path basename $entry)" — it loads nothing"
     end
     __say info 'codex symlinks intact'
+end
+
+function __check_commongrounds_codex --description 'COMMONGROUNDS Codex adapters are reproducible'
+    set -l project $HOME/Projects/commongrounds
+    test -d $project/.git; or begin
+        __say warn 'COMMONGROUNDS is absent — skipping its Codex parity checks'
+        return
+    end
+
+    for path_name in AGENTS.md .agents/skills .codex/config.toml .codex/hooks.json .codex/README.md
+        git -C $project ls-files --error-unmatch -- $path_name >/dev/null 2>&1
+        or __fail "COMMONGROUNDS adapter is not tracked: $path_name"
+    end
+    test -L $project/AGENTS.md
+    and test (readlink $project/AGENTS.md) = .claude/CLAUDE.md
+    or __fail 'COMMONGROUNDS AGENTS.md must link to .claude/CLAUDE.md'
+    test -L $project/.agents/skills
+    and test (readlink $project/.agents/skills) = ../.claude/skills
+    or __fail 'COMMONGROUNDS .agents/skills must link to ../.claude/skills'
+
+    test -e $project/.agents/rules
+    and __fail 'COMMONGROUNDS still has obsolete .agents/rules content'
+    test -e $project/.claude/rules
+    and __fail 'COMMONGROUNDS still has obsolete .claude/rules content'
+
+    string match -qr '\[mcp_servers\.godot-lsp\]' <$project/.codex/config.toml
+    or __fail 'COMMONGROUNDS project config lacks godot-lsp'
+    string match -qr '@satelliteoflove/godot-mcp@4\.1\.11' <$project/.codex/config.toml
+    or __fail 'COMMONGROUNDS project config lacks the pinned godot-mcp'
+    if string match -qr '\[mcp_servers\.godot-(lsp|mcp)\]' <$REPO/codex/config.toml
+        __fail 'project Godot MCPs leaked into the global Codex config'
+    end
+
+    for hook in check-gdscript.sh format-gdscript.sh format-markdown.sh
+        string match -q "*$hook*" <$project/.codex/hooks.json
+        or __fail "COMMONGROUNDS Codex hook adapter omits $hook"
+    end
+    __say info 'COMMONGROUNDS Codex adapters are tracked and scoped'
+end
+
+function __capture_codex_prompt --argument-names directory output --description 'render Codex context for one directory'
+    pushd $directory >/dev/null
+    command codex debug prompt-input parity-probe >$output 2>/dev/null
+    set -l result $status
+    popd >/dev/null
+    return $result
+end
+
+function __check_codex_visibility --description 'Codex sees only the instructions and skills in scope'
+    type -q codex; or begin
+        __fail 'codex is not installed — cannot prove model-visible context'
+        return
+    end
+
+    set -l project $HOME/Projects/commongrounds
+    set -l unrelated (mktemp -d)
+    set -l project_prompt (mktemp)
+    set -l dotfiles_prompt (mktemp)
+    set -l unrelated_prompt (mktemp)
+
+    __capture_codex_prompt $project $project_prompt
+    or __fail 'could not render COMMONGROUNDS Codex context'
+    __capture_codex_prompt $REPO $dotfiles_prompt
+    or __fail 'could not render dotfiles Codex context'
+    __capture_codex_prompt $unrelated $unrelated_prompt
+    or __fail 'could not render unrelated-directory Codex context'
+
+    string match -q '*Project-wide law — always on*' <$project_prompt
+    or __fail 'COMMONGROUNDS router is not model-visible to Codex'
+    for skill in (path filter -d $project/.claude/skills/*)
+        set -l name (path basename $skill)
+        string match -q "*- $name:*" <$project_prompt
+        or __fail "COMMONGROUNDS skill is not model-visible to Codex: $name"
+    end
+
+    string match -q '*Always-on dotfiles law*' <$dotfiles_prompt
+    or __fail 'dotfiles router is not model-visible to Codex'
+    for skill in (path filter -d $REPO/.claude/skills/*)
+        set -l name (path basename $skill)
+        string match -q "*- $name:*" <$dotfiles_prompt
+        or __fail "dotfiles skill is not model-visible to Codex: $name"
+    end
+
+    if string match -q '*Project-wide law — always on*' <$unrelated_prompt
+        __fail 'COMMONGROUNDS instructions leaked into an unrelated Codex context'
+    end
+    string match -q '*firecrawl:firecrawl:*' <$unrelated_prompt
+    or __fail 'Firecrawl plugin skills are not model-visible to Codex'
+
+    rm $project_prompt $dotfiles_prompt $unrelated_prompt
+    rmdir $unrelated
+    __say info 'Codex instruction and skill visibility is scoped'
+end
+
+function __check_codex_runtime --description 'Codex MCP and plugin gates match policy'
+    set -l project $HOME/Projects/commongrounds
+    set -l unrelated (mktemp -d)
+    set -l project_mcp (mktemp)
+    set -l unrelated_mcp (mktemp)
+    set -l plugins (mktemp)
+
+    pushd $project >/dev/null
+    command codex mcp list --json >$project_mcp 2>/dev/null
+    set -l project_status $status
+    popd >/dev/null
+    pushd $unrelated >/dev/null
+    command codex mcp list --json >$unrelated_mcp 2>/dev/null
+    set -l unrelated_status $status
+    popd >/dev/null
+    command codex plugin list >$plugins 2>/dev/null
+    set -l plugin_status $status
+
+    test $project_status -eq 0; or __fail 'could not list project Codex MCPs'
+    test $unrelated_status -eq 0; or __fail 'could not list unrelated-directory Codex MCPs'
+    test $plugin_status -eq 0; or __fail 'could not list Codex plugins'
+    jq -e '.[] | select(.name == "godot-mcp" and .enabled == true)' $project_mcp >/dev/null
+    or __fail 'project-scoped godot-mcp is not enabled in COMMONGROUNDS'
+    if jq -e '.[] | select(.name == "godot-mcp")' $unrelated_mcp >/dev/null
+        __fail 'godot-mcp leaked outside COMMONGROUNDS'
+    end
+    jq -e '.[] | select(.name == "cloudflare-api" and .enabled == false)' $project_mcp >/dev/null
+    or __fail 'Cloudflare MCP is not disabled by default'
+    string match -q '*firecrawl@firecrawl*installed, enabled*' <$plugins
+    or __fail 'Firecrawl Codex plugin is not installed and enabled'
+    string match -q '*cloudflare@openai-curated*installed, disabled*' <$plugins
+    or __fail 'Cloudflare Codex plugin is not installed and disabled by default'
+
+    rm $project_mcp $unrelated_mcp $plugins
+    rmdir $unrelated
+    __say info 'Codex MCP scope and plugin gates are correct'
 end
 
 function __check_project_agent_links --description 'claude project guidance is shared with codex'
@@ -213,7 +348,7 @@ function __check_universals --description 'fish universal variables must stay at
     __fail "fish universals present: $names — machine state escaping version control"
 end
 
-function main
+function main --description 'audit tracked config, links and Codex parity'
     __say info "auditing $REPO"
     __check_new_arrivals
     __check_secrets
@@ -221,6 +356,9 @@ function main
     __check_claude_links
     __check_codex_links
     __check_project_agent_links
+    __check_commongrounds_codex
+    __check_codex_visibility
+    __check_codex_runtime
     __check_rust_links
     __check_permissions
     __check_universals

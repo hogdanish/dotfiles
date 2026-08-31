@@ -242,6 +242,6 @@ mas "Wipr", id: 1662217862      # safari: content blocker
 - **Secrets or `op://` references.** Nothing in a Brewfile is secret. If something here feels like it
   should be, it belongs in the `Claude Code` 1Password Environment, fetched at point of use with
   `op run` — see the `auth` skill. ⚠ **Not** `~/.config/fish/conf.d/secrets.fish`: that file was retired
-  on 2026-07-28 and must never be recreated (`.claude/rules/security.md`).
+  on 2026-07-28 and must never be recreated (`.claude/skills/auth/SKILL.md`).
 - **`cask_args appdir:`.** The default `/Applications` is correct here, and setting it globally changes
   where *every* cask lands.

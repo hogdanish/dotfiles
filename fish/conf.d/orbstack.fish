@@ -4,7 +4,7 @@
 # ⚠ NOT sourcing ~/.orbstack/shell/init2.fish, despite that being orbstack's own documented
 # integration point. its entire content is `fish_add_path -aP ~/.orbstack/bin`, and without
 # -g that writes the *universal* fish_user_paths — this repo's steady state is zero
-# universals (claude-code/rules/fish.md), so replicating the one line with -g here avoids it.
+# universals (claude-code/CLAUDE.md), so replicating the one line with -g here avoids it.
 # unlike zoxide's abbr/alias violations (tolerated, upstream's business), a universal write
 # is cheap to avoid outright rather than tolerate.
 #

@@ -1,6 +1,6 @@
 ---
 name: fish
-description: "Fish 4.8.x on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work; the path-scoped fish rule is the trigger."
+description: "Fish 4.8.x on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work."
 ---
 
 # Fish shell
@@ -41,8 +41,8 @@ completion and a standalone script.
 `-n` and silently return **true**.
 
 ⚠ Does it prompt, ask, list, wait, or print for a human? **Read
-`~/.config/claude-code/skills/gum/SKILL.md`** — gum is the house default for every one of those, and
-the path-scoped `interactive-scripts.md` rule says so. ⚠ In
+`~/.config/claude-code/skills/gum/SKILL.md`** — the global always-on conventions make gum the house
+default for every one of those. ⚠ In
 fish, `(gum style …)` splits on newlines and shreds a multi-line block; pipe through `string collect`
 *inside* the substitution.
 
@@ -127,7 +127,7 @@ FISH
 
 `style-guide.md` is mandatory for every fish task. Then read **all** of the matching row.
 
-<!-- duplicated in claude-code/rules/fish.md so it is present even unloaded — change both -->
+<!-- duplicated in claude-code/CLAUDE.md so it is present even unloaded — change both -->
 
 | Task | Also read, in full |
 | --- | --- |
@@ -190,7 +190,7 @@ FISH
 ## Maintenance — this skill is expected to grow
 
 Fish has a long tail of surprises, and rediscovering one is a documentation defect, not bad luck.
-`claude-code/rules/fish.md` makes this mandatory; here is the mechanic:
+`claude-code/CLAUDE.md` makes this mandatory; here is the mechanic:
 
 1. **A surprise costs you a debugging cycle** → append an entry to
    [caveats.md](references/caveats.md) in the same turn, using the entry format at the top of that
@@ -202,7 +202,7 @@ Fish has a long tail of surprises, and rediscovering one is a documentation defe
    [config-layout.md](references/config-layout.md) §7. Delete both when the fix lands.
 4. **A new fish subsystem gets used** → extend the owning reference; only add a new reference file if
    none fits, and then add it to the Required-reading table *and* its mirror in
-   `claude-code/rules/fish.md`.
+   `claude-code/CLAUDE.md`.
 5. **Verify before you write it down.** Everything in these files was executed against fish 4.8.1, not
    recalled. `/opt/homebrew/bin/fish --no-config -c '...'` and `fish_indent --check` are the standard.
    An unverified caveat is worse than none.
@@ -211,6 +211,7 @@ Fish has a long tail of surprises, and rediscovering one is a documentation defe
 entries in `caveats.md` exist precisely because the confident-sounding correction was the wrong one.
 
 ---
+
 *User-level skill: it loads in every project on this machine. The always-on subset is
-`claude-code/rules/fish.md`; the write-time check is `claude-code/hooks/fish-validate.sh`. Changes to
+`claude-code/CLAUDE.md`; the write-time check is `claude-code/hooks/fish-validate.sh`. Changes to
 `~/.config/fish` update this skill in the same change.*

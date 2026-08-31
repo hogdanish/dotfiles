@@ -1,4 +1,4 @@
-function codex --wraps codex --description 'codex, with development secrets from 1password'
+function codex --wraps codex --description 'codex with 1password secrets; --infra enables cloudflare'
     # codex itself keeps its chatgpt oauth login. this environment supplies credentials to
     # tools the agent launches, without writing them to shell config or codex config.
     # --infra re-enables the cloudflare plugin and the cloudflare-api mcp server, which

@@ -4,7 +4,7 @@ Append-only record of fish behaviour that **surprised someone and cost a debuggi
 first when something is behaving impossibly. Every entry here was verified against fish **4.8.1** on
 this machine, not recalled from training data — several contradict what a model will confidently assert.
 
-## How to append (mandatory — see `claude-code/rules/fish.md`)
+## How to append (mandatory — see `claude-code/CLAUDE.md`)
 
 Found a new caveat? Add an entry in the same turn, newest at the top of its section, using this shape:
 
@@ -28,7 +28,9 @@ These were each asserted confidently during this skill's authoring and then disp
 will get them wrong again.
 
 ### a successful `set` does not reset `$status` — it preserves the previous command's
+
 `2026-08-06` · writing `conf.d/cloudflare.fish`; `fish --no-config -c 'source <file>'` exited 1 with no output
+
 - **Cause** — `set` only assigns `$status` on *failure*. On success it leaves the prior value intact.
   So the house idiom `set -q VAR; or set -gx VAR val` returns **1** whenever `VAR` was unset: `set -q`
   fails (1), `or` runs `set -gx`, which succeeds but never clears the 1. `false; or true` returns 0;
@@ -44,7 +46,9 @@ will get them wrong again.
   "Verify a change" block already said "no stray output" and needed no change.)
 
 ### fish itself runs `fish_config theme choose` on **every** interactive startup, and there is no opt-out
+
 `2026-07-29` · chasing the largest startup line that is not in `conf.d/`
+
 - **Cause** — the embedded `config.fish` ends with
   `if status is-interactive || set -qgx __fish_force_load_default_theme` → `fish_config theme choose default --no-override`,
   which runs *after* all of `conf.d/`. It reads and tokenises the shipped `default.theme` to fill in any
@@ -57,7 +61,9 @@ will get them wrong again.
   the line appears in every interactive profile and in none of the non-interactive ones.
 
 ### `set_color` **does** accept a leading `#`, but a `.theme` file does not
+
 `2026-07-29` · authoring `themes/laramie.theme`
+
 - **Cause** — two different parsers. `set_color` strips a leading `#` itself, so
   `set_color '#7aa2f7'` works. A `.theme` file is read with `read -lat toks`, i.e. **fish tokenizer
   rules**, where `#` starts a comment — so `fish_color_normal #a9b1d6` parses to *one* token and the
@@ -71,7 +77,9 @@ will get them wrong again.
 - Corrected [prompt-and-colours.md](prompt-and-colours.md) §4, which said hex must have "no `#`".
 
 ### `edit_command_buffer` and the clipboard functions are **not** bound by default
+
 `2026-07-29` · writing `conf.d/keybindings.fish`
+
 - **Cause** — the manual describes `alt-e`/`alt-v` for `edit_command_buffer` and `ctrl-x`/`ctrl-v`
   for the clipboard helpers, but on 4.8.1 `bind` reports no binding for any of them, preset or user.
   The functions exist; nothing points at them.
@@ -80,32 +88,42 @@ will get them wrong again.
 - **Verified** — `fish -ic 'bind | string match -r ".*edit_command_buffer.*"'` → no output.
 
 ### `2>&1 |` is valid fish and must not be "fixed"
+
 `2026-07-28` · authoring `bash-to-fish.md`
+
 - **Cause** — fish creates the pipe first, then applies redirections left to right, so `2>&1` targets
   the already-created pipe. The official manual shows it beside `&|`.
 - **Do** — prefer `&|` as the house spelling; never rewrite a working `2>&1 |` as a "bash-ism".
 - **Verified** — `fish -c 'begin; echo o; echo e >&2; end 2>&1 | wc -l'` → `2`.
 
 ### `test -n $unset` returns true, it does not error
+
 `2026-07-28` · style-guide §3
+
 - **Cause** — the empty list expands to nothing, `test` sees the single argument `-n`, and takes the
   one-argument form: a non-empty *string*, therefore true. Silent logic inversion, no warning.
 - **Do** — always `test -n "$var"`. (`test-require-arg` is still off in 4.8.1.)
 
 ### `set -q` returns 0 for a variable set to an empty list
+
 `2026-07-28` · the `set -q X; or set -gx X …` default idiom
+
 - **Cause** — `-q` tests *existence*, not emptiness. So the house default idiom will not repair
   `set -gx EDITOR ''`.
 - **Do** — when an empty value must also be replaced: `test -n "$EDITOR"; or set -gx EDITOR …`.
 
 ### There is no `share/fish/config.fish`, and no `share/fish/themes/`, in fish 4.x
+
 `2026-07-28` · trying to read fish's init logic
+
 - **Cause** — the init script, the standard library and the shipped themes are compiled into the
   binary. `$__fish_data_dir` holds only `man/`.
 - **Do** — `status get-file config.fish`, `status list-files themes`, `functions -D <name>`.
 
 ### Ghostty's fish integration *is* reachable through `vendor_conf.d` — it hides its own path
+
 `2026-07-28` · guarding the `source` in `conf.d/_shell.fish`
+
 - **Cause** — Ghostty prepends `$GHOSTTY_RESOURCES_DIR/shell-integration` to `XDG_DATA_DIRS`, so
   `$__fish_vendor_confdirs` (computed at step 1) *does* include its `fish/vendor_conf.d`. The snippet
   then strips that entry and erases `GHOSTTY_SHELL_INTEGRATION_XDG_DIR`, so by the time you inspect the
@@ -119,23 +137,31 @@ will get them wrong again.
 - Corrected [config-layout.md](config-layout.md) §6, which claimed the path is "a path fish never scans".
 
 ### Vendor `conf.d` runs *after* the user's, and sorting is per-directory
+
 `2026-07-28` · reasoning about load order
+
 - **Cause** — precedence is User > Admin > Vendor > fish, implemented by basename masking. Sorting
   happens within each directory, so a vendor `aaa-x.fish` still runs after a user `zzz-y.fish`.
 - **Do** — see [config-layout.md](config-layout.md) §1 for the full sequence.
 
 ### Truecolour does not require `$COLORTERM`
+
 `2026-07-28` · authoring the laramie theme
+
 - **Cause** — since 4.1.0 `set_color <hex>` emits `\e[38;2;…m` unconditionally. `_shell.fish` setting
   `COLORTERM` is harmless but not load-bearing. The real switches are `fish_term24bit`/`fish_term256`.
 
 ### Assigning past the end of a list does not error
+
 `2026-07-28` · authoring `variables.md`
+
 - **Cause** — `set -l l a b c; set l[5] z` returns 0 and pads the gap with an empty string.
 - **Verified** — `count $l` → `5`.
 
 ### `__fish_initialized` no longer exists
+
 `2026-07-28` · authoring the special-variable catalogue
+
 - **Cause** — fish 4.8.1 stopped creating it. Any config branching on it takes the unset path forever.
 
 ---
@@ -143,7 +169,9 @@ will get them wrong again.
 ## Language and builtin surprises
 
 ### a *quoted* glob stored in a variable silently matches nothing
+
 `2026-08-28` · `scripts/relink-metal-toolchain.fish`; the script reported "no cryptex mounted" while the identical pattern written inline matched
+
 - **Cause** — fish globs during tokenisation and **never re-globs an expanded variable**. Quoting at
   assignment suppresses that one chance: `set -l g '/a/*/b'` stores the literal one-element string,
   and `$g` later passes `/a/*/b` verbatim to the command. Unquoted (`set -l g /a/*/b`) it expands at
@@ -157,7 +185,9 @@ will get them wrong again.
   `count (path filter -- $g)` → `0`; unquoted `set -l g /etc/*; count $g` → the real file count.
 
 ### a background job whose redirection names an unpaired fifo blocks the whole script
+
 `2026-08-11` · commongrounds `./cg play` — `godot <fifo &` froze the launcher before its fifo holder line ran
+
 - **Cause** — fish sets up a job's redirections before the `&` takes effect, and `open(2)` on a fifo
   blocks until the other end exists. Backgrounding does not defer the open, so the *script* hangs, no
   child is created, and signal handlers do not run (the shell is inside open, not at a safe point).
@@ -169,7 +199,9 @@ will get them wrong again.
   immediately and a later `printf >>/tmp/f` is delivered.
 
 ### every `fish_add_path` call rebuilds the whole of `$PATH` — batch them
+
 `2026-07-29` · `conf.d/brew.fish` made two calls where one would do
+
 - **Cause** — fish's embedded init registers `__fish_reconstruct_path` as an
   `--on-variable fish_user_paths` handler, so the cost is per *call*, not per path. Measured ~0.55 ms
   each; three calls across `brew.fish` and `bun.fish` were 1.6 ms of a 14.6 ms startup.
@@ -180,26 +212,34 @@ will get them wrong again.
   empty; the profile shows one `fish_add_path` line where it showed two.
 
 ### `mkdir -p` with an empty list is an error, not a no-op
+
 `2026-07-29` · the batched "only create what is missing" idiom in `conf.d/_init.fish`
+
 - **Cause** — an empty fish list expands to *zero arguments*, so `mkdir` gets none and prints its
   usage with status 64. In the steady state (every directory already exists) that is **every**
   startup, so the unguarded form is noisy exactly when it should be silent.
 - **Do** — guard on the list, never on the call:
+
   ```fish
   set -l missing (path filter -vd $wanted)
   test -n "$missing"; and mkdir -p $missing
   ```
+
 - **Verified** — `fish --no-config -c 'set -l m; mkdir -p $m; echo $status'` → usage error, `64`.
 
 ### `seq` is an external command — never call it in `conf.d/`
+
 `2026-07-29` · generating the `..N` dirstack abbreviations
+
 - **Cause** — fish ships no `seq` builtin, so `for i in (seq 2 9)` forks. Measured at **1.7 ms**,
   more than every cached tool init in this config combined.
 - **Do** — write the literal list (`for i in 2 3 4 5 6 7 8 9`), or `string repeat`/`math` in a loop.
   Startup forks are the only fish performance mistake that matters ([style-guide.md](style-guide.md) §8).
 
 ### Bare `(cmd)` does not substitute inside double quotes
+
 `2026-07-28` · writing `complete -a "(generator)"`
+
 - **Cause** — only `$(cmd)` expands inside `"`. This is exactly why 3.4 added `$(…)`.
 - **Do** — `"$(cmd)"` to substitute; `'(cmd)'` or `"(cmd)"` to defer (both store the parens literally).
   For `complete`, the real difference between quote styles is *when `$variables` freeze*, not whether
@@ -207,51 +247,72 @@ will get them wrong again.
 - **Verified** — `fish -c 'echo "x (echo Y)"'` → `x (echo Y)`.
 
 ### A builtin on the receiving end of a pipe sees nothing inside a block or function
+
 `2026-07-28` · authoring `language.md`
+
 - **Cause** — stdin is not threaded into the block for builtins.
 - **Do** — `echo x | begin; string upper; end` prints nothing; use `read`, or restructure. External
   commands and `read` are unaffected.
 
 ### `path normalize` / `path resolve` return 1 when the path was already canonical
+
 `2026-07-28` · using their status as an existence test
+
 - **Do** — never branch on their exit status. Use `path filter` or `test -e`.
 
 ### `path is A B` is true if *any* argument passes
+
 `2026-07-28` · translating `test -f A -a -f B`
+
 - **Do** — `path filter --all` is the "all of them" form.
 
 ### `string match`'s glob `*` crosses `/`
+
 `2026-07-28` · filtering paths
+
 - **Cause** — it is string matching, not filename globbing.
 - **Verified** — `string match -q '*.fish' -- a/b/c.fish` → true.
 
 ### `math -s0` truncates toward zero; it is not floor division
+
 `2026-07-28` · integer arithmetic
+
 - **Verified** — `math -s0 -- -7/2` → `-3`. Use `math -m floor` for flooring.
 
 ### `echo $v` prints nothing when `$v` is `-n`
+
 `2026-07-28` · the case for banning `echo`
+
 - **Do** — use `printf` for anything containing a variable, and for anything going to stderr.
 
 ### `--argument-names` defines unsupplied names as empty lists
+
 `2026-07-28` · detecting a missing argument
+
 - **Cause** — so `set -q name` is *always* true and can never detect a missing argument.
 - **Do** — test `count $argv`, or use `argparse` with `-N`/`--min-args`.
 
 ### `argparse --min-args` fires before `$_flag_help` is readable
+
 `2026-07-28` · authoring `builtins.md`
+
 - **Cause** — `-N 1` therefore makes `--help` unreachable. Also, argparse's own flags must precede all
   option specs or you get `Short flag '-' invalid`.
 
 ### `exit` inside a function kills the whole shell
+
 `2026-07-28` · authoring `bash-to-fish.md`
+
 - **Do** — `return` in a function. `exit` is only for a script's top level.
 
 ### Unmatched globs are an error (status 124), except in a few commands
+
 `2026-07-28` · authoring `language.md`
+
 - **Cause** — exempt: `set`, `path`, `count`, `for`, and environment-override prefixes.
 
 ### `${var}` is a hard parse error, and `{1..3}` does not expand
+
 `2026-07-28` · authoring `bash-to-fish.md`
 
 ---
@@ -259,7 +320,9 @@ will get them wrong again.
 ## Tooling and environment
 
 ### a median of 15 startups cannot resolve a sub-millisecond change — use per-line attribution
+
 `2026-07-30` · measuring what 38 new git abbreviations cost in `conf.d/abbrs.fish`
+
 - **Cause** — the existing advice ("compare medians", §7 of [config-layout.md](config-layout.md)) is
   right about not trusting a single run, but understates the drift. Measured back to back on an
   otherwise idle machine: 11.04 ms with the file, 9.49 ms with it renamed `.off`, **9.84 ms with the
@@ -268,17 +331,21 @@ will get them wrong again.
   20.93.
 - **Do** — for anything under ~1 ms, do not benchmark wall clock at all. Read the cost straight out of
   the profile, where it is stable and directly attributable:
+
   ```sh
   fish --profile-startup=/tmp/p -c exit
   awk 'NR>1 && $1 ~ /^[0-9]+$/ && $0 ~ /abbr -a/ {s+=$1; n++} END{printf "%d lines, %.2f ms\n", n, s/1000}' /tmp/p
   ```
+
   That gave 68 abbr lines = **0.30 ms**, reproducibly, while the medians disagreed with themselves.
   Keep the median comparison for changes of several ms (a new fork, an uncached tool init).
 - **Verified** — the three benchmarks above, 15 runs each, run in one command with nothing else
   started in between.
 
 ### atuin's per-session `atuin uuid` fork is **avoidable** — it was called unavoidable here for a day
+
 `2026-07-29` · a benchmark pass; it was **31% of interactive startup**, the single largest line
+
 - **Cause** — the cached init opens with
   `if not set -q ATUIN_SESSION; or test "$ATUIN_SHLVL" != "$SHLVL"` then `set -gx ATUIN_SESSION (atuin uuid)`.
   Caching the init text cannot remove a fork *inside* it, which is why it was written off. But the
@@ -296,7 +363,9 @@ will get them wrong again.
   per-session `atuin uuid`".
 
 ### fish's `--profile-startup` output is space-separated, and continuation rows break naive awk
+
 `2026-07-29` · `functions/fishprof.fish` printed junk rows with no timings
+
 - **Cause** — two things. The columns are **space**-separated (`time`, `sum`, `command`) with *trailing*
   tabs, so `-F'\t'` puts the whole row in `$1`. And a command spanning several source lines is written
   across as many rows, whose continuations begin with a **word**. `awk '$1 > 500'` then compares a
@@ -307,7 +376,9 @@ will get them wrong again.
   which twelve were fragments of `__fish_theme_cat`.
 
 ### `cachecmd starship init fish` caches a 70-byte stub and saves nothing
+
 `2026-07-29` · 13 ms of startup that looked cached and was not
+
 - **Cause** — `starship init fish` deliberately emits only a one-line bootstrap,
   `source (starship init fish --print-full-init | psub)`. Caching *that* caches the bootstrap, so
   every shell still forks starship **and** the whole `psub` machinery (`mktemp` + `cat` + `rm`).
@@ -320,7 +391,9 @@ will get them wrong again.
   at 6.4 ms cumulative plus 7.8 ms of psub `mktemp`/`cat`/`rm`, on every start.
 
 ### atuin's `bind -k` lines are in an **untaken** branch — do not "fix" them
+
 `2026-07-29` · a `string replace` transform in `_shell.fish` that was pure dead code
+
 - **Cause** — `atuin init fish` contains `bind -k up …`, which fish 4 removed. Grepping for it finds
   two hits and suggests a rewrite is needed. It is not: the lines sit in the `else` arm of
   `if string match -q '4.*' $version`, and `$version` is fish's own, so on 4.8.1 the modern arm always
@@ -332,7 +405,9 @@ will get them wrong again.
   `fish -i -c 'atuin init fish | source; bind ctrl-r'` is silent and binds correctly.
 
 ### atuin binds `?` to a network AI call unless you pass `--disable-ai`
+
 `2026-07-29` · auditing what `atuin init fish` actually installs
+
 - **Cause** — the tail of the init defines `_atuin_ai_question_mark` and does `bind "?"` to it. At an
   empty command line, pressing `?` runs `atuin ai inline --hook`, which calls Atuin's AI service. Every
   other `?` also round-trips through a fish function.
@@ -341,7 +416,9 @@ will get them wrong again.
 - **Verified** — `fish -ic 'bind "?"'` → `bind ? _atuin_ai_question_mark` before, `No binding found` after.
 
 ### fzf's ctrl-r opt-out is an **empty but set** variable
+
 `2026-07-29` · giving ctrl-r to atuin without depending on `conf.d` load order
+
 - **Cause** — `fzf --fish` guards its bind with
   `if not set -q FZF_CTRL_R_COMMAND; or test -n "$FZF_CTRL_R_COMMAND"`. Empty-but-set therefore skips
   the binding silently, while any **non-empty** value prints
@@ -353,7 +430,9 @@ will get them wrong again.
   ctrl-r wins. That is how fzf silently took ctrl-r from atuin here for months.
 
 ### `/opt/homebrew/etc/grc.fish` must never be sourced
+
 `2026-07-29` · wiring up grc
+
 - **Cause** — Homebrew's snippet does `set -U grc_plugin_execs …` (a universal written from config,
   banned by [style-guide.md](style-guide.md) §3), then defines ~40 wrapper functions in a loop at
   source time, and each wrapper runs `eval command $executable $argv` — so a filename containing `;`
@@ -364,7 +443,9 @@ will get them wrong again.
   by the command *name*, so `grc command df` looks for `conf.command` and emits no colour.
 
 ### An early `return` in a multi-concern `conf.d` file silently skips everything below it
+
 `2026-07-29` · `_shell.fish` — `type -q starship; or return 1` above the ghostty and atuin blocks
+
 - **Cause** — `return` at the top level of a sourced file ends **that file**, which is the idiomatic
   early exit and is correct for a single-concern snippet. In a file holding four concerns it couples
   them: a missing starship would have taken ghostty shell integration and all of atuin with it, with
@@ -374,7 +455,9 @@ will get them wrong again.
   in the header — never `return`.
 
 ### A startup error that appears in a real terminal but never under `fish -c`
+
 `2026-07-28` · `conf.d/theme.fish` — `source: missing filename argument or input redirection`
+
 - **Cause** — two mechanisms compounding. `$__fish_themes_dir` does not exist (the real variable is
   `$FISH_THEMES_DIR`, or `__fish_theme_dir`), so `$__fish_themes_dir/$THEME.fish` annihilated the whole
   token ([language.md](language.md) §4) and `source` got **zero arguments**. `source` with no arguments
@@ -386,48 +469,64 @@ will get them wrong again.
   that reads as "applied" in the file and is not, with no error beyond the one `source` line.
 - **Do** — add a pty startup to the checklist whenever a `conf.d` file is touched, and never let
   `source` take a bare variable:
+
   ```fish
   set -l palette "$FISH_THEMES_DIR/$THEME.fish"
   test -r "$palette"; or return 1   # guard, so a bad path fails loudly instead of reading stdin
   source $palette
   ```
+
 - **Verified** — `script -q /dev/null fish --login --interactive -c exit` reproduces it;
   `fish -c true` and `fish --no-config -c 'source conf.d/theme.fish'` both exit 0 on the same file.
   `fish --no-config -c 'set -l e; source $e'` → the error on a tty, status 1.
 
 ### `--no-config` cannot test autoloading or universals
+
 `2026-07-28` · the style guide's isolation check
+
 - **Cause** — it leaves `$fish_function_path` unset and demotes `set -U` to global.
 - **Do** — use it to prove a file is self-contained and quiet; use `exec fish` to prove it works.
 
 ### A misspelled `fish_color_*` in a `.theme` file is silently dropped
+
 `2026-07-28` · authoring the laramie theme
+
 - **Cause** — no warning, zero exit status, no variable set. The warning loop in `__fish_theme_cat`
   matches the wrong variable, so it never fires.
 - **Do** — spell-check against the table in [prompt-and-colours.md](prompt-and-colours.md) §5.
 
 ### Four `fish_color_*` variables look real but are never read
+
 `2026-07-28` · copying from a shipped theme
+
 - **Cause** — `fish_color_background`, `fish_color_match`, `fish_color_statement_terminator`,
   `fish_color_gray` pass the `.theme` whitelist but fish 4.8.1 ignores them. Shipped
   Catppuccin/tokyonight themes set some of them, so copying from them imports dead config.
 
 ### `$FISH_THEMES_DIR` is decorative
+
 `2026-07-28` · `conf.d/_init.fish`
+
 - **Cause** — fish never reads it; `__fish_theme_dir` hardcodes `$__fish_config_dir/themes`.
 
 ### `__fish_no_arguments` is unusable in a completion
+
 `2026-07-28` · authoring `completions.md`
+
 - **Cause** — in a completion context `commandline -tc` yields one empty element, so its loop always
   hits `case '*'` and returns 1 — the completion is never offered.
 - **Do** — `__fish_use_subcommand` or `__fish_is_first_arg`.
 
 ### fish only autoloads `completions/<cmd>.fish` when `<cmd>` resolves
+
 `2026-07-28` · testing a completion for an unwritten tool
+
 - **Do** — `source` the completion file explicitly, then `complete -C '<cmd> '`.
 
 ### A non-interactive `fisher install` hangs
+
 `2026-07-28` · scripted plugin install
+
 - **Cause** — `isatty || read` waits on stdin.
 - **Do** — redirect: `fisher install owner/repo </dev/null`.
 
@@ -439,7 +538,9 @@ Tracked here only while unfixed; the current-state inventory is
 [config-layout.md](config-layout.md) §7. Delete an entry when the fix lands.
 
 ### ~~`conf.d/brew.fish` uses `$HOMEBREW_PREFIX` 14 lines before setting it~~ — RESOLVED
+
 `2026-07-28` · `$PATH` order was non-deterministic; **fixed 2026-07-28**
+
 - **Cause** — Ghostty launches fish directly with no zsh, so the variable was unset and
   `"$HOMEBREW_PREFIX/bin"` expanded to literal `/bin`. `fish_add_path -m` then moved `/bin` and
   `/sbin` to the front of `$PATH` **and persisted it to `fish_variables`**.
@@ -447,7 +548,9 @@ Tracked here only while unfixed; the current-state inventory is
   and the stale universal was erased. Verified: `$PATH` leads with the Homebrew entries.
 
 ### ~~`conf.d/_shell.fish` writes a universal `STARSHIP_CONFIG`~~ — RESOLVED
+
 `2026-07-29` · `set -Ux STARSHIP_CONFIG` re-issued on every interactive start
+
 - **Cause** — a universal variable written from a config file, banned by
   [style-guide.md](style-guide.md) §3. It was the only entry in `fish_variables`.
 - **Outcome** — `themes/starship.toml` moved to `~/.config/starship.toml`, starship's own default
@@ -456,26 +559,34 @@ Tracked here only while unfixed; the current-state inventory is
 - **Verified** — `fish -c 'set -U --names'` prints nothing; `fish_variables` holds only its header.
 
 ### ~~`conf.d/secrets.fish` holds plaintext credentials~~ — RESOLVED
+
 `2026-07-28` · four live API tokens as environment variables; **file retired the same day**
+
 - **Outcome** — moved to the `Claude Code` 1Password Environment, consumed by `functions/wrappers/claude.fish`
   via `op run --no-masking --environment`. Verified: a fresh login fish exports none of the four.
 - **⚠ Never recreate it.** A shell that needs a credential gets it at the moment of use.
 
 ### ~~Live files fail `fish_indent --check`~~ — RESOLVED
+
 `2026-07-29` · `abbrs.fish`, `tools.fish`, `cachecmd.fish`
+
 - **Outcome** — `fish_indent -w` on each, plus `.editorconfig` at the repo root so an editor
   enforces it on save. Every `.fish` file under `~/.config/fish` now passes both
   `fish_indent --check` and `fish -n`. The `fish-validate.sh` hook catches regressions on write.
 
 ### ~~`abbrs.fish` references three commands that do not exist~~ — RESOLVED
+
 `2026-07-29` · `cls`, `tre`, `z`
+
 - **Outcome** — `cls` is now `functions/cls.fish`; `tree` points at `eza --tree` instead of the
   uninstalled `tre`; `z` works because zoxide is initialised in `conf.d/tools.fish`. An
   every-target-resolves check is in the fish skill's verification section — run it after editing
   `abbrs.fish`.
 
 ### ⚠ `~/.config/op/plugins.sh` is POSIX shell and cannot be sourced from fish
+
 `2026-07-28` · `op plugin init` tells you to source it; doing so errors on every fish start
+
 - **Cause** — `op plugin init` writes POSIX function definitions (`gh() { op plugin run -- gh "$@" }`)
   regardless of the invoking shell. `op plugin init --help` even suggests adding the `source` line to
   `~/.config/fish/config.fish`. It does not parse as fish.
@@ -489,7 +600,9 @@ Tracked here only while unfixed; the current-state inventory is
   raises a 1Password prompt. Same trap for any wrapped CLI a `conf.d` file invokes.
 
 ### `fish_add_path -g` snapshots a stale universal instead of clearing it
+
 `2026-07-28` · fixing `brew.fish` alone did not remove `/bin` and `/sbin` from `$PATH`
+
 - **Cause** — `fish_add_path -g` reads whatever `fish_user_paths` currently holds (the universal) and
   copies it into the new global, preserving the junk. Shadowing also leaves residue: the universal is
   merged into `$PATH` during fish's own startup, *before* `conf.d` runs.
@@ -499,7 +612,9 @@ Tracked here only while unfixed; the current-state inventory is
   `/opt/homebrew/bin`, and `/bin` fell back to its natural `/etc/paths` position.
 
 ### Claude Code's Bash tool is a *non-interactive login* zsh
+
 `2026-07-28` · aliases and `~/.zshrc` are unreachable, but the fish environment is inherited
+
 - **Cause** — the tool spawns `/bin/zsh -l` without `-i`. `~/.zprofile` is read; `~/.zshrc` is **not**;
   aliases do not expand. But `claude` itself is launched *from fish*, so the whole fish environment is
   inherited by the tool's subprocesses.
@@ -530,7 +645,9 @@ delta --show-config | rg plus-style     # must NOT say: syntax "#002800"
 ```
 
 ### `fish_indent --check` follows completion symlinks
+
 `2026-08-08` · the pre-commit hook tried to format OrbStack/Homebrew-owned completions
+
 - **Cause** — `fish_indent` follows a path that is a symlink. The tracked `docker.fish`,
   `kubectl.fish`, and `orbctl.fish` entries point at generated vendor files, so treating every
   staged `*.fish` path as authored source makes the hook enforce this repo's format on another
@@ -540,7 +657,9 @@ delta --show-config | rg plus-style     # must NOT say: syntax "#002800"
   their owner instead.
 
 ### `set -l` inside an `if` block does not survive the block
+
 `2026-08-14` · agent launch wrappers silently lost 1Password references before `op run`
+
 - **Cause** — Fish local scope is the current block. `set -lx TOKEN ...` inside `if ... end` erases
   `TOKEN` at that `end`; the later command in the same function does not inherit it.
 - **Do** — use `set -fx TOKEN ...` when a conditional must assign a function-scoped variable for a

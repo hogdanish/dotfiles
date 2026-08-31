@@ -77,6 +77,7 @@ function main --description 'link codex config and user-authored skills'
 
     __link_one $SHARED_SRC/CLAUDE.md $CODEX_DEST/AGENTS.md claude-code/CLAUDE.md
     __link_one $SRC/config.toml $CODEX_DEST/config.toml codex/config.toml
+    __link_one $SRC/hooks.json $CODEX_DEST/hooks.json codex/hooks.json
     for profile in (path filter -f $SRC/*.config.toml)
         set -l name (path basename $profile)
         __link_one $profile $CODEX_DEST/$name codex/$name

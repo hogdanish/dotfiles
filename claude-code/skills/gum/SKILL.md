@@ -1,14 +1,14 @@
 ---
 name: gum
-description: "Gum 0.17.x for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human; the interactive-scripts rule is the trigger."
+description: "Gum 0.17.x for interactive and formatted terminal scripts: all 13 commands, GUM_* variables, the stdout/stderr and exit-code contract, theming, and shell traps. Load before writing anything that prompts or prints for a human."
 ---
 
 # gum — glamorous shell scripts
 
 **gum 0.17.x** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal formatting
 on this machine, in **any** directory and in **any** shell — fish, bash or zsh. It is a hard
-dependency here, not a nicety: `claude-code/rules/interactive-scripts.md` is the path-scoped rule
-that makes it the default for anything a human reads or answers.
+dependency here, not a nicety: `claude-code/CLAUDE.md` makes it the default for anything a human
+reads or answers.
 
 **Reading floor.** Writing a gum command you have not written before → read
 [commands.md](references/commands.md). Composing more than one gum call into a script or a layout →
@@ -54,7 +54,7 @@ you must see it render.
 
 ## Replace the primitives
 
-This table is the always-on rule's core, repeated here because it is what you act on:
+This table expands the global always-on convention:
 
 | Instead of | Use |
 | --- | --- |
@@ -184,5 +184,6 @@ A gum behaviour that surprises you is a documentation defect: add it to the Cave
 the matching reference, in the same turn.
 
 ---
+
 *User-level skill: it loads in every project on this machine. The always-on trigger is
-`claude-code/rules/interactive-scripts.md`; shell syntax belongs to the `fish` skill.*
+`claude-code/CLAUDE.md`; shell syntax belongs to the `fish` skill.*

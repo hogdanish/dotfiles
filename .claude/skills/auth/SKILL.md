@@ -163,7 +163,7 @@ stdout/stderr for secret values, which means replacing those fds with pipes. Cla
 tty to decide whether it can draw a TUI; with a piped stdout it silently switches to `--print` mode
 and exits with:
 
-```
+```text
 Error: Input must be provided either through stdin or as a prompt argument when using --print
 ```
 
@@ -191,7 +191,7 @@ exists.
 
 ## Non-negotiables
 
-`.claude/rules/security.md` carries the always-on subset. The short version:
+`.claude/skills/auth/SKILL.md` carries the always-on subset. The short version:
 
 1. **Never write a credential literal** into any file — use an `op://` reference, `op run`, or a
    mounted Environment. This includes "temporary" values and test fixtures.

@@ -3,7 +3,7 @@
 # anything that must also work in scripts and pipelines is a function, not an abbr.
 #
 # ⚠ every target here must actually exist on this machine. three entries were dead for
-# months because it was not checked; see .claude/rules/machine-inventory.md.
+# months because it was not checked; see .claude/CLAUDE.md.
 #
 # an abbreviation is purely a line-editor feature — it expands on typed input and scripts
 # never see one, so defining them in a non-interactive shell is time spent on something

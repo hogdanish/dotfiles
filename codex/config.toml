@@ -5,8 +5,15 @@ web_search = "live"
 model_reasoning_summary = "auto"
 personality = "pragmatic"
 model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "medium"
 service_tier = "default"
+developer_instructions = """
+When delegation is explicitly requested or applicable project instructions call for it, keep the
+agent tree at most two levels below the primary: a primary may spawn subagents, and a subagent may
+spawn grandchildren for bounded independent work, but grandchildren must not delegate. All
+descendants share the configured concurrency ceiling; treat it as headroom, not a target. Normally
+use no more than four workers at once unless the user explicitly asks for more.
+"""
 
 [marketplaces.openai-bundled]
 source_type = "local"
@@ -15,6 +22,11 @@ source = "/Users/ethan/.codex/.tmp/bundled-marketplaces/openai-bundled"
 [marketplaces.openai-primary-runtime]
 source_type = "local"
 source = "/Users/ethan/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[marketplaces.firecrawl]
+source_type = "git"
+source = "https://github.com/firecrawl/firecrawl-claude-plugin.git"
+ref = "cf966ed"
 
 [plugins."browser@openai-bundled"]
 enabled = true
@@ -60,9 +72,19 @@ enabled = true
 [plugins."codex-app-tools@openai-bundled"]
 enabled = true
 
+[plugins."firecrawl@firecrawl"]
+enabled = true
+
 [features]
 js_repl = false
 memories = true
+
+# Keep large reviews capable but bounded. Prompts should normally use no more
+# than four workers at once; this ceiling leaves room for targeted follow-ups.
+[agents]
+max_concurrent_threads_per_session = 6
+default_subagent_model = "gpt-5.6-sol"
+default_subagent_reasoning_effort = "high"
 
 [mcp_servers.node_repl]
 args = []
@@ -99,21 +121,6 @@ default_tools_approval_mode = "writes"
 # gated behind --infra, with the cloudflare plugin above
 enabled = false
 
-[mcp_servers.godot-lsp]
-command = "/opt/homebrew/bin/bunx"
-args = [ "@ryanmazzolini/minimal-godot-mcp" ]
-startup_timeout_sec = 60
-default_tools_approval_mode = "auto"
-
-[mcp_servers.godot-mcp]
-command = "/opt/homebrew/bin/bunx"
-args = [ "@satelliteoflove/godot-mcp" ]
-startup_timeout_sec = 60
-default_tools_approval_mode = "writes"
-
-[mcp_servers.godot-mcp.env]
-GODOT_MCP_USAGE_LOG = "0"
-
 [mcp_servers.computer-use]
 command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
 args = [ "mcp" ]
@@ -129,7 +136,7 @@ NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "7fe0e1c59da4bc68f9d6ab81ae8d349b53fe
 
 [desktop]
 external-agent-import-sync-enabled = true
-conversationDetailMode = "STEPS_PROSE"
+conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = true
 preventSleepWhileRunning = true
 show-context-window-usage = true
@@ -165,10 +172,16 @@ trust_level = "trusted"
 [hooks.state]
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:0"]
-trusted_hash = "sha256:3f9af55a331302eddcaae257055cc288224ebbbf22d3ceec0abdef3b005a87ae"
+trusted_hash = "sha256:abc5d0f6282a43ea8f9e3b363a493e020df037bc248823bb9930cd27369a98dd"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:5dc4536b8d79b48a25e6704916751540782e10d7373b691476e9b3a8e5c009b5"
+trusted_hash = "sha256:cfa5383b5b0905ada45a9be46edf0d188462c8f255ff17bc6ce66f27f9db990a"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:pre_tool_use:0:0"]
 trusted_hash = "sha256:7aefc290ac0a2202a7fc15eabeb5c88062567615cabff5b860a3256026586eb1"
+
+[hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:1"]
+trusted_hash = "sha256:597076289e605442477f79f111f0bf69c729a9792d7a09af7d5fa629604950bd"
+
+[hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:2"]
+trusted_hash = "sha256:abef831ebbbf5c3e97be25af0e466a13b92f2bc84db596f0d49e1ae021c43111"

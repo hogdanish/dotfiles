@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PostToolUse hook — validate any .fish file after a Write/Edit touches it.
 #
-# enforces the parts of claude-code/rules/fish.md that are mechanically checkable.
+# enforces the parts of claude-code/CLAUDE.md that are mechanically checkable.
 # prose is a request; a hook is a guarantee. silent on success.
 #
 # user-level: wired from claude-code/settings.json, so it fires on every .fish
@@ -16,16 +16,34 @@ FISH=/opt/homebrew/bin/fish
 INDENT=/opt/homebrew/bin/fish_indent
 
 input=$(cat)
-file_path=$(jq -r '.tool_input.file_path // empty' <<<"$input" 2>/dev/null)
+files=$(jq -r '
+  if (.tool_input.file_path? // "") != "" then
+    .tool_input.file_path
+  elif .tool_name == "apply_patch" then
+    (.tool_input.command // "")
+    | split("\n")[]
+    | select(startswith("*** Update File: ") or startswith("*** Add File: "))
+    | sub("^\\*\\*\\* (Update|Add) File: "; "")
+  else
+    empty
+  end
+' <<<"$input" 2>/dev/null)
 
-case "$file_path" in
-  *.fish) ;;
-  *) exit 0 ;;
-esac
-[[ -f "$file_path" ]] || exit 0
 [[ -x "$FISH" ]] || exit 0
 
-errors=""
+validate_file() {
+  local file_path=$1
+  local errors=""
+
+  case "$file_path" in
+    /*) ;;
+    *) file_path="${CLAUDE_PROJECT_DIR:-${PWD}}/$file_path" ;;
+  esac
+  case "$file_path" in
+    *.fish) ;;
+    *) return 0 ;;
+  esac
+  [[ -f "$file_path" ]] || return 0
 
 # 1. does it parse? catches [[ ]], ${var}, unbalanced end, bad redirections.
 if ! out=$("$FISH" -n "$file_path" 2>&1); then
@@ -51,13 +69,13 @@ fi
 # 4. house style violations that fish itself accepts. keep these
 #    high-confidence: a noisy hook is an ignored hook.
 if hits=$(grep -nE '^[[:space:]]*alias[[:space:]]+[^[:space:]]' "$file_path" 2>/dev/null); then
-  errors+="\`alias\` is banned (rules/fish.md §7) — write a function or an abbr:\n${hits}\n\n"
+  errors+="\`alias\` is banned (claude-code/CLAUDE.md §7) — write a function or an abbr:\n${hits}\n\n"
 fi
 
 # `set -U` / `--universal`, but not an erase (`set -eU x` is the sanctioned fix).
 if hits=$(grep -nE '^[[:space:]]*set[[:space:]]+(-[a-zA-Z]*U[a-zA-Z]*|--universal)([[:space:]]|$)' "$file_path" 2>/dev/null \
           | grep -vE '(-[a-zA-Z]*e[a-zA-Z]*[[:space:]]|--erase)'); then
-  errors+="universal variable written from a config file (rules/fish.md §1). \`set -U\` persists to\n"
+  errors+="universal variable written from a config file (claude-code/CLAUDE.md §1). \`set -U\` persists to\n"
   errors+="fish_variables, which is machine state, not version-controlled config:\n${hits}\n\n"
 fi
 
@@ -72,18 +90,25 @@ if hits=$(grep -nE '(^|[[:space:]])\[\[[[:space:]]' "$file_path" 2>/dev/null); t
   errors+="use \`test\` or \`string match\`:\n${hits}\n\n"
 fi
 
-# every function needs a description (rules/fish.md §6).
+# every function needs a description (claude-code/CLAUDE.md §6).
 if hits=$(grep -nE '^[[:space:]]*function[[:space:]]+' "$file_path" 2>/dev/null \
           | grep -vE '(-d[[:space:]]|--description)'); then
-  errors+="function without a --description (rules/fish.md §6):\n${hits}\n\n"
+  errors+="function without a --description (claude-code/CLAUDE.md §6):\n${hits}\n\n"
 fi
 
-if [[ -n "$errors" ]]; then
-  printf 'Fish validation failed for %s\n\n' "$file_path" >&2
-  printf '%b' "$errors" >&2
-  printf 'Fix before continuing. Full law: the fish rule, and the fish skill'"'"'s\n' >&2
-  printf 'references/style-guide.md\n' >&2
-  exit 1
-fi
+  if [[ -n "$errors" ]]; then
+    printf 'Fish validation failed for %s\n\n' "$file_path" >&2
+    printf '%b' "$errors" >&2
+    printf 'Fix before continuing. Full law: claude-code/CLAUDE.md and the fish skill'"'"'s\n' >&2
+    printf 'references/style-guide.md.\n' >&2
+    return 1
+  fi
+}
 
-exit 0
+status=0
+while IFS= read -r file_path; do
+  [[ -n "$file_path" ]] || continue
+  validate_file "$file_path" || status=1
+done <<<"$files"
+
+exit "$status"

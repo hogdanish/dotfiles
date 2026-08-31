@@ -7,7 +7,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "opus[1m]",
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
@@ -83,7 +83,7 @@
       "**Cloud provider(s)**: None configured",
       "**Repository visibility**: PUBLIC — hogdanish/dotfiles (github.com) is public; any push there is publishing",
       "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
-      "**Secrets management**: 1Password (`op` CLI, `op://` references, `op run`/`op plugin run`, 1Password Environments) is the root of trust on this machine; no credential literals are ever written to disk — see `.claude/rules/security.md` and the `auth` skill",
+      "**Secrets management**: 1Password (`op` CLI, `op://` references, `op run`/`op plugin run`, 1Password Environments) is the root of trust on this machine; no credential literals are ever written to disk — see `.claude/skills/auth/SKILL.md` and the `auth` skill",
       "**Default / protected branches**: `main` (default). No rulesets or classic branch protection listed via gh — repo is public, so treat `main` as sensitive to force-push/history-rewrite despite the absence of a technical block",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",

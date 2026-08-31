@@ -31,13 +31,10 @@ file and silently detach it from version control — `scripts/audit-config.fish`
 
 ## The claude-code/ layout
 
-**`rules/`** — user-level, loaded in every project on this machine. Path-scoped (free until a
-matching file is touched): `gdscript.md` (`**/*.gd`), `fish.md` (`**/*.fish`),
-`interactive-scripts.md` (script files — the gum trigger, scoped 2026-08-16). Unscoped and kept lean
-on purpose: `notify.md` (when to reach Ethan via `PushNotification`) and `tool-selection.md` (which
-of the overlapping web/docs/Cloudflare tools to reach for, and in what order — the counterweight to
-plugin skills that advertise themselves over the built-ins). ⚠ Unlike skills, `rules/` is symlinked
-**as a directory** — a new rule needs no `link-claude.fish` run.
+**Always-on dotfiles law** — the Brewfile is the complete inventory; read it before configuring a
+tool and update it with every install/removal. Never write, print or inspect resolved secrets; use
+1Password references at consumption time. Load `fish` for `.fish`, `gum` for human-facing shell and
+`auth` for credential paths. The repo is public and its `.gitignore` is an allowlist.
 
 **`hooks/`** — user-level, wired from `claude-code/settings.json` by absolute path, so they fire in
 every project. `fish-validate.sh` fires on every `.fish` write anywhere. ⚠ It is not symlinked and
@@ -61,13 +58,14 @@ always-on CLAUDE.md pointers to get them read at all. Deleted: `prose` (2026-08-
   declaration version-controls itself. A hand-authored copy goes stale (the brief `firecrawl` one
   proved it).
 
-**`codex/`** — Codex-specific TOML only. Codex does not separate config from state, so live
+**`codex/`** — thin Codex protocol adapters only. Codex does not separate config from state, so live
 `~/.codex/` stays untracked and links back here: `config.toml` and `*.config.toml` profiles into
-`codex/`, `AGENTS.md` into `claude-code/CLAUDE.md`, and each `~/.agents/skills/<name>` into
-`claude-code/skills/`. Run `scripts/link-codex.fish` after adding a global skill. Codex's base
-config exposes Context7 and the Godot LSP/editor MCP in every session (editor calls still need an
-open project). Symmetrically, Claude Code owns this repo's project instructions and skills: root
-`AGENTS.md` symlinks to `.claude/CLAUDE.md`, `.agents/skills/<name>` to each `.claude/skills/` dir.
+`codex/`, `hooks.json` into the same directory, `AGENTS.md` into `claude-code/CLAUDE.md`, and each
+`~/.agents/skills/<name>` into `claude-code/skills/`. Run `scripts/link-codex.fish` after adding a
+global skill or hook adapter. Codex's base config exposes Context7; project-specific MCPs belong in
+each trusted repository's `.codex/config.toml`. Symmetrically, Claude Code owns project instructions,
+skills and hook implementations; tracked Codex files adapt their protocols without copying
+substantive content.
 
 **Cloudflare tooling: on by default for Claude Code, still `--infra`-gated for Codex.** It was gated
 for both agents 2026-08-16 and **ungated for Claude Code 2026-08-28** — `settings.json` sets
@@ -94,8 +92,13 @@ the `Claude Code` 1Password Environment that `wrappers/claude.fish` mounts, and 
 inherits it; launch claude any other way and every firecrawl skill fails on a missing key. ⚠ The
 skills advertise themselves over the built-in `WebFetch`/`WebSearch` ("use this instead of
 WebFetch"), and the Firecrawl API is metered — enabling it globally would move routine web reads
-onto paid credits, so `rules/tool-selection.md` is the always-on counterweight that keeps the
-built-ins the default and firecrawl the step-up.
+onto paid credits; the global always-on conventions keep built-ins the default and Firecrawl the
+step-up.
+
+Codex imports Firecrawl through its supported external-agent/plugin workflow; no vendor skill body
+is tracked here. Claude's arbitrary-language LSP plugin components and agent-callable mid-task push
+notifications have no exact Codex equivalents today. Codex retains repository-native diagnostics and
+turn-ended notification; do not install an unmaintained bridge merely for inventory symmetry.
 
 **Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
 *names* go into context up front and a schema is fetched only when it is first needed, rather than
@@ -122,8 +125,7 @@ tool**; it names every top-level entry that is neither tracked nor known junk.
 Homebrew's own runtime config. **It is kept current in both directions** — installs and removals
 update it in the same change, and `brewfile-audit.sh` proves nothing is installed-but-undeclared or
 declared-but-gone — so trust it for what exists rather than surveying `brew list`.
-`.claude/rules/machine-inventory.md` has the protocol and the ⚠ that being *declared* still is not
-proof a given binary resolves today.
+The always-on law above still distinguishes declared inventory from a binary proven to resolve.
 
 **Homebrew updates itself unattended** — the `domt4/autoupdate` tap on a launchd timer, every 12 h,
 AC power only, notifying only on failure (`brew autoupdate logs`). ⚠ It runs **without `--sudo`**,
@@ -168,7 +170,7 @@ are not available to you.
 
 **Editing any `.fish` file? Invoke the `fish` skill first** — house style, load order, theming, the
 bash→fish table, startup-cost budget and every caveat, in full. Its Required-reading rows are
-floors, not menus. The `fish` rule is the always-on subset, and
+floors, not menus. The global always-on conventions carry the trigger, and
 `claude-code/hooks/fish-validate.sh` checks every write. ⚠ A fish behaviour that surprises you or
 costs a debugging cycle goes into the skill's `references/caveats.md` in the same turn, verified
 against the installed fish — never corrected from memory.
@@ -199,9 +201,8 @@ human-facing script, or any file with a colour in it. What is worth knowing *unl
   ⚠ Channel `tip` with `auto-update = download`: never assert an option exists from memory
   (`ghostty +explain-config <key>`), and run `.claude/skills/ghostty/scripts/ghostty-audit.sh`
   after an upgrade.
-- **`gum`** — the source of truth for every script a human runs; the path-scoped
-  `interactive-scripts` rule is the trigger and carries the non-negotiables. A hard dependency here,
-  but still guard with `type -q gum`.
+- **`gum`** — the source of truth for every script a human runs. A hard dependency here, but still
+  guard with `type -q gum`.
 - **`laramie`** — owns the 32-token OKLCH spec, per-tool bindings, the ANSI-16 contract and syntax
   doctrine. ⚠ Run `bat cache --build` after editing the tmTheme or bat falls back silently and
   `delta.syntax-theme = laramie` breaks with it. ⚠ Where a tool takes ANSI colour *names*
@@ -213,7 +214,7 @@ human-facing script, or any file with a colour in it. What is worth knowing *unl
 **The `auth` skill is the source of truth** for anything credential-shaped — 1Password, `op://`
 references, Environments, shell plugins, the SSH agent and `op-ssh-sign` signing, the
 GnuPG/pinentry-touchid chain, every Touch ID surface. Load it before writing any config that stores
-or consumes a secret; `.claude/rules/security.md` is the always-on subset. Everything configured
+or consumes a secret. Everything configured
 here (agent socket, `agent.toml` vault scoping, `allowedSignersFile`, the `gh`/`linode-cli` shell
 plugins, the `op run` wrappers) is documented there, along with the traps `op whoami` fails from a
 Bash tool call · `op run` needs `--no-masking` for a TUI child · never source `op/plugins.sh` from

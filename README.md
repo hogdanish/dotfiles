@@ -1,6 +1,6 @@
 # dotfiles
 
-My simple macOS config.  No GNU Stow, chezmoi, or anything else. This repo is `~/.config`.
+My simple macOS config. No GNU Stow, chezmoi, or anything else. This repo is `~/.config`.
 
 - **OS**: macOS Golden Gate 27.x
 - **Hardware**: MacBook Pro (M5, 14-inch, 24 GB)
@@ -14,7 +14,10 @@ My simple macOS config.  No GNU Stow, chezmoi, or anything else. This repo is `~
 - `.gitignore` is the allowlist, everything is ignored by default
 - `Brewfile` acts as an automatically updated software inventory for everything (CLI tools, GUI apps, NPM packages, app store apps, etc)
 - `home/` holds files that have to be in `$HOME`, symlinked via `scripts/link-home.fish`.
-- `claude-code/` and `codex/` are custom global system agent configs and are symlinked via `scripts/link-claude.fish` & `link-codex.fish`
+- `claude-code/` owns shared agent instructions, skills and hooks; `codex/` contains only thin
+  Codex adapters linked by `scripts/link-codex.fish`
+- Codex keeps Cloudflare behind `codex --infra`; project MCPs stay in each project's tracked
+  `.codex/config.toml`
 - All secrets are managed via 1Password and resolved at use time via `op run`, never stored on disk.
 
 ## New machine

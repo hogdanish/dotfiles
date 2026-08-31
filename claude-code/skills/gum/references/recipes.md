@@ -254,7 +254,7 @@ gum input --password --header 'Vault passphrase' | sudo -nS true
 ```
 
 ⚠ For anything credential-shaped, prefer `op run` / `op://` references over prompting at all. See
-`.claude/rules/security.md` and the `auth` skill — a prompted secret in a shell variable is a plaintext
+`.claude/skills/auth/SKILL.md` and the `auth` skill — a prompted secret in a shell variable is a plaintext
 secret.
 
 ---
