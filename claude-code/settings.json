@@ -8,6 +8,7 @@
     "defaultMode": "auto"
   },
   "model": "opus[1m]",
+  "enabledMcpjsonServers": ["website-spec"],
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"

@@ -121,6 +121,18 @@ default_tools_approval_mode = "writes"
 # gated behind --infra, with the cloudflare plugin above
 enabled = false
 
+# the website specification — https://specification.website/mcp/
+# stateless streamable http, no auth, read-only: search / list_topics / get_topic /
+# get_checklist / get_categories / get_changes, plus an audit_url prompt.
+# declared globally, off by default: web work is rare here and the `website-spec` skill
+# vendors the whole checklist, so an audit never depends on this being connected.
+# ~/Projects/hogdot/.codex/config.toml turns it on there.
+[mcp_servers.website-spec]
+url = "https://mcp.specification.website/mcp"
+startup_timeout_sec = 30
+default_tools_approval_mode = "auto"
+enabled = false
+
 [mcp_servers.computer-use]
 command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
 args = [ "mcp" ]
@@ -158,6 +170,9 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/ethan/.config"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Projects/hogdot"]
 trust_level = "trusted"
 
 [projects."/Users/ethan/Documents/Codex/2026-08-14/create-a-scheduled-task-called-weekday"]

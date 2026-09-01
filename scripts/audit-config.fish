@@ -269,8 +269,11 @@ end
 function __check_codex_runtime --description 'Codex MCP and plugin gates match policy'
     set -l project $HOME/Projects/commongrounds
     set -l unrelated (mktemp -d)
+    set -l hogdot $HOME/Projects/hogdot
     set -l project_mcp (mktemp)
     set -l unrelated_mcp (mktemp)
+    set -l hogdot_mcp (mktemp)
+    set -l hogdot_status 1
     set -l plugins (mktemp)
 
     pushd $project >/dev/null
@@ -281,6 +284,15 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     command codex mcp list --json >$unrelated_mcp 2>/dev/null
     set -l unrelated_status $status
     popd >/dev/null
+    # the website spec server is the one gate that lives outside this repo's projects, so probe
+    # hogdot too. skipped rather than failed when the checkout is absent — this repo must audit
+    # clean on a machine that has not cloned it.
+    if test -d $hogdot
+        pushd $hogdot >/dev/null
+        command codex mcp list --json >$hogdot_mcp 2>/dev/null
+        set hogdot_status $status
+        popd >/dev/null
+    end
     command codex plugin list >$plugins 2>/dev/null
     set -l plugin_status $status
 
@@ -294,12 +306,19 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     end
     jq -e '.[] | select(.name == "cloudflare-api" and .enabled == false)' $project_mcp >/dev/null
     or __fail 'Cloudflare MCP is not disabled by default'
+    jq -e '.[] | select(.name == "website-spec" and .enabled == false)' $unrelated_mcp >/dev/null
+    or __fail 'Website Spec MCP is not disabled by default'
+    if test -d $hogdot
+        test $hogdot_status -eq 0; or __fail 'could not list hogdot Codex MCPs'
+        jq -e '.[] | select(.name == "website-spec" and .enabled == true)' $hogdot_mcp >/dev/null
+        or __fail 'Website Spec MCP is not enabled in hogdot'
+    end
     string match -q '*firecrawl@firecrawl*installed, enabled*' <$plugins
     or __fail 'Firecrawl Codex plugin is not installed and enabled'
     string match -q '*cloudflare@openai-curated*installed, disabled*' <$plugins
     or __fail 'Cloudflare Codex plugin is not installed and disabled by default'
 
-    rm $project_mcp $unrelated_mcp $plugins
+    rm $project_mcp $unrelated_mcp $hogdot_mcp $plugins
     rmdir $unrelated
     __say info 'Codex MCP scope and plugin gates are correct'
 end

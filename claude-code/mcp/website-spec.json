@@ -1,0 +1,21 @@
+{
+  "$comment": [
+    "The Website Specification MCP server — https://specification.website/mcp/",
+    "Stateless Streamable HTTP, no auth, read-only. Six tools + an audit_url prompt.",
+    "",
+    "This is the canonical declaration. It is NOT loaded from here: Claude Code reads MCP",
+    "server definitions only from ~/.claude.json (untracked state) or a project's .mcp.json.",
+    "So this file is the copy-source — drop it in as a project's .mcp.json to switch the",
+    "server on there. The user-level settings.json pre-approves the name in",
+    "enabledMcpjsonServers, so it connects without a trust prompt wherever it appears.",
+    "",
+    "Live in: ~/Projects/hogdot. Off everywhere else, by design — the vendored checklist in",
+    "the website-spec skill is what makes an audit possible without it."
+  ],
+  "mcpServers": {
+    "website-spec": {
+      "type": "http",
+      "url": "https://mcp.specification.website/mcp"
+    }
+  }
+}

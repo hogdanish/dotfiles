@@ -38,6 +38,12 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
   snake/Pascal/constant naming and formatter-owned layout. Treat every warning as a defect.
 - **Fish and human-facing shell** — load `fish` before any `.fish` work and read every required
   reference; use `gum` for human prompts/status, never for machine-readable output.
+- **Web development** — load the `website-spec` skill before writing, reviewing or shipping any
+  web front-end: HTML, CSS, a page `<head>`, meta/Open Graph tags, favicons, `robots.txt`,
+  sitemaps, security headers, `/.well-known/` paths, `llms.txt`, accessibility, Core Web Vitals,
+  i18n, 404s and redirects. It vendors **The Website Specification** in full — all 168 items with
+  their required/recommended/optional/avoid status — so an audit never needs the network. Report
+  the spec's status, never a promoted one; a `required` gap is a defect.
 - **Tools** — built-in web search/fetch first; Firecrawl only for crawling, extraction or a failed
   built-in path because it is metered. Context7 is for named versioned libraries; Cloudflare docs/API
   outrank generic web for Cloudflare work.

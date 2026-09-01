@@ -42,12 +42,20 @@ must not be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`. �
 `SessionStart`/`SessionEnd` keep-awake hook was **deleted 2026-08-27** — do not reintroduce it.
 
 **`skills/`** — user-level, loaded everywhere (unlike `.claude/skills/`, which loads only inside
-this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`. `fish` and `gum` live here rather than
-in `.claude/` because neither is repo-specific. All five are listed and model-invocable —
-`disable-model-invocation: true` was dropped **2026-08-27**, because hiding them meant relying on
-always-on CLAUDE.md pointers to get them read at all. Deleted: `prose` (2026-08-16) and `toolbox`
-(2026-08-17), skill and rule each.
+this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `website-spec`. `fish` and `gum` live
+here rather than in `.claude/` because neither is repo-specific. All six are listed and
+model-invocable — `disable-model-invocation: true` was dropped **2026-08-27**, because hiding them
+meant relying on always-on CLAUDE.md pointers to get them read at all. Deleted: `prose`
+(2026-08-16) and `toolbox` (2026-08-17), skill and rule each.
 
+- ⚠ **`website-spec` (added 2026-09-01) vendors a third party's living documents** — the full
+  168-item checklist from `specification.website/checklist.md` and the spec author's own
+  `SKILL.md`, both verbatim. That is the one deliberate exception to the vendor-skills rule below,
+  and it is only safe because the exception is *content*, not a skill body we pretend to own: our
+  `SKILL.md` is authored here, upstream's is kept whole beside it as a reference, and
+  `scripts/website-spec-sync.sh` re-fetches both, diffs them, and checks the sha256 the site
+  publishes in `/.well-known/agent-skills/index.json`. Never hand-edit the two vendored files —
+  run the script with `--write` and commit the refresh on its own.
 - ⚠ Symlinked **one directory at a time**: `$CLAUDE_CONFIG_DIR/skills/` is a namespace any installer
   may write into, and linking it wholesale would drag foreign output into a public repo.
 - ⚠ Symlinked skills **do** load (verified against Claude Code 2.1.220); one that fails to appear
@@ -66,6 +74,24 @@ global skill or hook adapter. Codex's base config exposes Context7; project-spec
 each trusted repository's `.codex/config.toml`. Symmetrically, Claude Code owns project instructions,
 skills and hook implementations; tracked Codex files adapt their protocols without copying
 substantive content.
+
+**`claude-code/mcp/`** — canonical MCP server declarations that Claude Code will not read from a
+tracked file. ⚠ There is **no `mcpServers` key in `settings.json`** (verified against the settings
+reference, 2026-09-01): Claude Code takes server definitions only from `~/.claude.json` (untracked
+state) or a project's `.mcp.json`. So a declaration here is a *copy-source*, and the global,
+tracked half of the wiring is `enabledMcpjsonServers` in `claude-code/settings.json` — a
+user-level pre-approval of the server **name**, which means the server connects with no trust
+prompt in any project whose `.mcp.json` declares it, and in no project that does not.
+
+**Website Spec MCP: declared globally for both agents, live only in `~/Projects/hogdot`**
+(2026-09-01). `https://mcp.specification.website/mcp` — Streamable HTTP, **no auth**, read-only,
+six tools plus an `audit_url` prompt. Claude Code: `claude-code/mcp/website-spec.json` plus
+`"enabledMcpjsonServers": ["website-spec"]`. Codex: `[mcp_servers.website-spec]` in
+`codex/config.toml` with `enabled = false`, the same gating shape as `cloudflare-api`. hogdot
+carries the live switches in its own repo — `.mcp.json` and `.codex/config.toml`. ⚠ Codex reads a
+project `config.toml` only in a **trusted** repo, and hogdot is not in `[projects]` here, so its
+first Codex run there prompts for trust. ⚠ Its being off is never a reason to skip a spec audit:
+the `website-spec` skill vendors the whole checklist, which is the point of vendoring it.
 
 **Cloudflare tooling: on by default for Claude Code, still `--infra`-gated for Codex.** It was gated
 for both agents 2026-08-16 and **ungated for Claude Code 2026-08-28** — `settings.json` sets
