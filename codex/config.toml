@@ -5,7 +5,7 @@ web_search = "live"
 model_reasoning_summary = "auto"
 personality = "pragmatic"
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 service_tier = "default"
 developer_instructions = """
 When delegation is explicitly requested or applicable project instructions call for it, keep the
@@ -103,8 +103,8 @@ NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunc
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.825.51511"
-NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.825.51511/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+BROWSER_USE_CODEX_APP_VERSION = "26.831.11858"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.831.11858/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
 [mcp_servers.context7]
