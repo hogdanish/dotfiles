@@ -7,8 +7,10 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
-  "enabledMcpjsonServers": ["website-spec"],
+  "model": "claude-fable-5[1m]",
+  "enabledMcpjsonServers": [
+    "website-spec"
+  ],
   "deniedMcpServers": [
     {
       "serverName": "plugin:cloudflare:cloudflare-docs"
