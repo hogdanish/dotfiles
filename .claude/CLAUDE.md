@@ -165,6 +165,18 @@ the autoupdate plist, `brew.env` and `/opt/homebrew/etc/npmrc` all live outside 
 "only fish exports it" failures and the `HOMEBREW_*` boolean trap:
 `brewfile` skill → `references/homebrew-runtime.md`.
 
+⚠ **Claude Code is deliberately not a cask** (dropped 2026-09-01) — it is the native
+self-updating build at `~/.local/bin/claude`, and the Brewfile carries a comment saying so where
+the cask used to be. The cask hardcodes `version` + sha256 that a bot bumps per release, so it
+trailed the channel by days (pinned to 2.1.252 while `latest` served 2.1.257) and no `brew upgrade`
+could close the gap; `claude doctor` now reports install method native, auto-updates enabled,
+channel `latest`. Reinstall with `curl -fsSL https://claude.ai/install.sh | bash -s latest`.
+⚠ **Never `brew uninstall --zap` that cask** — its zap list includes `~/.local/state/claude`
+(`$CLAUDE_CONFIG_DIR`: transcripts, memory, plugins), `~/.config/claude` and `~/.claude.json`.
+This is the *second* documented gap in the Brewfile-as-inventory rule, alongside VS Code
+extensions and `bun`/`npm` globals; `audit-config.fish` asserts the native build is what `$PATH`
+resolves, and `conf.d/localbin.fish` is what puts `~/.local/bin` there.
+
 **Commits are gated** by `lefthook.yml`: `betterleaks` on staged content, a force-add guard,
 `fish -n` + `fish_indent --check`, `ruby -c` on the Brewfile. ⚠ `.git/hooks` is never
 version-controlled — `lefthook install` once per clone or none of that exists.
@@ -203,11 +215,12 @@ floors, not menus. The global always-on conventions carry the trigger, and
 costs a debugging cycle goes into the skill's `references/caveats.md` in the same turn, verified
 against the installed fish — never corrected from memory.
 
-`config.fish` is intentionally **empty**. Everything is eighteen one-concern snippets in `conf.d/`,
+`config.fish` is intentionally **empty**. Everything is nineteen one-concern snippets in `conf.d/`,
 sourced before it, sorted digits → `_` → letters:
 
 `_init` · `_shell` · `abbrs` · `brew` · `bun` · `cloudflare` · `colours` · `fzf` · `ghostty` ·
-`git` · `gum` · `java` · `keybindings` · `op` · `rust` · `tools` · `uv` · `xdg-apps`
+`git` · `gum` · `java` · `keybindings` · `localbin` · `op` · `orbstack` · `rust` · `tools` ·
+`xdg-apps`
 
 New tool config goes in its own `conf.d/<tool>.fish`, never `config.fish`. `functions/` is filed
 **by caller**: top level for commands a human types (`brewup` `cls` `extract` `fishprof` `funcfresh`

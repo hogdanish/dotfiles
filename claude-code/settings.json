@@ -110,5 +110,6 @@
   "allowDangerouslySkipPermissions": true,
   "additionalDirectories": [
     "/Users/ethan/.config"
-  ]
+  ],
+  "autoUpdatesChannel": "latest"
 }

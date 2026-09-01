@@ -134,7 +134,12 @@ cask "visual-studio-code@insiders"  # main ide (insiders channel)
 cask "rider"                        # .net ide: c# and unity
 cask "ghostty"                      # terminal emulator
 cask "godot"                        # game engine
-cask "claude-code@latest"           # terminal ai coding agent
+# ⚠ claude code is deliberately NOT a cask — do not add one back. the cask hardcodes a
+# `version` + sha256 that a bot must bump per release, so it trails the real channel by days
+# (it was pinned to 2.1.252 while `latest` served 2.1.257 on 2026-09-01) and no amount of
+# `brew upgrade` closes the gap. the native installer self-updates instead — `claude doctor`
+# reports install method native, auto-updates enabled, channel latest. to reinstall:
+#   curl -fsSL https://claude.ai/install.sh | bash -s latest
 cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
 cask "orbstack"                     # docker desktop: containers and linux vms
