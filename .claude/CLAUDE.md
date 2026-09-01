@@ -83,15 +83,17 @@ tracked half of the wiring is `enabledMcpjsonServers` in `claude-code/settings.j
 user-level pre-approval of the server **name**, which means the server connects with no trust
 prompt in any project whose `.mcp.json` declares it, and in no project that does not.
 
-**Website Spec MCP: declared globally for both agents, live only in `~/Projects/hogdot`**
-(2026-09-01). `https://mcp.specification.website/mcp` — Streamable HTTP, **no auth**, read-only,
-six tools plus an `audit_url` prompt. Claude Code: `claude-code/mcp/website-spec.json` plus
+**Website Spec MCP: declared globally for both agents, switched on per project** (2026-09-01).
+`https://mcp.specification.website/mcp` — Streamable HTTP, **no auth**, read-only, six tools plus
+an `audit_url` prompt. Claude Code: `claude-code/mcp/website-spec.json` plus
 `"enabledMcpjsonServers": ["website-spec"]`. Codex: `[mcp_servers.website-spec]` in
-`codex/config.toml` with `enabled = false`, the same gating shape as `cloudflare-api`. hogdot
-carries the live switches in its own repo — `.mcp.json` and `.codex/config.toml`. ⚠ Codex reads a
-project `config.toml` only in a **trusted** repo, and hogdot is not in `[projects]` here, so its
-first Codex run there prompts for trust. ⚠ Its being off is never a reason to skip a spec audit:
-the `website-spec` skill vendors the whole checklist, which is the point of vendoring it.
+`codex/config.toml` with `enabled = false`, the same gating shape as `cloudflare-api`. Each
+project carries its own live switches — `.mcp.json` and `.codex/config.toml`, tracked in that
+repo. **Live in `~/Projects/hogdot` and `~/Projects/commongrounds`**; adding another is those two
+files plus an `audit-config.fish` assertion. ⚠ Codex reads a project `config.toml` only in a
+**trusted** repo, which is why hogdot was added to `[projects]` here. ⚠ Its being off is never a
+reason to skip a spec audit: the `website-spec` skill vendors the whole checklist, which is the
+point of vendoring it.
 
 **Cloudflare tooling: on by default for Claude Code, still `--infra`-gated for Codex.** It was gated
 for both agents 2026-08-16 and **ungated for Claude Code 2026-08-28** — `settings.json` sets

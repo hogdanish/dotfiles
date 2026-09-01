@@ -9,8 +9,9 @@
     "server on there. The user-level settings.json pre-approves the name in",
     "enabledMcpjsonServers, so it connects without a trust prompt wherever it appears.",
     "",
-    "Live in: ~/Projects/hogdot. Off everywhere else, by design — the vendored checklist in",
-    "the website-spec skill is what makes an audit possible without it."
+    "Live in: ~/Projects/hogdot and ~/Projects/commongrounds. Off everywhere else, by",
+    "design — the vendored checklist in the website-spec skill is what makes an audit",
+    "possible without it."
   ],
   "mcpServers": {
     "website-spec": {

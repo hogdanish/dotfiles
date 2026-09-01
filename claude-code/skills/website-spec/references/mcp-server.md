@@ -1,9 +1,10 @@
 # The Website Spec MCP server, as wired on this machine
 
 The spec ships a read-only MCP server. It is **declared in the global user configuration for both
-agents and switched on in one project only** — `~/Projects/hogdot`. Everywhere else it is off by
-design, and that is deliberately harmless: the whole checklist is vendored in
-[checklist.md](checklist.md), so an audit never depends on this server being connected.
+agents and switched on per project** — live today in `~/Projects/hogdot` and
+`~/Projects/commongrounds`. Everywhere else it is off by design, and that is deliberately
+harmless: the whole checklist is vendored in [checklist.md](checklist.md), so an audit never
+depends on this server being connected.
 
 ## The server
 
@@ -30,21 +31,27 @@ or a project's `.mcp.json` — there is no `mcpServers` key in `settings.json`, 
 user-level definition is not possible. The tracked halves are therefore:
 
 - `~/.config/claude-code/mcp/website-spec.json` — the canonical declaration and copy-source.
-  Drop it in as a project's `.mcp.json` to switch the server on there.
+  Drop it in as a project's `.mcp.json`, or merge its one `mcpServers` entry into an existing
+  one, to switch the server on there.
 - `~/.config/claude-code/settings.json` — `"enabledMcpjsonServers": ["website-spec"]`, a
   user-level pre-approval. That is the global half: the name is trusted machine-wide, so the
   server connects with no prompt wherever a `.mcp.json` declares it, and nowhere it does not.
 
 **Codex.** `~/.config/codex/config.toml` carries `[mcp_servers.website-spec]` with
-`enabled = false` — the same shape as the `--infra`-gated `cloudflare-api` entry above it.
-`~/Projects/hogdot/.codex/config.toml` overrides it with `enabled = true`.
+`enabled = false` — the same shape as the `--infra`-gated `cloudflare-api` entry above it. Each
+live project's `.codex/config.toml` overrides it with `enabled = true`.
 
-**hogdot.** `.mcp.json` and `.codex/config.toml`, both tracked in that repo.
+**The live projects.** `hogdot` and `commongrounds` each track their own `.mcp.json` and
+`.codex/config.toml`. `~/.config/scripts/audit-config.fish` asserts both halves of the gate —
+enabled in each, disabled in an unrelated directory — so a project that silently stops loading
+it fails the audit rather than degrading quietly.
 
 ## Turning it on in another project
 
 ```sh
-cp ~/.config/claude-code/mcp/website-spec.json <project>/.mcp.json   # claude code
+# claude code — a project with no .mcp.json yet
+cp ~/.config/claude-code/mcp/website-spec.json <project>/.mcp.json
+# ...otherwise merge the one entry into the existing mcpServers object by hand
 ```
 
 ```toml

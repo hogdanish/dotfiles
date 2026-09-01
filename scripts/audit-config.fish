@@ -308,6 +308,8 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     or __fail 'Cloudflare MCP is not disabled by default'
     jq -e '.[] | select(.name == "website-spec" and .enabled == false)' $unrelated_mcp >/dev/null
     or __fail 'Website Spec MCP is not disabled by default'
+    jq -e '.[] | select(.name == "website-spec" and .enabled == true)' $project_mcp >/dev/null
+    or __fail 'Website Spec MCP is not enabled in COMMONGROUNDS'
     if test -d $hogdot
         test $hogdot_status -eq 0; or __fail 'could not list hogdot Codex MCPs'
         jq -e '.[] | select(.name == "website-spec" and .enabled == true)' $hogdot_mcp >/dev/null

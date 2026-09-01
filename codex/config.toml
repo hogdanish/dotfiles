@@ -124,9 +124,9 @@ enabled = false
 # the website specification — https://specification.website/mcp/
 # stateless streamable http, no auth, read-only: search / list_topics / get_topic /
 # get_checklist / get_categories / get_changes, plus an audit_url prompt.
-# declared globally, off by default: web work is rare here and the `website-spec` skill
-# vendors the whole checklist, so an audit never depends on this being connected.
-# ~/Projects/hogdot/.codex/config.toml turns it on there.
+# declared globally, off by default: most projects here are not web projects, and the
+# `website-spec` skill vendors the whole checklist, so an audit never depends on this.
+# each project's own .codex/config.toml turns it on: hogdot and commongrounds today.
 [mcp_servers.website-spec]
 url = "https://mcp.specification.website/mcp"
 startup_timeout_sec = 30
