@@ -1,0 +1,35 @@
+{
+  "$comment": [
+    "Safari's own MCP server — `safaridriver --mcp`, shipped inside macOS.",
+    "Apple added it in Safari Technology Preview 247 and it is live in the Safari 27.0 that",
+    "ships with this macOS 27 beta (`safaridriver --help` lists --mcp). 17 tools, stdio.",
+    "",
+    "Nothing to install and no supply chain: no npm package, no driver, no cask. It is the",
+    "same safaridriver that has always shipped with the OS, run in a different mode.",
+    "⚠ It needed no `safaridriver --enable` here — verified 2026-09-02 by driving a real",
+    "session cold. If a session ever fails with `Could not create a session`, that is the",
+    "command to run (it prompts for authentication, so it is yours to run, not an agent's).",
+    "",
+    "⚠ OFF BY DEFAULT, deliberately — 17 tool descriptions in every session to serve a rare",
+    "one is the wrong trade, exactly as for firefox-devtools. Load it per session:",
+    "    claude --safari           (the wrapper passes --mcp-config with this file)",
+    "",
+    "Drives an isolated WebDriver automation session, not the logged-in Safari — so it is the",
+    "safe one to point at a page, and the wrong one for anything needing your cookies.",
+    "⚠ Closing the window out from under a live session leaves the server with no addressable",
+    "browsing context: navigate_to_url still reports success, list_tabs then returns [] and the",
+    "next evaluate_javascript fails with `Could not find browsing context`. create_tab recovers",
+    "it. Observed 2026-09-02 — the cause was a human closing the window, not a Safari defect.",
+    "",
+    "WebGPU works headed and out of the box: vendor `apple`, timestamp-query,",
+    "texture-compression-bc, maxTextureDimension2D 16384 (Firefox reports 32767 — a real",
+    "cross-browser limit difference, not a reporting artifact)."
+  ],
+  "mcpServers": {
+    "safari": {
+      "type": "stdio",
+      "command": "safaridriver",
+      "args": ["--mcp"]
+    }
+  }
+}

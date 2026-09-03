@@ -1,4 +1,4 @@
-function claude --wraps claude --description 'claude code, with secrets from a 1password environment'
+function claude --wraps claude --description 'claude code with 1password secrets; --firefox/--safari add browser control'
     # why the whole process is wrapped rather than each mcp server:
     # the github plugin ships an HTTP mcp server whose config interpolates
     # `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *claude process environment*.
@@ -28,14 +28,38 @@ function claude --wraps claude --description 'claude code, with secrets from a 1
     # swallowed here so muscle memory — and the codex wrapper, where the flag still means
     # something — never reaches claude as an unknown option. the credential broker below
     # serves `cf` and `linode-cli` in every session either way.
+    #
+    # --firefox / --safari load a browser-control mcp server for THIS LAUNCH ONLY, via
+    # --mcp-config. both are off by default on purpose: firefox-devtools is 45 tool descriptions
+    # in the `developer` preset and safari is 17, and almost no session drives a browser. nothing
+    # is added to enabledMcpjsonServers and neither belongs in a project .mcp.json — the flag is
+    # the whole enable mechanism, so an ordinary session pays nothing.
+    # ⚠ neither is headless. headless firefox resolves requestAdapter() to NULL on this machine,
+    # so a window has to appear for webgpu to exist at all. see claude-code/mcp/*.json.
     set -l args
+    set -l mcp
     for a in $argv
-        if test "$a" = --infra
-            echo >&2 'claude: --infra is a no-op — the cloudflare plugin is enabled by default'
-        else
-            set -a args $a
+        switch $a
+            case --infra
+                echo >&2 'claude: --infra is a no-op — the cloudflare plugin is enabled by default'
+            case --firefox
+                set -a mcp "$XDG_CONFIG_HOME/claude-code/mcp/firefox-devtools.json"
+            case --safari
+                set -a mcp "$XDG_CONFIG_HOME/claude-code/mcp/safari.json"
+            case '*'
+                set -a args $a
         end
     end
+
+    for f in $mcp
+        if not test -r $f
+            echo >&2 "claude: missing mcp declaration $f"
+            return 1
+        end
+    end
+    # appended, never prepended: --mcp-config is variadic, so anything following it on the command
+    # line would be swallowed as another config path.
+    test (count $mcp) -gt 0; and set -a args --mcp-config $mcp
 
     # deferred tools: tool names go into context up front and a schema is fetched only when it is
     # actually needed, instead of every mcp/plugin schema being inlined every turn. this is claude

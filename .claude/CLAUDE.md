@@ -128,6 +128,52 @@ is tracked here. Claude's arbitrary-language LSP plugin components and agent-cal
 notifications have no exact Codex equivalents today. Codex retains repository-native diagnostics and
 turn-ended notification; do not install an unmaintained bridge merely for inventory symmetry.
 
+**Browser control: Firefox and Safari, off by default, one flag per session** (2026-09-02). Both
+agents can drive a real browser — spawn windows, read the console and network, evaluate scripts,
+screenshot, profile — and **neither costs an ordinary session anything**, which is the whole design.
+
+| | Firefox | Safari |
+|---|---|---|
+| Server | `@mozilla/firefox-devtools-mcp`, pinned `0.10.1` | `safaridriver --mcp`, shipped in macOS |
+| Transport | WebDriver BiDi (Selenium + `geckodriver`) | stdio, first-party |
+| Tools | 45 on `--tool-preset developer` | 17 |
+| Enable | `claude --firefox` / `codex --firefox` | `claude --safari` / `codex --safari` |
+
+The enable path is the wrapper flag and nothing else. Claude Code gets `--mcp-config` pointing at
+`claude-code/mcp/{firefox-devtools,safari}.json` for that launch only; Codex declares both in
+`codex/config.toml` with `enabled = false` and the flag adds `-c mcp_servers.<n>.enabled=true`, the
+same gating shape as `cloudflare-api`. ⚠ **Neither name goes in `enabledMcpjsonServers` and neither
+belongs in a project `.mcp.json`** — 62 tool descriptions in every session to serve the rare one is
+exactly the trade this repo refuses. `audit-config.fish` fails if either leaks into settings, into
+a project `.mcp.json`, or into a Codex default.
+
+⚠ **Not headless, and that is a measured constraint, not a preference.** Headless Firefox resolves
+`navigator.gpu.requestAdapter()` to **NULL** on this machine — a headless run cannot see WebGPU at
+all. Headed returns a real adapter. A window has to appear for the GPU to.
+
+⚠ **Playwright is the wrong tool here and was rejected.** Its `firefox` and `webkit` are patched
+builds, not the branded browsers, so they cannot answer what real Firefox or real Safari does with a
+real WebGPU pipeline — which is the entire reason this exists (COMMONGROUNDS ships to the browser
+over WebGPU). Mozilla's server drives `/Applications/Firefox.app`; Apple's drives real Safari.
+
+Measured 2026-09-02, both headed, and worth knowing before reading a cross-browser bug as a code
+defect: Firefox reports `maxTextureDimension2D` **32767**, Safari **16384**, and both expose
+`timestamp-query` and `texture-compression-bc`. ⚠ Safari needed **no** `safaridriver --enable`; if a
+session ever fails with `Could not create a session`, that command is the fix and it authenticates,
+so it is Ethan's to run, not an agent's. The `developer` preset is what carries
+`list_console_messages`, `list_network_requests` and the Gecko profiler — the default `basic` preset
+has none of the three, which is why the pin names it.
+
+⚠ **Closing the browser window out from under a live session breaks it, in both servers.** The
+navigation still reports success, the tab list then comes back empty, and the next script eval
+fails with `Could not find browsing context`; `create_tab` / `new_page` recovers. Observed
+2026-09-02 and worth knowing before reading it as a driver bug — the window is session state.
+
+⚠ **`cg bench web` is Chrome-only and stays that way.** COMMONGROUNDS' Rust harness is ~5.6k lines
+built on a hand-rolled CDP client, with `ChildRole::Chrome` and `discover_chrome` through its spine;
+Firefox dropped CDP in 129 and speaks BiDi. These MCP servers are an *exploratory* path beside that
+harness, not a second measurement arm — a number for the record still comes from `cg bench web`.
+
 **Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
 *names* go into context up front and a schema is fetched only when it is first needed, rather than
 every MCP and plugin schema being inlined every turn. ⚠ This is already Claude Code's default (unset
@@ -136,6 +182,15 @@ turns it off, as does `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS`. It is process-wi
 not per-project — there is no per-repo setting and none is needed. Skills are separate and already
 lazy by construction: only each `SKILL.md`'s name and description sit in context until the skill is
 invoked.
+
+⚠ **claude-swap (`cswap`) was installed and fully removed on 2026-09-02 — do not reinstall it.**
+The `uv` tool, its `[menubar]` launchd agent, `~/.claude-swap-backup/`, its Keychain items and every
+tracked reference (a Brewfile line, an `audit-config.fish` assertion, a `brewfile-audit.sh` extras
+strip) are gone; nothing about it was ever committed. It swaps accounts by rewriting the live
+`.claude.json` and the `Claude Code-credentials-<hash>` Keychain item under the running profile,
+which desynced them: its own `list` reported both slots holding one account while `/status` showed
+the config's identity beside the *other* account's token and billing. Two accounts belong in two
+`CLAUDE_CONFIG_DIR`s, not one profile with a mutating credential.
 
 **`scripts/`** — `bootstrap.sh` (POSIX sh; fish and gum may not exist when it runs),
 `link-home.fish`, `link-claude.fish`, `link-codex.fish`, `audit-config.fish`, and the agent session

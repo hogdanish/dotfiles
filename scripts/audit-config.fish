@@ -26,7 +26,8 @@ set -g KNOWN_IGNORED \
     claude \
     .wrangler \
     cagent \
-    caddy
+    caddy \
+    configstore
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]
@@ -308,6 +309,12 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     or __fail 'Cloudflare MCP is not disabled by default'
     jq -e '.[] | select(.name == "website-spec" and .enabled == false)' $unrelated_mcp >/dev/null
     or __fail 'Website Spec MCP is not disabled by default'
+    for browser_mcp in firefox-devtools safari
+        jq -e --arg n $browser_mcp '.[] | select(.name == $n and .enabled == false)' $unrelated_mcp >/dev/null
+        or __fail "browser MCP $browser_mcp is not disabled by default"
+        jq -e --arg n $browser_mcp '.[] | select(.name == $n and .enabled == false)' $project_mcp >/dev/null
+        or __fail "browser MCP $browser_mcp is enabled inside COMMONGROUNDS — it is --firefox/--safari only"
+    end
     jq -e '.[] | select(.name == "website-spec" and .enabled == true)' $project_mcp >/dev/null
     or __fail 'Website Spec MCP is not enabled in COMMONGROUNDS'
     if test -d $hogdot
@@ -398,6 +405,56 @@ function __check_claude_install --description 'claude code is the self-updating 
     __say info 'claude code is the native self-updating build'
 end
 
+function __check_browser_mcp --description 'browser control stays opt-in, never always-on'
+    # ⚠ the whole point of these two is that they cost an ordinary session NOTHING. firefox-devtools
+    # is 45 tool descriptions in the `developer` preset and safari is 17, so the moment either lands
+    # in enabledMcpjsonServers or a project .mcp.json, every session pays for a capability almost
+    # none of them use. the only enable path is `claude --firefox` / `claude --safari`, which pass
+    # --mcp-config for that launch alone.
+    for decl in firefox-devtools safari
+        set -l f $REPO/claude-code/mcp/$decl.json
+        if not test -r $f
+            __fail "missing browser MCP declaration $f"
+            continue
+        end
+        jq -e . $f >/dev/null 2>&1; or __fail "$decl.json is not valid JSON"
+    end
+
+    set -l settings $REPO/claude-code/settings.json
+    for name in firefox-devtools safari
+        if jq -e --arg n $name '.enabledMcpjsonServers // [] | index($n)' $settings >/dev/null 2>&1
+            __fail "$name is pre-approved in enabledMcpjsonServers — it must stay --mcp-config only"
+        end
+    end
+
+    # a project .mcp.json naming either one would switch it on for every session in that repo.
+    for project in $HOME/Projects/commongrounds $HOME/Projects/hogdot
+        set -l mcp $project/.mcp.json
+        test -r $mcp; or continue
+        for name in firefox-devtools safari
+            if jq -e --arg n $name '.mcpServers | has($n)' $mcp >/dev/null 2>&1
+                __fail "$name leaked into "(path basename $project)"/.mcp.json — it is per-session only"
+            end
+        end
+    end
+
+    # headed, not headless: headless firefox resolves requestAdapter() to NULL on this machine, so a
+    # --headless arg here would silently remove the ability to see WebGPU at all.
+    if jq -e '.mcpServers["firefox-devtools"].args | index("--headless")' \
+            $REPO/claude-code/mcp/firefox-devtools.json >/dev/null 2>&1
+        __fail 'firefox-devtools is configured --headless, which resolves requestAdapter() to NULL'
+    end
+
+    type -q geckodriver
+    or __fail 'geckodriver is missing — Selenium would download an untracked one into ~/.cache'
+    test -d /Applications/Firefox.app
+    or __fail 'Firefox.app is missing — the firefox-devtools MCP drives the branded browser'
+    type -q safaridriver; and safaridriver --help 2>&1 | string match -q '*--mcp*'
+    or __fail 'safaridriver does not support --mcp on this Safari'
+
+    __say info 'browser MCPs are declared, opt-in, and headed'
+end
+
 function main --description 'audit tracked config, links and Codex parity'
     __say info "auditing $REPO"
     __check_new_arrivals
@@ -405,6 +462,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_home_links
     __check_claude_links
     __check_claude_install
+    __check_browser_mcp
     __check_codex_links
     __check_project_agent_links
     __check_commongrounds_codex

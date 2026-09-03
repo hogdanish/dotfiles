@@ -70,6 +70,7 @@ brew "ccache"           # scons: c/c++ compiler cache
 brew "pre-commit"       # lefthook: for upstream repos that use it
 brew "emscripten"       # llvm: c/c++ -> wasm
 brew "glslang"          # emscripten: glsl -> spir-v shader compiler
+brew "geckodriver"      # firefox webdriver, for the devtools mcp
 brew "shellcheck"       # bash: static analysis for hook scripts
 brew "shfmt"            # shellcheck: the formatter half
 
@@ -145,6 +146,7 @@ cask "temurin@25"                   # java runtime (prism launcher)
 cask "orbstack"                     # docker desktop: containers and linux vms
 cask "google-chrome"                # browser: driven by the claude-in-chrome extension
 cask "google-chrome@canary"         # browser (canary channel)
+cask "firefox"                      # browser: driven by the firefox devtools mcp
 cask "perforce"                     # perforce cli (p4): version control
 cask "p4v"                          # perforce gui client (with p4merge)
 

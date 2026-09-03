@@ -133,6 +133,39 @@ startup_timeout_sec = 30
 default_tools_approval_mode = "auto"
 enabled = false
 
+# mozilla's first-party firefox devtools mcp — drives the BRANDED firefox in /Applications over
+# webdriver bidi (selenium + the homebrew geckodriver). playwright's `firefox` is a patched build
+# and cannot answer what real firefox does with a real webgpu pipeline, which is the whole point.
+# the `developer` preset is what carries list_console_messages, list_network_requests and the
+# gecko profiler; the default `basic` preset has none of the three.
+# ⚠ NOT --headless: headless firefox resolves navigator.gpu.requestAdapter() to NULL on this
+# machine (measured 2026-09-02), so a window has to appear for webgpu to exist at all.
+# declared globally, off by default — 45 tool descriptions is the wrong price for every session
+# to pay. `codex --firefox` flips it on for one launch. version pinned, like every stdio server
+# here; npx rather than bunx because the server is selenium-backed and mozilla documents node.
+[mcp_servers.firefox-devtools]
+command = "npx"
+args = [ "-y", "@mozilla/firefox-devtools-mcp@0.10.1", "--tool-preset", "developer", "--viewport", "1280x720" ]
+startup_timeout_sec = 120
+default_tools_approval_mode = "writes"
+enabled = false
+
+# safari's own mcp server, shipped inside macos — `safaridriver --mcp`, added by apple in safari
+# technology preview 247 and live in the safari 27.0 on this macos 27 beta. 17 tools, stdio.
+# nothing to install and no supply chain: no npm package, no driver, no cask.
+# ⚠ needed no `safaridriver --enable` here (verified 2026-09-02 against a cold session). if a
+# session ever fails with `Could not create a session`, that is the command — it authenticates,
+# so it is yours to run, not an agent's.
+# drives an isolated webdriver session, not the logged-in safari. webgpu works out of the box:
+# vendor `apple`, maxTextureDimension2D 16384 against firefox's 32767.
+# declared globally, off by default; `codex --safari` flips it on for one launch.
+[mcp_servers.safari]
+command = "safaridriver"
+args = [ "--mcp" ]
+startup_timeout_sec = 60
+default_tools_approval_mode = "writes"
+enabled = false
+
 [mcp_servers.computer-use]
 command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
 args = [ "mcp" ]

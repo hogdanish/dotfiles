@@ -1,0 +1,40 @@
+{
+  "$comment": [
+    "Mozilla's first-party Firefox DevTools MCP server —",
+    "https://firefox-source-docs.mozilla.org/ai-agent-tools/firefox-devtools-mcp.html",
+    "Drives the BRANDED Firefox in /Applications over WebDriver BiDi, via Selenium and the",
+    "Homebrew geckodriver. That is the whole point: Playwright's `firefox` is a patched build,",
+    "so it cannot answer what real Firefox does with a real WebGPU pipeline.",
+    "",
+    "⚠ OFF BY DEFAULT, deliberately. This file is NOT in enabledMcpjsonServers and belongs in no",
+    "project's .mcp.json. The `developer` preset is 45 tools; paying that in every session to use",
+    "it in a handful is the wrong trade. Load it per session instead:",
+    "    claude --firefox          (the wrapper passes --mcp-config with this file)",
+    "",
+    "⚠ NOT --headless, and that is load-bearing. Measured 2026-09-02 on this machine:",
+    "headless Firefox resolves navigator.gpu.requestAdapter() to NULL, so a headless run cannot",
+    "see WebGPU at all. Headed returns a real adapter (texture-compression-bc, timestamp-query,",
+    "maxTextureDimension2D 32767). A window has to appear for the GPU to.",
+    "",
+    "`developer` is the preset that carries list_console_messages, list_network_requests and the",
+    "Gecko profiler; the default `basic` preset has none of the three.",
+    "",
+    "Pinned like every other stdio server here — @latest would re-resolve the supply chain on",
+    "every launch. npx rather than bunx because the server is Selenium-backed and Mozilla",
+    "documents Node (>= 20.19); this machine's node is what the probe ran against."
+  ],
+  "mcpServers": {
+    "firefox-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mozilla/firefox-devtools-mcp@0.10.1",
+        "--tool-preset",
+        "developer",
+        "--viewport",
+        "1280x720"
+      ]
+    }
+  }
+}
