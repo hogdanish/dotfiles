@@ -1,22 +1,20 @@
-function codex --wraps codex --description 'codex with 1password secrets; --infra, --firefox, --safari'
+function codex --wraps codex --description 'codex with 1password secrets; --firefox/--safari add browser control'
     # codex itself keeps its chatgpt oauth login. this environment supplies credentials to
     # tools the agent launches, without writing them to shell config or codex config.
-    # --infra re-enables the cloudflare plugin and the cloudflare-api mcp server, which
-    # codex/config.toml disables by default to keep their weight out of ordinary sessions.
-    # `-c` overrides outrank the config file. the credential broker below serves `cf`
-    # and `linode-cli` in every session either way.
+    # cloudflare skills and the cloudflare-api mcp are enabled globally in codex/config.toml.
+    # --infra remains a swallowed no-op for muscle memory and parity with the claude wrapper.
+    # the credential broker below serves `cf` and `linode-cli` in every session either way.
     # --firefox / --safari flip the two browser-control mcp servers on for this launch only.
-    # codex/config.toml declares both with `enabled = false` — the same gating shape as
-    # cloudflare-api — because firefox-devtools is 45 tool descriptions and safari 17, and almost
-    # no session drives a browser. ⚠ neither runs headless: headless firefox resolves
+    # codex/config.toml declares both with `enabled = false` because firefox-devtools is 45 tool
+    # descriptions and safari 17, and almost no session drives a browser. ⚠ neither runs headless:
+    # headless firefox resolves
     # requestAdapter() to NULL on this machine, so a window has to appear for webgpu to exist.
     set -l args
     set -l overlay
     for a in $argv
         switch $a
             case --infra
-                set -a overlay -c 'plugins."cloudflare@openai-curated".enabled=true' \
-                    -c 'mcp_servers.cloudflare-api.enabled=true'
+                echo >&2 'codex: --infra is a no-op — the cloudflare plugin is enabled by default'
             case --firefox
                 set -a overlay -c 'mcp_servers.firefox-devtools.enabled=true'
             case --safari

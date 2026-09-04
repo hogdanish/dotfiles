@@ -240,7 +240,7 @@ function __check_codex_visibility --description 'Codex sees only the instruction
     __capture_codex_prompt $unrelated $unrelated_prompt
     or __fail 'could not render unrelated-directory Codex context'
 
-    string match -q '*Project-wide law — always on*' <$project_prompt
+    string match -q '*## Project-wide law*' <$project_prompt
     or __fail 'COMMONGROUNDS router is not model-visible to Codex'
     for skill in (path filter -d $project/.claude/skills/*)
         set -l name (path basename $skill)
@@ -256,11 +256,13 @@ function __check_codex_visibility --description 'Codex sees only the instruction
         or __fail "dotfiles skill is not model-visible to Codex: $name"
     end
 
-    if string match -q '*Project-wide law — always on*' <$unrelated_prompt
+    if string match -q '*## Project-wide law*' <$unrelated_prompt
         __fail 'COMMONGROUNDS instructions leaked into an unrelated Codex context'
     end
     string match -q '*firecrawl:firecrawl:*' <$unrelated_prompt
     or __fail 'Firecrawl plugin skills are not model-visible to Codex'
+    string match -q '*cloudflare:cloudflare:*' <$unrelated_prompt
+    or __fail 'Cloudflare plugin skills are not model-visible to Codex'
 
     rm $project_prompt $dotfiles_prompt $unrelated_prompt
     rmdir $unrelated
@@ -300,13 +302,21 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     test $project_status -eq 0; or __fail 'could not list project Codex MCPs'
     test $unrelated_status -eq 0; or __fail 'could not list unrelated-directory Codex MCPs'
     test $plugin_status -eq 0; or __fail 'could not list Codex plugins'
-    jq -e '.[] | select(.name == "godot-mcp" and .enabled == true)' $project_mcp >/dev/null
-    or __fail 'project-scoped godot-mcp is not enabled in COMMONGROUNDS'
-    if jq -e '.[] | select(.name == "godot-mcp")' $unrelated_mcp >/dev/null
-        __fail 'godot-mcp leaked outside COMMONGROUNDS'
+    for godot_mcp in godot-lsp godot-mcp
+        jq -e --arg n $godot_mcp '.[] | select(.name == $n and .enabled == true)' $project_mcp >/dev/null
+        or __fail "project-scoped $godot_mcp is not enabled in COMMONGROUNDS"
+        if jq -e --arg n $godot_mcp '.[] | select(.name == $n)' $unrelated_mcp >/dev/null
+            __fail "$godot_mcp leaked outside COMMONGROUNDS"
+        end
     end
-    jq -e '.[] | select(.name == "cloudflare-api" and .enabled == false)' $project_mcp >/dev/null
-    or __fail 'Cloudflare MCP is not disabled by default'
+    for mcp_file in $project_mcp $unrelated_mcp
+        jq -e '.[] | select(.name == "cloudflare-api" and .enabled == true)' $mcp_file >/dev/null
+        or __fail 'Cloudflare MCP is not enabled globally'
+        jq -e '.[] | select(.name == "context7" and .enabled == true)' $mcp_file >/dev/null
+        or __fail 'Context7 MCP is not enabled globally'
+    end
+    python3 -c 'import sys, tomllib; c = tomllib.load(open(sys.argv[1], "rb")); t = c["mcp_servers"]["cloudflare-api"]["tools"]; assert all(t[n]["approval_mode"] == "approve" for n in ("search", "execute"))' $REPO/codex/config.toml
+    or __fail 'Cloudflare MCP cannot run under the global never-approve policy'
     jq -e '.[] | select(.name == "website-spec" and .enabled == false)' $unrelated_mcp >/dev/null
     or __fail 'Website Spec MCP is not disabled by default'
     for browser_mcp in firefox-devtools safari
@@ -324,12 +334,12 @@ function __check_codex_runtime --description 'Codex MCP and plugin gates match p
     end
     string match -q '*firecrawl@firecrawl*installed, enabled*' <$plugins
     or __fail 'Firecrawl Codex plugin is not installed and enabled'
-    string match -q '*cloudflare@openai-curated*installed, disabled*' <$plugins
-    or __fail 'Cloudflare Codex plugin is not installed and disabled by default'
+    string match -q '*cloudflare@openai-curated-remote*installed, enabled*' <$plugins
+    or __fail 'Cloudflare Codex plugin is not installed and enabled'
 
     rm $project_mcp $unrelated_mcp $hogdot_mcp $plugins
     rmdir $unrelated
-    __say info 'Codex MCP scope and plugin gates are correct'
+    __say info 'Codex MCP scope and plugin state are correct'
 end
 
 function __check_project_agent_links --description 'claude project guidance is shared with codex'

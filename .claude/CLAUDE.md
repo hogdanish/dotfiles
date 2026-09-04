@@ -87,26 +87,29 @@ prompt in any project whose `.mcp.json` declares it, and in no project that does
 `https://mcp.specification.website/mcp` — Streamable HTTP, **no auth**, read-only, six tools plus
 an `audit_url` prompt. Claude Code: `claude-code/mcp/website-spec.json` plus
 `"enabledMcpjsonServers": ["website-spec"]`. Codex: `[mcp_servers.website-spec]` in
-`codex/config.toml` with `enabled = false`, the same gating shape as `cloudflare-api`. Each
-project carries its own live switches — `.mcp.json` and `.codex/config.toml`, tracked in that
+`codex/config.toml` with `enabled = false`. Each project carries its own live switches — `.mcp.json`
+and `.codex/config.toml`, tracked in that
 repo. **Live in `~/Projects/hogdot` and `~/Projects/commongrounds`**; adding another is those two
 files plus an `audit-config.fish` assertion. ⚠ Codex reads a project `config.toml` only in a
 **trusted** repo, which is why hogdot was added to `[projects]` here. ⚠ Its being off is never a
 reason to skip a spec audit: the `website-spec` skill vendors the whole checklist, which is the
 point of vendoring it.
 
-**Cloudflare tooling: on by default for Claude Code, still `--infra`-gated for Codex.** It was gated
-for both agents 2026-08-16 and **ungated for Claude Code 2026-08-28** — `settings.json` sets
-`cloudflare@cloudflare: true`, so the skills and the `cloudflare-api` MCP server load in every
-project, `~/Projects/commongrounds` included (nothing there overrides `enabledPlugins`). ⚠ The
-context weight is trimmed by `deniedMcpServers`, which blocks the plugin's other four servers
-(`cloudflare-docs`, `-bindings`, `-builds`, `-observability`) — remove an entry there to gain one
-back. `functions/wrappers/claude.fish` still swallows `--infra` as a no-op so the flag never reaches
-claude as an unknown option; `functions/wrappers/codex.fish` keeps the real gate, since Codex's base
-config still disables the plugin and its `cloudflare-api` server. There is deliberately **no** Linode
-MCP or infrastructure profile; agents use `linode-cli` and SSH. In every session the wrapper resolves
-infrastructure credentials once and a session-scoped broker holds the Linode and Cloudflare CLI
-tokens in memory for the agent's lifetime.
+**Cloudflare tooling: on by default for Claude Code and Codex.** It was gated for both agents
+2026-08-16, ungated for Claude Code 2026-08-28, and brought to parity in Codex 2026-09-04.
+`settings.json` enables `cloudflare@cloudflare`; `codex/config.toml` enables
+`cloudflare@openai-curated-remote`. The skills and `cloudflare-api` MCP server therefore load in every
+project, `~/Projects/commongrounds` included. ⚠ Claude's context weight is trimmed by
+`deniedMcpServers`, which blocks the plugin's other four servers (`cloudflare-docs`, `-bindings`,
+`-builds`, `-observability`) — remove an entry there to gain one back. Both launch wrappers swallow
+`--infra` as a no-op so old muscle memory never reaches either CLI as an unknown option. There is
+deliberately **no** Linode MCP or infrastructure profile; agents use `linode-cli` and SSH. In every
+session the wrapper resolves infrastructure credentials once and a session-scoped broker holds the
+Linode and Cloudflare CLI tokens in memory for the agent's lifetime. ⚠ Cloudflare's MCP exposes
+discovery and API calls through two tools, `search` and `execute`, neither marked read-only. Codex
+pre-approves both because its global `approval_policy = "never"` would otherwise block every call.
+The behavioral boundary is therefore load-bearing: never mutate remote Cloudflare state without
+explicit permission in the current request.
 
 **Firecrawl: on by default for Claude Code as of 2026-08-28.** `settings.json` sets
 `firecrawl@claude-plugins-official: true`, so its ten skills and the `/skill-gen` command load in
@@ -141,8 +144,8 @@ screenshot, profile — and **neither costs an ordinary session anything**, whic
 
 The enable path is the wrapper flag and nothing else. Claude Code gets `--mcp-config` pointing at
 `claude-code/mcp/{firefox-devtools,safari}.json` for that launch only; Codex declares both in
-`codex/config.toml` with `enabled = false` and the flag adds `-c mcp_servers.<n>.enabled=true`, the
-same gating shape as `cloudflare-api`. ⚠ **Neither name goes in `enabledMcpjsonServers` and neither
+`codex/config.toml` with `enabled = false` and the flag adds `-c mcp_servers.<n>.enabled=true`.
+⚠ **Neither name goes in `enabledMcpjsonServers` and neither
 belongs in a project `.mcp.json`** — 62 tool descriptions in every session to serve the rare one is
 exactly the trade this repo refuses. `audit-config.fish` fails if either leaks into settings, into
 a project `.mcp.json`, or into a Codex default.

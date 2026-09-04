@@ -58,13 +58,19 @@ enabled = true
 [plugins."slack@openai-curated"]
 enabled = true
 
-# cloudflare tooling is gated behind the launch wrapper's --infra flag
-# (fish/functions/wrappers/codex.fish re-enables both via `-c` overrides)
-[plugins."cloudflare@openai-curated"]
-enabled = false
+# cloudflare matches claude code: skills and the api mcp are available in every session.
+[plugins."cloudflare@openai-curated-remote"]
+enabled = true
 
-[plugins."cloudflare@openai-curated".mcp_servers.cloudflare-api]
-enabled = false
+[plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api]
+enabled = true
+default_tools_approval_mode = "writes"
+
+[plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api.tools.search]
+approval_mode = "approve"
+
+[plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api.tools.execute]
+approval_mode = "approve"
 
 [plugins."chrome@openai-bundled"]
 enabled = true
@@ -117,9 +123,17 @@ default_tools_approval_mode = "auto"
 url = "https://mcp.cloudflare.com/mcp"
 auth = "oauth"
 startup_timeout_sec = 30
+# cloudflare exposes all discovery through `search` and all api calls through `execute`; neither is
+# marked read-only. the narrow overrides below keep the server usable under the global
+# `approval_policy = "never"`; remote mutation still requires an explicit user request.
 default_tools_approval_mode = "writes"
-# gated behind --infra, with the cloudflare plugin above
-enabled = false
+enabled = true
+
+[mcp_servers.cloudflare-api.tools.search]
+approval_mode = "approve"
+
+[mcp_servers.cloudflare-api.tools.execute]
+approval_mode = "approve"
 
 # the website specification — https://specification.website/mcp/
 # stateless streamable http, no auth, read-only: search / list_topics / get_topic /
