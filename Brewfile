@@ -132,7 +132,6 @@ uv "gdtoolkit"  # gdformat/gdlint: headless gdscript formatter and linter
 
 ## development
 cask "visual-studio-code@insiders"  # main ide (insiders channel)
-cask "rider"                        # .net ide: c# and unity
 cask "ghostty"                      # terminal emulator
 cask "godot"                        # game engine
 # ⚠ claude code is deliberately NOT a cask — do not add one back. the cask hardcodes a
@@ -147,8 +146,6 @@ cask "orbstack"                     # docker desktop: containers and linux vms
 cask "google-chrome"                # browser: driven by the claude-in-chrome extension
 cask "google-chrome@canary"         # browser (canary channel)
 cask "firefox"                      # browser: driven by the firefox devtools mcp
-cask "perforce"                     # perforce cli (p4): version control
-cask "p4v"                          # perforce gui client (with p4merge)
 
 ## fonts
 cask "font-commit-mono"            # editor font
@@ -187,7 +184,6 @@ cask "protonvpn"  # vpn client
 
 ## games
 cask "steam"          # game distribution platform
-cask "epic-games"     # game distribution platform
 cask "prismlauncher"  # minecraft launcher
 cask "crossover"      # wine: runs windows apps and games
 
