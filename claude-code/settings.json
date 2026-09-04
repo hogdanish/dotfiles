@@ -7,7 +7,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "claude-fable-5-1[1m]",
   "enabledMcpjsonServers": [
     "website-spec"
   ],
@@ -45,7 +45,7 @@
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "cloudflare@cloudflare": true,
-    "clangd-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
@@ -62,7 +62,7 @@
       "effortLevel": "high"
     },
     "claude-opus-5": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-fable-5-1": {
       "effortLevel": "medium"
