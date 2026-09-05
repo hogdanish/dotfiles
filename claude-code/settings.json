@@ -7,7 +7,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5-1[1m]",
+  "model": "opus[1m]",
   "enabledMcpjsonServers": [
     "website-spec"
   ],
@@ -65,7 +65,7 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
-      "effortLevel": "medium"
+      "effortLevel": "xhigh"
     }
   },
   "showClearContextOnPlanAccept": true,
