@@ -154,11 +154,52 @@ remove the resolved token from the agent environment. Agent CLI shims use the br
 socket, while resolved tokens stay only in broker memory. The third-party Linode MCP and its separate
 `LINODE_API_TOKEN` path were removed.
 
-## 7. The 1Password MCP Server (beta)
+## 7. The 1Password MCP Server
 
-A separate thing from the hook: an MCP server that lets Codex or Kiro *manage* Environments (create
-them, list variable names, configure mounts) behind a 1Password authorization prompt for every
-action. It never returns secret values to the model. Not currently used here.
+A separate thing from the hook: 1Password's own MCP server, which lets an agent *manage*
+Environments behind the desktop app's authorization. **Wired into Claude Code at user scope on
+2026-09-04**, so it loads in every project.
+
+```sh
+claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/MacOS/1password-mcp
+```
+
+Two toggles in the app are prerequisites: **Settings > Labs > MCP Server**, then **Settings >
+Developer > Integrate with MCP clients**. Enterprise tenants can also gate it under
+Policies > Agentic permissions.
+
+⚠ **The binary is not on `PATH`.** 1Password's docs give `command: "1password-mcp"`, but the
+`1password@beta` cask ships it only inside the bundle at
+`/Applications/1Password.app/Contents/MacOS/1password-mcp` (with an `onepassword-mcp` symlink
+beside it). A bare command name fails to start with no visible error, which is why the tracked
+declaration uses the absolute path. It needs no token and no `op` session of its own — it reaches
+the running desktop app over the same app-integration channel as `op`, so it authenticates the way
+you unlock 1Password.
+
+Eight tools, verified against app 8.12.36-32.BETA on 2026-09-04 (`rmcp 1.1.0`, protocol
+`2025-06-18`):
+
+| Tool | Effect |
+| --- | --- |
+| `authenticate` | Establish the desktop-app connection |
+| `list_environments` | Read-only — Environments in an account |
+| `list_variables` | Read-only — variable **names** only |
+| `list_local_env_files` | Read-only — currently mounted `.env` files |
+| `create_environment` | New Environment |
+| `rename_environment` | Rename one |
+| `append_variables` | Add or update variables |
+| `create_local_env_file` | Mount a `.env` (the FIFO of §3, never on disk) |
+
+⚠ **This is an Environments server, not a vault client.** There is no item read, no vault browse,
+no `op read` equivalent, and no delete. It is not a way to give an agent "full 1Password access" —
+and that limit is the reason it is safe to leave on globally: the server never returns a secret
+*value* to the client, so non-negotiable 3 (never run a command that prints a resolved secret into
+the transcript) is enforced by the server rather than by our restraint. Reading a secret is still
+`op run`/`op inject` at the point of consumption, and writing an item is still the app or `op item`.
+
+The tracked declaration is `claude-code/mcp/1password.json`; the live wiring is user scope in
+`$CLAUDE_CONFIG_DIR/.claude.json`, which is untracked state, so `scripts/audit-config.fish` asserts
+the two still agree and that the declared binary is present.
 
 ## 8. Caveats
 

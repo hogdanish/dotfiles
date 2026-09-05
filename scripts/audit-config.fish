@@ -465,6 +465,47 @@ function __check_browser_mcp --description 'browser control stays opt-in, never 
     __say info 'browser MCPs are declared, opt-in, and headed'
 end
 
+function __check_onepassword_mcp --description '1Password MCP is wired at user scope and matches its declaration'
+    # ⚠ the inverse of the browser MCPs above: this one is deliberately always-on. eight tools, and
+    # by construction none of them can return a secret VALUE — list_variables returns names only.
+    # that is what makes it safe everywhere, and why the wiring is user scope rather than per repo.
+    set -l decl $REPO/claude-code/mcp/1password.json
+    if not test -r $decl
+        __fail "missing 1Password MCP declaration $decl"
+        return
+    end
+    jq -e . $decl >/dev/null 2>&1; or __fail '1password.json is not valid JSON'
+
+    # ⚠ 1Password's docs say `command: "1password-mcp"`, but the cask never puts it on PATH — it
+    # ships inside the bundle. a relative command here would fail to start with no visible error.
+    set -l declared (jq -r '.mcpServers["1password"].command' $decl)
+    if not test -x "$declared"
+        __fail "1Password MCP binary is missing or not executable: $declared"
+    end
+
+    # the live wiring is untracked state, so the declaration is only worth keeping if it still
+    # describes reality. a 1Password app update that moved the binary would show up here.
+    set -l live $XDG_STATE_HOME/claude/.claude.json
+    if not test -r $live
+        __fail "cannot read $live to verify the 1Password MCP user-scope entry"
+        return
+    end
+    set -l wired (jq -r '.mcpServers["1password"].command // ""' $live)
+    if test -z "$wired"
+        __fail '1Password MCP is not wired at user scope — claude mcp add --scope user 1password -- '$declared
+    else if test "$wired" != "$declared"
+        __fail "user-scope 1Password MCP runs $wired, but 1password.json declares $declared"
+    end
+
+    # one wiring path only. the name in enabledMcpjsonServers would pre-approve a project .mcp.json
+    # copy, giving a second, diverging declaration of an already-global server.
+    if jq -e '.enabledMcpjsonServers // [] | index("1password")' $REPO/claude-code/settings.json >/dev/null 2>&1
+        __fail '1password is pre-approved in enabledMcpjsonServers — it is user scope, not per project'
+    end
+
+    __say info '1Password MCP is wired at user scope'
+end
+
 function main --description 'audit tracked config, links and Codex parity'
     __say info "auditing $REPO"
     __check_new_arrivals
@@ -473,6 +514,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_claude_links
     __check_claude_install
     __check_browser_mcp
+    __check_onepassword_mcp
     __check_codex_links
     __check_project_agent_links
     __check_commongrounds_codex

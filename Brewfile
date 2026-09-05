@@ -158,7 +158,7 @@ cask "figma@beta"  # design tool (beta channel)
 cask "blender"     # 3d creation suite
 
 ## productivity & utilities
-cask "1password@beta"      # password manager (beta channel)
+cask "1password@beta"      # password manager (beta channel); ships 1password-mcp
 cask "1password-cli@beta"  # 1password: cli and shell plugins
 cask "raycast"             # spotlight: launcher
 cask "alt-tab"             # macos app switcher: windows-style switching

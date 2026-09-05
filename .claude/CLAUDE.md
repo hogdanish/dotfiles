@@ -95,6 +95,35 @@ files plus an `audit-config.fish` assertion. ⚠ Codex reads a project `config.t
 reason to skip a spec audit: the `website-spec` skill vendors the whole checklist, which is the
 point of vendoring it.
 
+**1Password MCP: on by default for Claude Code, at user scope** (2026-09-04). 1Password's own
+server, `1password-mcp`, shipped inside the `1password@beta` cask. It is the **one** MCP server here
+wired at *user* scope rather than per project, so it loads in every session on this machine:
+
+```sh
+claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/MacOS/1password-mcp
+```
+
+⚠ **The live entry is `$CLAUDE_CONFIG_DIR/.claude.json` — untracked state**, which is the same
+constraint the paragraph above describes; the difference is that user scope has no
+`enabledMcpjsonServers` half to track, so `claude-code/mcp/1password.json` is a *mirror* rather than
+a copy-source and `audit-config.fish` asserts the two still agree. ⚠ `~/.claude.json` is **not** that
+file — it is a 1 KB leftover from before `$CLAUDE_CONFIG_DIR` was relocated.
+
+⚠ **It manages Environments, and nothing else** — `authenticate`, `list_environments`,
+`list_variables` (names only), `list_local_env_files`, `create_environment`, `rename_environment`,
+`append_variables`, `create_local_env_file`. No item read, no vault browse, no delete. It is **not**
+"full 1Password access for agents", and that is exactly why it can be always-on: the server never
+returns a secret *value*, so the never-print-a-resolved-secret rule is enforced by the server
+instead of by an agent's restraint. Eight tool names is also a negligible context cost under the
+deferred-tool pin below — the calculus that keeps the browser MCPs opt-in does not apply.
+
+⚠ **Two app toggles are prerequisites**, and both are Ethan's to set: Settings > Labs > **MCP
+Server**, then Settings > Developer > **Integrate with MCP clients**. ⚠ The binary is **not on
+`PATH`** despite 1Password's docs saying `command: "1password-mcp"`; a bare name silently fails to
+start, hence the absolute path. It carries no token — it reaches the desktop app over the same
+app-integration channel as `op`. Full detail: `auth` skill → `1password-environments.md` §7. Codex
+is **not** wired to it (`codex/config.toml` is untouched); add it there only on request.
+
 **Cloudflare tooling: on by default for Claude Code and Codex.** It was gated for both agents
 2026-08-16, ungated for Claude Code 2026-08-28, and brought to parity in Codex 2026-09-04.
 `settings.json` enables `cloudflare@cloudflare`; `codex/config.toml` enables
