@@ -5,6 +5,8 @@ web_search = "live"
 model_reasoning_summary = "auto"
 personality = "pragmatic"
 model = "gpt-6-astra"
+# Compact at 75% of the current 272,000-token context window.
+model_auto_compact_token_limit = 204000
 model_reasoning_effort = "high"
 service_tier = "fast"
 developer_instructions = """
