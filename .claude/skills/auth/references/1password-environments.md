@@ -164,9 +164,13 @@ Environments behind the desktop app's authorization. **Wired into Claude Code at
 claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/MacOS/1password-mcp
 ```
 
-Two toggles in the app are prerequisites: **Settings > Labs > MCP Server**, then **Settings >
-Developer > Integrate with MCP clients**. Enterprise tenants can also gate it under
-Policies > Agentic permissions.
+⚠ **One toggle, not two.** 1Password's docs tell you to turn on **Settings > Labs > MCP Server**
+first, but on app 8.12.36-32.BETA that experiment is gone — Labs lists only *Secure snippets*
+(checked 2026-09-04). The feature graduated out of Labs, so **Settings > Developer > Integrate with
+MCP clients** is the only switch. Enterprise tenants can additionally gate it under
+Policies > Agentic permissions. Verified end to end the same day: with only that Developer toggle
+set, an `authenticate` tool call returns the account id and `isError: false`, so the missing Labs row
+is genuinely absent rather than a broken setup.
 
 ⚠ **The binary is not on `PATH`.** 1Password's docs give `command: "1password-mcp"`, but the
 `1password@beta` cask ships it only inside the bundle at

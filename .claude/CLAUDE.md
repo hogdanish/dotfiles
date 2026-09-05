@@ -117,12 +117,24 @@ returns a secret *value*, so the never-print-a-resolved-secret rule is enforced 
 instead of by an agent's restraint. Eight tool names is also a negligible context cost under the
 deferred-tool pin below — the calculus that keeps the browser MCPs opt-in does not apply.
 
-⚠ **Two app toggles are prerequisites**, and both are Ethan's to set: Settings > Labs > **MCP
-Server**, then Settings > Developer > **Integrate with MCP clients**. ⚠ The binary is **not on
-`PATH`** despite 1Password's docs saying `command: "1password-mcp"`; a bare name silently fails to
-start, hence the absolute path. It carries no token — it reaches the desktop app over the same
-app-integration channel as `op`. Full detail: `auth` skill → `1password-environments.md` §7. Codex
-is **not** wired to it (`codex/config.toml` is untouched); add it there only on request.
+⚠ **There is exactly one app toggle, and 1Password's docs are wrong about it here.** They say to
+enable Settings > Labs > **MCP Server** first; on app **8.12.36-32.BETA that experiment does not
+exist** — Labs lists only *Secure snippets*. The feature has graduated, so Settings > Developer >
+**Integrate with MCP clients** is the whole switch, and it is Ethan's to set. Do not go hunting for
+a Labs row that was already removed. ⚠ The binary is **not on `PATH`** despite the same docs saying
+`command: "1password-mcp"`; a bare name silently fails to start, hence the absolute path. It carries
+no token — it reaches the desktop app over the same app-integration channel as `op`. Full detail:
+`auth` skill → `1password-environments.md` §7. Codex is **not** wired to it (`codex/config.toml` is
+untouched); add it there only on request.
+
+⚠ **Adding a user-scope MCP server does not reach a session that is already running**, verified
+2026-09-04 by adding this one mid-session and finding no `1password` tool in that session's
+resolved tool list. Claude Code binds MCP servers once at startup; there is no `/mcp reload`, and
+`/reload-plugins` covers **plugin**-supplied servers only, which this is not. The lossless move is
+`/resume` (or `claude --continue` through `wrappers/claude.fish`, which the wrapper's `op run`
+parent requires) — the conversation comes back, only the process restarts. ⚠ Nothing about the add
+disturbs a running session either, so it is always safe to wire one up mid-flight and pick it up at
+the next natural break.
 
 **Cloudflare tooling: on by default for Claude Code and Codex.** It was gated for both agents
 2026-08-16, ungated for Claude Code 2026-08-28, and brought to parity in Codex 2026-09-04.
