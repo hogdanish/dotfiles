@@ -2,14 +2,16 @@
 
 ## Account and billing
 
-`account` covers account details/settings, invoices/items, payments, payment submission, login history,
-notifications, maintenance, network transfer, regional service availability, promos, Managed enablement,
-OAuth clients, and account cancellation. Read-only billing inspection is allowed. Payment, promo,
-OAuth-secret reset, Managed enablement, settings updates, and cancellation require explicit current
-authorization. Never expose invoice or payment details beyond what the task needs.
+`account` covers account details/settings, invoices/items, payments, payment submission, login
+history, notifications, maintenance, network transfer, regional service availability, promos,
+Managed enablement, OAuth clients, and account cancellation. Read-only billing inspection is
+allowed. Payment, promo, OAuth-secret reset, Managed enablement, settings updates, and cancellation
+require explicit current authorization. Never expose invoice or payment details beyond what the task
+needs.
 
-`payment-methods` can list/view, add, set default, and delete methods. `phone` manages verification and
-deletion. `security-questions` is list-only. These are account-security surfaces, not routine setup.
+`payment-methods` can list/view, add, set default, and delete methods. `phone` manages verification
+and deletion. `security-questions` is list-only. These are account-security surfaces, not routine
+setup.
 
 ## Profile and identity
 
@@ -30,9 +32,9 @@ keys. Resolve the exact identity and preserve least privilege.
 ## Transfers, betas, and child accounts
 
 `service-transfers` can create/list/view, accept, and cancel transfers. Acceptance changes ownership
-and may change billing; require explicit authorization from the account owner. `betas` can inspect and
-enroll; enrollment may expose unstable services and is opt-in only. `child-account` can create proxy
-tokens and exposes deprecated list/view actions; proxy-token output is sensitive.
+and may change billing; require explicit authorization from the account owner. `betas` can inspect
+and enroll; enrollment may expose unstable services and is opt-in only. `child-account` can create
+proxy tokens and exposes deprecated list/view actions; proxy-token output is sensitive.
 
 `image-sharegroups` and service-transfer tokens are capability-bearing. Do not print or relay them
 except directly to the authorized consumer.

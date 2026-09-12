@@ -1,6 +1,6 @@
 # 1Password for SSH & Git
 
-Distilled from www.1password.dev/ssh (2026-07-28) and verified against this machine's
+Distilled from <https://www.1password.dev/ssh> (2026-07-28) and verified against this machine's
 `~/.ssh/config`, `~/.config/1Password/ssh/agent.toml` and `~/.config/git/.gitconfig`.
 
 ## 1. What the agent is
@@ -11,7 +11,7 @@ request is authorized individually**, and the private key never leaves the app.
 
 Socket on macOS:
 
-```
+```text
 ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
 ```
 
@@ -37,7 +37,7 @@ SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock 
 
 ## 3. `agent.toml` — which keys, in what order
 
-```
+```text
 $XDG_CONFIG_HOME/1Password/ssh/agent.toml     # checked first when XDG_CONFIG_HOME is set
 ~/.config/1Password/ssh/agent.toml            # macOS/Linux default
 ```
@@ -91,7 +91,7 @@ set immediately afterward.
 
 ### `IdentityAgent` (preferred)
 
-```
+```text
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 ```
@@ -116,15 +116,15 @@ specific client that needs it.
 OpenSSH (10.4 here) has **no XDG support**; `~/.ssh/config` is hardcoded. But `Include` accepts `~`
 and environment variables, so the config body can live in `~/.config` with no symlink:
 
-```
+```text
 # ~/.ssh/config — stub only
 Include ~/.config/ssh/config
 Include ~/.ssh/1Password/config
 ```
 
 ⚠ **First obtained value wins** in `ssh_config`. `Include` lines and host-specific blocks go at the
-*top*; `Host *` defaults go at the bottom. An `Include` placed after a `Host *` block cannot override
-what that block already set.
+*top*; `Host *` defaults go at the bottom. An `Include` placed after a `Host *` block cannot
+override what that block already set.
 
 `~/.ssh` still has to exist for `known_hosts`, `authorized_keys`, downloaded public keys and the
 1Password-generated bookmark directory.
@@ -134,7 +134,7 @@ what that block already set.
 `IdentityAgent none` opts a host out; `IdentityFile none` opts out of a key file. So the 1Password
 agent can serve `Host *` while one legacy host keeps a local `.pem`:
 
-```
+```text
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
@@ -153,12 +153,14 @@ follows without a prompt.
 Two settings in Settings → Developer control friction:
 
 **What is being approved:**
+
 - *For each new application* (default) — per key, per app, including subprocesses.
 - *For each new application and terminal session* — additionally per terminal tab. Strictest.
 - *Approve for all applications* — a per-prompt checkbox; authorizes every process of the current OS
   user for that key, for the session. Only file permissions on the socket restrict it after that.
 
 **How long approval is remembered:**
+
 - *Until 1Password locks* (default)
 - *Until 1Password quits*
 - *For 4 / 12 / 24 hours* — approvals survive locking; you still get an unlock prompt, because the
@@ -187,7 +189,7 @@ attempt gets `Too many authentication failures`. Three fixes, in order of prefer
 3. **Manual `IdentityFile`** — download the *public* key from the item and point a `Host` block at
    it. The private key stays in 1Password.
 
-```
+```text
 Host github.com
   IdentityFile ~/.ssh/github.pub
   IdentitiesOnly yes
@@ -205,7 +207,7 @@ an entry in the SSH activity log.
 Settings → Developer → Advanced → *Generate SSH config files from 1Password SSH bookmarks* makes
 1Password write:
 
-```
+```text
 ~/.ssh/1Password/config     # Match Host blocks mapping hosts → keys
 ~/.ssh/1Password/*.pub      # public keys, named by fingerprint
 ```
@@ -258,17 +260,17 @@ Without it, `git log --show-signature` prints
 `error: gpg.ssh.allowedSignersFile needs to be configured…`. It blocks local verification only, not
 committing. The file is shareable and can be committed like `CODEOWNERS`.
 
-**Mixed setups** — `includeIf "gitdir:~/work/acme/"` can point a subtree at a GPG configuration while
-SSH signing stays the default. See [gnupg-macos.md](gnupg-macos.md).
+**Mixed setups** — `includeIf "gitdir:~/work/acme/"` can point a subtree at a GPG configuration
+while SSH signing stays the default. See [gnupg-macos.md](gnupg-macos.md).
 
 ### Signing failures, in order of likelihood
 
-| Symptom | Cause |
-| --- | --- |
-| `unsupported value for gpg.format: ssh` | Git < 2.34 |
-| `failed to write commit object`, `could not deserialize public key` | `user.signingkey` is not a valid SSH public key |
-| commits show `Unverified` on GitHub | key not registered as a **signing** key, or author email ≠ registered email (case-sensitive on GitLab/Bitbucket) |
-| local values differ from `~/.gitconfig` | repo-level override — `git config --local --unset gpg.format` etc. |
+| Symptom                                                             | Cause                                                                                                            |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `unsupported value for gpg.format: ssh`                             | Git < 2.34                                                                                                       |
+| `failed to write commit object`, `could not deserialize public key` | `user.signingkey` is not a valid SSH public key                                                                  |
+| commits show `Unverified` on GitHub                                 | key not registered as a **signing** key, or author email ≠ registered email (case-sensitive on GitLab/Bitbucket) |
+| local values differ from `~/.gitconfig`                             | repo-level override — `git config --local --unset gpg.format` etc.                                               |
 
 Diagnose with `git config --show-origin --get-regexp '^(gpg|commit|user\.signing)'`.
 
@@ -296,8 +298,8 @@ Diagnose with `git config --show-origin --get-regexp '^(gpg|commit|user\.signing
 - **Already exists in 1Password** — fingerprint matches an item; delete the disk copy.
 - **Unsupported key** — cannot be imported; regenerate if it should live in 1Password.
 
-`~/.ssh/.ignore` (glob patterns, one per line) exempts files. Turning this on is the fastest audit of
-"is there a plaintext key anywhere on this machine".
+`~/.ssh/.ignore` (glob patterns, one per line) exempts files. Turning this on is the fastest audit
+of "is there a plaintext key anywhere on this machine".
 
 ## 11. Client compatibility
 

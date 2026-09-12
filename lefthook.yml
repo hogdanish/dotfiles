@@ -61,7 +61,32 @@ pre-commit:
           }
         done
 
-    # 4. the Brewfile is ruby. a syntax error there breaks `brew bundle` on a fresh machine,
+    # 4. markdown is FORMATTED, never rejected. this is the only commit-time job here that
+    #    rewrites your work instead of refusing it: rumdl fixes the file and `stage_fixed`
+    #    puts the result back in the index, so a commit never fails on a ragged table or an
+    #    over-long line. the same rumdl, the same ~/.config/.rumdl.toml, as the editor and
+    #    the agent hook — this is just the net for an edit that reached the index without
+    #    passing either.
+    #    ⚠ `fmt` not `check --fix`: fmt exits 0 even when something is left unfixable, which
+    #      is what keeps this job incapable of blocking a commit.
+    #    ⚠ rumdl still honours .rumdl.toml's exclude list for explicitly-passed paths, so
+    #      staged vendored markdown is passed over rather than rewritten.
+    #    ⚠ PARTIAL STAGING of an UNFORMATTED file will fail this hook — verified 2026-09-12.
+    #      lefthook hides the unstaged remainder, this job reformats the staged copy, and the
+    #      hidden patch then no longer applies: "Unable to restore previously hidden unstaged
+    #      changes". lefthook DISCARDS that remainder, so unstaged edits to other files are
+    #      lost. format the working tree BEFORE staging (`rumdl fmt .`), not after.
+    #    ⚠ deliberately NOT the official rumdl-pre-commit hooks. that repo targets the
+    #      `pre-commit` framework, which this repo rejected on purpose (see the header): it
+    #      needs python + a venv per hook, in the repo whose job is to bootstrap the machine.
+    - name: markdown-format
+      glob: "*.md"
+      run: |
+        command -v rumdl >/dev/null 2>&1 || exit 0
+        rumdl fmt --silent -- {staged_files}
+      stage_fixed: true
+
+    # 5. the Brewfile is ruby. a syntax error there breaks `brew bundle` on a fresh machine,
     #    which is the one moment you cannot afford it.
     - name: brewfile-syntax
       glob: "Brewfile"

@@ -21,12 +21,13 @@ chroma fast above L≈0.83, so a flat `loud` tier drives all three toward a comm
 collapses bright-blue against bright-cyan (measured ΔE 16.2, floor 20). Seating those three at 0.828
 restores it to 20.9. Do not "tidy" this into a single lightness.
 
-⚠ **Chroma is intentionally non-uniform.** Green reaches 0.160, cyan only 0.114. Equalising it is the
-failure mode Tonsky names — see `rationale.md` §2.
+⚠ **Chroma is intentionally non-uniform.** Green reaches 0.160, cyan only 0.114. Equalising it is
+the failure mode Tonsky names — see `rationale.md` §2.
 
 **Reproduce:** the derivation is ~60 lines of `coloraide`. Nothing is installed for it; run it
-ephemerally with `uv run --no-project --with coloraide`. The script is not committed on purpose — the
-table below _is_ the artifact, and a committed generator would imply a build step that does not exist.
+ephemerally with `uv run --no-project --with coloraide`. The script is not committed on purpose —
+the table below _is_ the artifact, and a committed generator would imply a build step that does not
+exist.
 
 ## 2. Primitives
 
@@ -61,16 +62,16 @@ table below _is_ the artifact, and a committed generator would imply a build ste
 | `accent.violet.base` | `#cb92fc` | `oklch(75.5% 0.158 307.8)` | 6.71:1  | 15.4            |
 | `accent.violet.loud` | `#dab4fe` | `oklch(82.9% 0.109 307.6)` | 8.84:1  | 12.5            |
 
-**Diff surfaces** — the one place a *tinted* background is unavoidable, because added and removed
-lines must differ from each other and from `surface.raised` without relying on the foreground. Derived
-at the surface-ramp lightnesses with the green and red hues at low chroma.
+**Diff surfaces** — the one place a _tinted_ background is unavoidable, because added and removed
+lines must differ from each other and from `surface.raised` without relying on the foreground.
+Derived at the surface-ramp lightnesses with the green and red hues at low chroma.
 
-| token | hex | OKLCH | `text.base` on it | ΔE vs `surface.raised` |
-| --- | --- | --- | --- | --- |
-| `surface.add` | `#29381d` | `oklch(31.9% 0.049 133.0)` | 5.93:1 | 26.3 |
-| `surface.remove` | `#49282c` | `oklch(32.1% 0.050 12.0)` | 6.13:1 | 17.7 |
-| `surface.add.emph` | `#3a5723` | `oklch(42.1% 0.086 133.0)` | 3.87:1 | — |
-| `surface.remove.emph` | `#743841` | `oklch(42.1% 0.085 12.0)` | 4.17:1 | — |
+| token                 | hex       | OKLCH                      | `text.base` on it | ΔE vs `surface.raised` |
+| --------------------- | --------- | -------------------------- | ----------------- | ---------------------- |
+| `surface.add`         | `#29381d` | `oklch(31.9% 0.049 133.0)` | 5.93:1            | 26.3                   |
+| `surface.remove`      | `#49282c` | `oklch(32.1% 0.050 12.0)`  | 6.13:1            | 17.7                   |
+| `surface.add.emph`    | `#3a5723` | `oklch(42.1% 0.086 133.0)` | 3.87:1            | —                      |
+| `surface.remove.emph` | `#743841` | `oklch(42.1% 0.085 12.0)`  | 4.17:1            | —                      |
 
 `surface.add` ~ `surface.remove` is ΔE **33.2** — unmistakable. ⚠ The `.emph` pair is for word-level
 highlights only; at ~4:1 they are below AA for body text and must always carry `text.loud`.
@@ -79,7 +80,8 @@ highlights only; at ~4:1 they are below AA for body text and must always carry `
 
 ## 3. Semantic aliases
 
-Aliases, not new colours. Use the alias name in `bindings.md` wherever the _meaning_ is what matters.
+Aliases, not new colours. Use the alias name in `bindings.md` wherever the _meaning_ is what
+matters.
 
 | alias              | → primitive          | used for                                                                      |
 | ------------------ | -------------------- | ----------------------------------------------------------------------------- |
@@ -116,16 +118,16 @@ laramie never configures (`grc`, `gh`, any TUI). Set in `ghostty/themes/laramie`
 ⚠ **Brights must differ from normals.** Until 2026-07-30, slots 9–14 were byte-identical to 1–6 —
 six of sixteen slots doing no work. Any future edit that re-collapses them is a regression.
 
-⚠ **ANSI 8 is `text.dim` (4.53:1), not a border colour.** It was a surface-ramp value at **1.74:1**, effectively
-invisible, and it is what `git log`'s `%C(brightblack)`, `starship` and most TUIs use for _secondary
-text_. Legibility wins over border subtlety here; a TUI that uses ANSI 8 for box-drawing will now
-render brighter than before, which is the correct trade.
+⚠ **ANSI 8 is `text.dim` (4.53:1), not a border colour.** It was a surface-ramp value at **1.74:1**,
+effectively invisible, and it is what `git log`'s `%C(brightblack)`, `starship` and most TUIs use
+for _secondary text_. Legibility wins over border subtlety here; a TUI that uses ANSI 8 for
+box-drawing will now render brighter than before, which is the correct trade.
 
 ## 5. Syntax roles
 
 See `SKILL.md` for the table and the doctrine. In token terms:
 
-```
+```text
 syntax.literal      = accent.green.base   #86c452
 syntax.definition   = accent.cyan.loud    #49ebf0
 syntax.comment      = accent.amber.loud   #ffc55b
@@ -146,8 +148,8 @@ Measured separation, all against a floor of ΔE2000 ≥ 20:
 
 **Scope-agnostic by construction** — tokens are named by role, values recorded in OKLCH first.
 
-**CSS.** Emit primitives as custom properties in OKLCH (browsers gamut-map for you; the hex column is
-the sRGB fallback), then layer the semantic aliases:
+**CSS.** Emit primitives as custom properties in OKLCH (browsers gamut-map for you; the hex column
+is the sRGB fallback), then layer the semantic aliases:
 
 ```css
 :root {
@@ -165,6 +167,6 @@ unchanged:
 1. Invert the two ramps: `surface.*` becomes L 0.98 → 0.86, `text.*` becomes L 0.38 → 0.15.
 2. Reflect the accent tiers about L 0.5 — `deep` → L 0.40, `base` → L 0.245, `loud` → L 0.14 — so
    "loud" still means "furthest from the background".
-3. Re-run the same chroma rule. ⚠ Headroom differs at low lightness, so the `loud` override will land
-   on a **different** set of hues; re-measure, do not copy §1's override.
+3. Re-run the same chroma rule. ⚠ Headroom differs at low lightness, so the `loud` override will
+   land on a **different** set of hues; re-measure, do not copy §1's override.
 4. Re-check every floor in `SKILL.md`. ⚠ WCAG contrast is not symmetric under inversion.

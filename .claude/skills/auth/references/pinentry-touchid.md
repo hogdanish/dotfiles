@@ -36,14 +36,13 @@ macOS keychain.
 
  ![pinentry-touchid in action with gopass](https://user-images.githubusercontent.com/1291846/128176593-271ac649-5207-41f2-83da-3fb3d37ede9c.gif)
 
-
 ## How does it work
 
 This program interacts with the `gpg-agent` for providing a password, using the following rules:
 
 - If the password entry for the given key cannot be found in the Keychain we fallback to the
-  `pinentry-mac` program to get the password. We recommend preventing `pinentry-mac` from storing the
-  password: uncheck the <kbd>Save in keychain</kbd> checkbox in the dialog.
+  `pinentry-mac` program to get the password. We recommend preventing `pinentry-mac` from storing
+  the password: uncheck the <kbd>Save in keychain</kbd> checkbox in the dialog.
 
 - If a password entry is found the user will be shown the Touch ID dialog and upon successful
   authentication the password stored from the keychain will be returned to the gpg-agent.
@@ -58,9 +57,8 @@ This program interacts with the `gpg-agent` for providing a password, using the 
 
 ### Prerequisites
 
-* [gnupg](https://formulae.brew.sh/formula/gnupg)
-* [pinentry-mac](https://github.com/GPGTools/pinentry-mac)
-
+- [gnupg](https://formulae.brew.sh/formula/gnupg)
+- [pinentry-mac](https://github.com/GPGTools/pinentry-mac)
 
 If you have already installed GPG, make sure that executing `pinentry` shows a GUI prompt by running
 the following command:
@@ -69,7 +67,8 @@ the following command:
 $ echo GETPIN | pinentry
 ```
 
-You should get the dialog from [pinentry-mac](https://github.com/GPGTools/pinentry-mac). If that is not the case you can install it though Homebrew:
+You should get the dialog from [pinentry-mac](https://github.com/GPGTools/pinentry-mac). If that is
+not the case you can install it though Homebrew:
 
 ```sh
 $ brew install pinentry-mac
@@ -81,7 +80,7 @@ You can overwrite the `pinentry` alias to point to `pinentry-mac`:
 $ alias pinentry='pinentry-mac'
 ```
 
-_Then try again whether you see a GUI prompt._
+*Then try again whether you see a GUI prompt.*
 
 In some cases aliasing `pinentry` to `pinentry-mac` is not enough because `gpgconf` returns the
 absolute path that points to the `$HOMEBREW_PREFIX/opt` path. In that case you can execute the
@@ -93,9 +92,8 @@ $ pinentry-touchid -fix
 
 ### Homebrew
 
-
-As part of our release process we keep an updated Homebrew Formula. To install `pinentry-touchid` using
-Homebrew execute the following commands:
+As part of our release process we keep an updated Homebrew Formula. To install `pinentry-touchid`
+using Homebrew execute the following commands:
 
 ```sh
 $ brew tap jorgelbg/tap
@@ -104,7 +102,7 @@ $ brew install pinentry-touchid
 
 Homebrew will print the next steps, which will look similar to:
 
-```
+```text
 ==> Caveats
 ➡️  Ensure that pinentry-mac is the default pinentry program:
       /usr/local/bin/pinentry-touchid -fix
@@ -146,6 +144,7 @@ $ pinentry-touchid -check
 ```
 
 If any error is reported `pinentry-touchid` can automatically fix the symlink for you:
+
 ```sh
 $ pinentry-touchid -fix
 ```
@@ -158,18 +157,20 @@ First, ensure pinentry-mac is already using the Keychain:
 $ security find-generic-password -s 'GnuPG'
 ```
 
-You should get a big list of attributes.
-If you get an error, such as the following, it means pinentry-mac is not configured to use the Keychain:
+You should get a big list of attributes. If you get an error, such as the following, it means
+pinentry-mac is not configured to use the Keychain:
 
-```
+```text
 security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.
 ```
 
-If you do not see this error, skip ahead to [Configuring pinentry-touchid](#configuring-pinentry-touchid).
+If you do not see this error, skip ahead to
+[Configuring pinentry-touchid](#configuring-pinentry-touchid).
 
 ### Configuring pinentry-mac
 
-Before configuring pinentry-touchid, you should configure pinentry-mac to use the Keychain at least once:
+Before configuring pinentry-touchid, you should configure pinentry-mac to use the Keychain at least
+once:
 
 ```sh
 $ defaults write org.gpgtools.common UseKeychain -bool yes
@@ -178,7 +179,8 @@ $ defaults write org.gpgtools.common UseKeychain -bool yes
 Note that there are two defaults which are the reverse of each other.
 This one, `UseKeychain`, should be set to `yes` or `true`.
 
-Ensure the `pinentry-program` entry in your `~/.gnupg/gpg-agent.conf` points to pinentry-mac, then restart the GPG Agent:
+Ensure the `pinentry-program` entry in your `~/.gnupg/gpg-agent.conf` points to pinentry-mac, then
+restart the GPG Agent:
 
 ```sh
 $ gpgconf --kill gpg-agent
@@ -190,9 +192,9 @@ Using gpg should then use pinentry-mac to provide a GUI prompt for your GPG pass
 $ echo 1234 | gpg -as -
 ```
 
-Make sure you check the "Save in Keychain" box on the prompt.
-You may then get a second prompt, this time for your login password, to authorize pinentry-mac to create and use the Keychain entry to store your GPG passphrase.
-If so, use "Always Allow" to avoid future prompts.
+Make sure you check the "Save in Keychain" box on the prompt. You may then get a second prompt, this
+time for your login password, to authorize pinentry-mac to create and use the Keychain entry to
+store your GPG passphrase. If so, use "Always Allow" to avoid future prompts.
 
 You should now be able to see the new Keychain entry via the same command as before:
 
@@ -204,8 +206,9 @@ Continue on to the next section to replace this password prompt with a TouchID p
 
 ### Configuring pinentry-touchid
 
-Once your Keychain is configured correctly, you can update your `gpg-agent.conf` with the correct path for `pinentry-program` pointing to the full path to `pinentry-touchid`.
-Remember to restart the GPG Agent each time you make a change to this configuration file:
+Once your Keychain is configured correctly, you can update your `gpg-agent.conf` with the correct
+path for `pinentry-program` pointing to the full path to `pinentry-touchid`. Remember to restart the
+GPG Agent each time you make a change to this configuration file:
 
 ```sh
 $ gpgconf --kill gpg-agent
@@ -234,14 +237,15 @@ new one.
 
 I've tested `pinentry-touchid` in the following combinations of devices and macOS versions:
 
-* MacBook Pro (15-inch, 2018), macOS Catalina - 10.15.7
-* MacBook Pro (15-inch, 2018), macOS Big Sur - 11.4, 11.5.0, 11.5.1
-* MacBook Pro (16-inch, Late 2019), macOS Big Sur - 11.4, 11.5.1
-* MacBook Pro (16-inch, Late 2021), macOS Monterey - 12.2
+- MacBook Pro (15-inch, 2018), macOS Catalina - 10.15.7
+- MacBook Pro (15-inch, 2018), macOS Big Sur - 11.4, 11.5.0, 11.5.1
+- MacBook Pro (16-inch, Late 2019), macOS Big Sur - 11.4, 11.5.1
+- MacBook Pro (16-inch, Late 2021), macOS Monterey - 12.2
 
 ## Links
 
-* The project icon is taken from <a href="https://icons8.com/icon/BebbEec6QUjh/touch-id">Touch ID icon by Icons8</a>.
+- The project icon is taken from <a href="https://icons8.com/icon/BebbEec6QUjh/touch-id">Touch ID
+  icon by Icons8</a>.
 
 ---
 
@@ -262,7 +266,7 @@ machine. The README is accurate but silent on all of the following.
 - ⚠ `-check` is safe — it only `lstat`s the path and reports whether it is (or resolves to)
   `pinentry-mac`. On this machine it reports, verbatim:
 
-  ```
+  ```text
   ❌ /opt/homebrew/opt/pinentry/bin/pinentry is a symlink that resolves to
      /opt/homebrew/Cellar/pinentry/1.3.3/bin/pinentry-curses not to pinentry-mac
   ```

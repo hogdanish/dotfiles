@@ -34,6 +34,11 @@
             "type": "command",
             "command": "$HOME/.config/claude-code/hooks/fish-validate.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.config/claude-code/hooks/markdown-format.sh",
+            "timeout": 30
           }
         ]
       }
@@ -54,7 +59,7 @@
   "statusLine": {
     "type": "command",
     "command": "HERDR_PLUGIN_STATE_DIR='/Users/ethan/.local/state/herdr/plugins/herdr-agent-quota' '/Users/ethan/.config/herdr/plugins/github/herdr-agent-quota-651432b09361/target/release/herdr-agent-quota' claude-statusline",
-    "refreshInterval": 60
+    "refreshInterval": 30
   },
   "enabledPlugins": {
     "github@claude-plugins-official": true,

@@ -6,20 +6,20 @@ macOS 27.0, Apple Silicon.
 
 ## 1. The surfaces
 
-| Surface | Gate | Configured here? |
-| --- | --- | --- |
-| 1Password app unlock | Touch ID / Apple Watch / account password | app setting — **verify** |
-| `op` CLI command | 1Password authorization prompt | yes (desktop-app integration) |
-| Shell plugin (`gh`, `aws`, …) | same prompt as `op` | no plugin configured |
-| SSH / Git over the 1Password agent | 1Password authorization prompt | yes |
-| Git commit signature (`op-ssh-sign`) | same | yes |
-| GPG passphrase | keychain ACL + Touch ID via `pinentry-touchid` | no (`~/.gnupg` absent) |
-| `sudo` | PAM: password, or `pam_tid.so` | ✅ `/etc/pam.d/sudo_local` (2026-07-30) |
-| `sudo` inside tmux/screen | needs `pam_reattach` before `pam_tid` | ✅ same file, line 1 |
-| `sudo mas upgrade` (App Store updates) | same `pam_tid.so` path as any `sudo` | ✅ via `brewup`; `mas update` needs root |
-| A launchd background job needing root | ⚠ **nothing works** — see §3.1 | avoided by design |
-| Keychain item access | per-item ACL | implicit |
-| macOS login / screen unlock | Touch ID | system default |
+| Surface                                | Gate                                           | Configured here?                         |
+| -------------------------------------- | ---------------------------------------------- | ---------------------------------------- |
+| 1Password app unlock                   | Touch ID / Apple Watch / account password      | app setting — **verify**                 |
+| `op` CLI command                       | 1Password authorization prompt                 | yes (desktop-app integration)            |
+| Shell plugin (`gh`, `aws`, …)          | same prompt as `op`                            | no plugin configured                     |
+| SSH / Git over the 1Password agent     | 1Password authorization prompt                 | yes                                      |
+| Git commit signature (`op-ssh-sign`)   | same                                           | yes                                      |
+| GPG passphrase                         | keychain ACL + Touch ID via `pinentry-touchid` | no (`~/.gnupg` absent)                   |
+| `sudo`                                 | PAM: password, or `pam_tid.so`                 | ✅ `/etc/pam.d/sudo_local` (2026-07-30)  |
+| `sudo` inside tmux/screen              | needs `pam_reattach` before `pam_tid`          | ✅ same file, line 1                     |
+| `sudo mas upgrade` (App Store updates) | same `pam_tid.so` path as any `sudo`           | ✅ via `brewup`; `mas update` needs root |
+| A launchd background job needing root  | ⚠ **nothing works** — see §3.1                 | avoided by design                        |
+| Keychain item access                   | per-item ACL                                   | implicit                                 |
+| macOS login / screen unlock            | Touch ID                                       | system default                           |
 
 Everything in the top half funnels through one thing: **whether 1Password itself is unlocked with
 Touch ID**. Fix that first — it is the difference between "tap" and "type your account password"
@@ -36,7 +36,7 @@ Three independent settings, all in the 1Password app:
    after minutes.
 3. **Developer → SSH agent → approval scope and memory.** See
    [1password-ssh-git.md](1password-ssh-git.md) §5. Recommended balance: *For each new application*
-   + remember *for 4–12 hours*. Prompts then collapse to about one per app per work session, while
+   - remember *for 4–12 hours*. Prompts then collapse to about one per app per work session, while
    each key still requires an explicit human approval the first time an app asks for it.
 
 `op` CLI sessions are separate and not configurable: per terminal window, ending at lock, 10 minutes
@@ -51,7 +51,7 @@ as you and that key. Reasonable for a short batch of work; not a default.
 macOS 14+ provides a drop-in that survives OS updates. `/etc/pam.d/sudo` already contains
 `auth include sudo_local` as its first line. The live file on this machine:
 
-```
+```text
 # touch id for sudo. managed by ~/.config/scripts/bootstrap.sh
 auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
 auth       sufficient     pam_tid.so
@@ -60,35 +60,35 @@ auth       sufficient     pam_tid.so
 `scripts/bootstrap.sh` step 10 writes exactly this, idempotently, and refuses to clobber an existing
 `sudo_local` that lacks a `pam_tid` line.
 
-`sufficient` means Touch ID satisfies auth if it succeeds and falls through to the password prompt if
-it fails or is unavailable (SSH sessions, lid closed, no finger enrolled) — so there is no lockout
-risk. It takes effect on the next `sudo`.
+`sufficient` means Touch ID satisfies auth if it succeeds and falls through to the password prompt
+if it fails or is unavailable (SSH sessions, lid closed, no finger enrolled) — so there is no
+lockout risk. It takes effect on the next `sudo`.
 
-⚠ Editing `/etc/pam.d/sudo` itself instead of `sudo_local` is the old advice; the file is replaced by
-OS updates and a syntax error there can make `sudo` unusable. Always use `sudo_local`, keep a root
-shell open while editing, and test in a second terminal before closing it.
+⚠ Editing `/etc/pam.d/sudo` itself instead of `sudo_local` is the old advice; the file is replaced
+by OS updates and a syntax error there can make `sudo` unusable. Always use `sudo_local`, keep a
+root shell open while editing, and test in a second terminal before closing it.
 
 ### 3.1 ⚠ Touch ID cannot rescue an unattended background job
 
-This is the limit that shapes the Homebrew autoupdate design (repo `CLAUDE.md`). A launchd agent that
-needs root has three options and all three are bad:
+This is the limit that shapes the Homebrew autoupdate design (repo `CLAUDE.md`). A launchd agent
+that needs root has three options and all three are bad:
 
-| Mechanism | What the user sees at 04:00 |
-| --- | --- |
-| plain `sudo` | fails — no tty, no askpass. The one privileged step errors |
-| `pam_tid.so` | a Touch ID sheet nobody is there to touch; times out, falls through to a password prompt nobody is there to type |
-| `SUDO_ASKPASS` → `pinentry-mac` (what `brew autoupdate --sudo` writes) | a modal password dialog at an arbitrary moment, with **no Touch ID path at all** |
+| Mechanism                                                              | What the user sees at 04:00                                                                                      |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| plain `sudo`                                                           | fails — no tty, no askpass. The one privileged step errors                                                       |
+| `pam_tid.so`                                                           | a Touch ID sheet nobody is there to touch; times out, falls through to a password prompt nobody is there to type |
+| `SUDO_ASKPASS` → `pinentry-mac` (what `brew autoupdate --sudo` writes) | a modal password dialog at an arbitrary moment, with **no Touch ID path at all**                                 |
 
-So Touch ID for `sudo` is a fix for *interactive* `sudo`, not for automation. The correct design is to
-keep root out of the background job entirely and do the privileged step by hand, where the tap is
+So Touch ID for `sudo` is a fix for *interactive* `sudo`, not for automation. The correct design is
+to keep root out of the background job entirely and do the privileged step by hand, where the tap is
 worth it. `brew autoupdate` is therefore started **without `--sudo`**, and the two `pkg`-artifact
 casks (`temurin@25`, `font-sf-pro`) are upgraded manually.
 
 ⚠ The remaining non-`sudo` blocker for background cask upgrades is **App Management** (TCC). macOS
 does not let a process prompt for it and wait — it is denied outright for a non-interactive job. The
 tap's README says to add
-`~/Library/Application Support/com.github.domt4.homebrew-autoupdate/brew_autoupdate` to
-System Settings → Privacy & Security → App Management. Check the run log after the first cask upgrade
+`~/Library/Application Support/com.github.domt4.homebrew-autoupdate/brew_autoupdate` to System
+Settings → Privacy & Security → App Management. Check the run log after the first cask upgrade
 lands: `brew autoupdate logs`.
 
 ### Inside tmux/screen
@@ -96,7 +96,7 @@ lands: `brew autoupdate logs`.
 `pam_tid.so` fails in a re-parented session. `pam-reattach` fixes it by reattaching to the user's
 GUI session:
 
-```
+```text
 auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
 auth       sufficient     pam_tid.so
 ```
@@ -134,13 +134,13 @@ security find-generic-password -s 'GnuPG'      # metadata only
 
 ## 5. What Touch ID here does *not* do
 
-- **It is not encryption.** Touch ID authorizes access to a secret protected by the login keychain or
-  by 1Password; it does not itself encrypt anything.
-- **`pinentry-touchid` does not use the Secure Enclave.** Its own README says so: the passphrase is a
-  normal keychain item, guarded by an ACL plus a biometric check.
-- **It is biometrics-only in `pinentry-touchid`** (`LAPolicyDeviceOwnerAuthenticationWithBiometrics`)
-  — no Apple Watch, no password fallback inside that program. 1Password's own prompts are more
-  flexible.
+- **It is not encryption.** Touch ID authorizes access to a secret protected by the login keychain
+  or by 1Password; it does not itself encrypt anything.
+- **`pinentry-touchid` does not use the Secure Enclave.** Its own README says so: the passphrase is
+  a normal keychain item, guarded by an ACL plus a biometric check.
+- **It is biometrics-only in `pinentry-touchid`**
+  (`LAPolicyDeviceOwnerAuthenticationWithBiometrics`) — no Apple Watch, no password fallback inside
+  that program. 1Password's own prompts are more flexible.
 - **It does not bound a process.** Once a session is authorized, every process in it can use the
   credential; consent is per-app-session, not per-command.
 

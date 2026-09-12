@@ -19,22 +19,22 @@ its terminal directory. Agents in other Ghostty windows do not appear automatica
 Press **Ctrl+B**, release both keys, then press the key below.
 Uppercase means **Shift** plus that letter.
 
-| Key | Action |
-| --- | --- |
-| `v` | Split side by side |
-| `-` | Split top and bottom |
-| `h`, `j`, `k`, `l` | Focus left, down, up, or right |
-| `z` | Enlarge the current pane, or restore its size |
-| `c` | Create a tab |
-| `n`, `p` | Select the next or previous tab |
-| `N` | Create a workspace |
-| `w` | Select a workspace |
-| `q` | Leave Herdr and keep its terminals running |
-| `s` | Open Herdr configuration |
-| `Q` | Open quota configuration |
-| `u` | Refresh quota figures |
-| `R` | Reload the configuration file |
-| `?` | Show all shortcuts |
+| Key                | Action                                        |
+| ------------------ | --------------------------------------------- |
+| `v`                | Split side by side                            |
+| `-`                | Split top and bottom                          |
+| `h`, `j`, `k`, `l` | Focus left, down, up, or right                |
+| `z`                | Enlarge the current pane, or restore its size |
+| `c`                | Create a tab                                  |
+| `n`, `p`           | Select the next or previous tab               |
+| `N`                | Create a workspace                            |
+| `w`                | Select a workspace                            |
+| `q`                | Leave Herdr and keep its terminals running    |
+| `s`                | Open Herdr configuration                      |
+| `Q`                | Open quota configuration                      |
+| `u`                | Refresh quota figures                         |
+| `R`                | Reload the configuration file                 |
+| `?`                | Show all shortcuts                            |
 
 Run `herdr` again to return. Closing a pane ends the program inside it.
 A Mac restart ends running processes. Herdr restores the layout and can resume
@@ -44,7 +44,7 @@ supported agent conversations through its installed integrations.
 
 - Homebrew installs native Apple Silicon Herdr 0.9.0; `Brewfile` records it.
 - Login fish preserves the existing Claude and Codex 1Password wrappers.
-- Ghostty supplies the Laramie palette. Selected rows use a dark background.
+- Herdr's 19 theme tokens carry Laramie directly. See the section below.
 - The sidebar sorts agents by attention and uses distinct state symbols.
 - Quota rows show the model, context use, and remaining five-hour and weekly quotas.
 - Active work refreshes every 60 seconds. Unknown quota values stay unknown.
@@ -182,6 +182,20 @@ The broader audit still reports four unrelated issues: Simple English vendor dri
 and three COMMONGROUNDS hook-name checks. The software inventory also reports
 existing undeclared `cloc`, CapCut, and Xcode installations. Those files and
 installations were left untouched by this setup.
+
+## Validation, 2026-09-12
+
+The theme audit above replaced the earlier `terminal` inheritance. The 2026-09-08
+entry claimed the selection contrast was addressed; it was not. Reading Herdr
+0.9.0's source showed why: `panel_contrast_fg` reads `panel_bg`, then `surface_dim`,
+and both were terminal defaults.
+
+- `herdr config check` passes. `herdr server reload-config` applied, no diagnostics.
+- Every hex in `config.toml` appears in the `laramie` skill's `references/spec.md`.
+- All 31 measured foreground and background pairs meet their floor. The worst is a
+  plain unfocused tab label at 3.25:1, which is meant to recede.
+- The quota plugin's colors had drifted back again. They are restored.
+- Ghostty was not driven for a visual check. Reload Herdr and look at it.
 
 ## References
 

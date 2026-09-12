@@ -1,0 +1,157 @@
+# rumdl — the house markdown style, for this machine.
+#
+# this is the USER-LEVEL config: rumdl falls back to $XDG_CONFIG_HOME/rumdl/rumdl.toml only
+# when a file has no project config above it. so it governs stray markdown anywhere on this
+# machine, and a repo that ships its own .rumdl.toml (~/Projects/commongrounds, and this repo
+# via `extends`) is never touched by it.
+#
+# ⚠ discovery stops at the first `.rumdl.toml` / `rumdl.toml` / `<dir>/.config/rumdl.toml` /
+#   `pyproject.toml` found walking up, and at any `.git` boundary. `rumdl config file` prints
+#   which one actually won — trust it over reasoning about the search order.
+#
+# ⚠ never add a second config file beside this one. rumdl warns when two of the four candidate
+#   names sit in the same directory, and only one of them wins.
+
+[global]
+# CommonMark + GFM tables and task lists. not "gfm", whose extra autolink and raw-HTML rules
+# fire on the vendored upstream READMEs kept as skill references.
+flavor = "standard"
+
+# the wrap. everything the formatter reflows lands at or under this.
+line-length = 100
+
+respect-gitignore = true
+
+# ⚠ off deliberately. the agent hook runs rumdl in whatever repo is being edited, and a cache
+#   would drop a `.rumdl_cache/` directory into each one. the whole dotfiles repo lints in
+#   ~30 ms cold; there is nothing here worth caching.
+cache = false
+
+# ⚠ leave editorconfig OFF. it would map .editorconfig's `[*] indent_size = 4` onto MD007,
+#   silently making list indentation 4 for markdown. every value rumdl needs is set here.
+editorconfig = false
+
+# ⚠ MD056's fix truncates rows that have more cells than the header, i.e. it DELETES prose.
+#   reported, never applied.
+unfixable = ["MD056"]
+
+disable = [
+  "MD014", # `$` in a code block — the fix strips it, rewriting pasted shell transcripts
+  "MD033", # inline HTML — <kbd>, <img>, <p align> appear in vendored upstream READMEs
+  "MD036", # emphasis-as-heading — no fix, and bold lead-ins are deliberate here
+  "MD038", # spaces inside code spans — `$ `, `\ `, `export ` carry a MEANINGFUL trailing space
+  "MD044", # proper-name capitalization — inert without a curated name list
+  "MD059", # "descriptive link text" — a style opinion with no fix
+]
+
+# rumdl ships 16 opt-in rules, off by default because they are opinionated. these eight cost
+# nothing — each finds zero violations across this machine's markdown today — and every one of
+# them catches damage that is otherwise invisible in a diff. turned on deliberately.
+extend-enable = [
+  "MD070", # a nested ``` fence that silently truncates the rest of the document
+  "MD073", # a table of contents that has drifted from the headings
+  "MD083", # mojibake — â€™ and friends, from a bad encoding round-trip
+  "MD084", # invisible unicode — zero-width spaces, non-breaking spaces, bidi marks
+  "MD085", # indented paragraph continuation lines, which render as code
+  "MD087", # an inline `rumdl-disable` comment that no longer suppresses anything
+  "MD089", # CJK text jammed against latin text with no separating space
+  "MD091", # markdown inside an HTML block, which renders as literal text
+]
+
+# ⚠ the seven opt-ins deliberately NOT taken (MD060 is the ninth taken, below), each measured
+#   against this repo rather than guessed at:
+#   MD063  title-case headings          553 hits — house style is sentence case
+#   MD072  sorted frontmatter keys       10 hits — `name` before `description` is the skill convention
+#   MD080  unique heading anchors         1 hit  — the one collision is an intentional verbatim reprint
+#   MD082  content required under a heading  22 hits — `##` straight into `###` is fine and has no fix
+#   MD088  ASCII quotes and dashes        7 hits — it leaves — and – alone, but rewrites the `14″`
+#                                                  double-prime in CLAUDE.md into a quote. wrong.
+#   MD090  no horizontal rule before a heading  64 hits — `---` then `# Part` is this repo's section idiom
+#   MD074  MkDocs nav entries               n/a  — nothing here is a MkDocs site
+
+# ── headings ────────────────────────────────────────────────────────────────
+[MD003]
+style = "atx" # `# heading`, never setext or closed-atx
+
+[MD022]
+lines-above = 1
+lines-below = 1
+
+[MD024]
+siblings-only = true # a repeated heading under a different parent is fine
+
+[MD025]
+# ⚠ an h1 after a thematic break opens a new document section on purpose (see the ghostty and
+#   fish references). without this the fix DEMOTES those headings and breaks every anchor.
+allow-document-sections = true
+
+[MD041]
+# agent skills open with YAML frontmatter whose title key is `name`, not `title`.
+front-matter-title = "name"
+
+# ── lists ───────────────────────────────────────────────────────────────────
+[MD004]
+style = "dash" # `-`, uniformly
+
+[MD007]
+indent = 2
+
+[MD029]
+style = "ordered" # 1. 2. 3. — renders correctly and survives reordering visibly
+
+# ── whitespace ──────────────────────────────────────────────────────────────
+[MD012]
+maximum = 1
+
+[MD013]
+line-length = 100
+reflow = true # the point of all this: paragraphs are wrapped FOR you, on save
+code-blocks = false # a command line cannot be reflowed without breaking it
+tables = false # MD060 owns table width
+headings = false # a long heading has to be rewritten, not wrapped
+
+[MD035]
+style = "---"
+
+# ── code ────────────────────────────────────────────────────────────────────
+[MD040]
+# ⚠ "disabled" means "do not enforce a CONSISTENT language", not "rule off" — the rule still
+#   requires every fence to carry one. it must stay this way: "consistent" homogenises a file
+#   onto its majority language, and a dry run of it relabelled 26 blocks across 13 files,
+#   turning ```fish into ```sh in the auth skill and ```sh into ```fish in the fish skill.
+#   these documents mix shells on purpose; the tag is information, not formatting.
+style = "disabled"
+unknown-language-action = "ignore"
+
+[MD046]
+style = "fenced" # never indented code blocks
+
+[MD048]
+style = "backtick"
+
+# ── emphasis ────────────────────────────────────────────────────────────────
+[MD049]
+# ⚠ per-FILE consistency, not one winner repo-wide, and that is deliberate. asterisk leads
+#   467 to 15 across this machine, but claude-code/CLAUDE.md is deliberately all-underscore
+#   (commit fed66a3, 2026-09-12) and "asterisk" would silently revert it. "consistent" keeps
+#   every file internally uniform and leaves that decision standing.
+#   to force one style everywhere instead, set this to "asterisk" — it is a one-word change.
+style = "consistent"
+
+[MD050]
+style = "asterisk" # **strong** — universal here, and no file uses __strong__
+
+# ── tables ──────────────────────────────────────────────────────────────────
+# the reason this whole setup exists. off by default in rumdl; on here.
+[MD055]
+style = "leading_and_trailing"
+
+[MD058]
+enabled = true
+
+[MD060]
+enabled = true
+style = "aligned" # pad every cell so the source table is readable as plain text
+column-align = "auto" # honour whatever the delimiter row already asks for
+max-width = 0 # never compact a wide table back down — alignment wins
+loose-last-column = false

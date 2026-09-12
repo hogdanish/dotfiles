@@ -19,28 +19,28 @@ Every config key is also a CLI flag: `ghostty --font-size=12 --font-family="Fira
 
 ### Actions
 
-| Action | Purpose |
-| --- | --- |
-| `+version` | Version, channel, Zig version, build mode, runtime, font engine, renderer, libxev backend. Also how you check the **libadwaita version** on Linux. |
-| `+help` | General help. `+<action> --help` for one action. |
-| `+show-config` | The fully resolved, merged config. `--default` for defaults, `--docs` to include doc comments. `+show-config --default --docs` is the canonical offline option reference. |
-| `+explain-config <key>` | Docs for a single option or action. `--option=` / `--keybind=` to disambiguate, `--no-pager` for scripting. Prints `Unknown: 'x'.` for a bad name. |
-| `+validate-config` | Validate. `--config-file=<path>` to check one file, `--config-default-files=false` to check it in isolation. Exit **1** with `file:line:key: message` per error. |
-| `+edit-config` | Open the config in the default editor. |
-| `+list-fonts` | All discoverable fonts via Ghostty's own discovery. `--family=` to filter. |
-| `+list-themes` | All themes (592 built-in + your own). `--plain` for scripting. |
-| `+list-colors` | Named X11 colours accepted by colour options. |
-| `+list-keybinds` | Current binds; `--default` for the shipped set. |
-| `+list-actions` | All keybind actions; `--docs` for descriptions. |
-| `+show-face` | Which font face is chosen for given text/style — the tool for debugging fallback. |
-| `+ssh` / `+ssh-cache` | SSH wrapper and its terminfo cache (§4). Both present on the installed 1.3.2-main build (verified 2026-07-28). |
-| `+new-window` / `+toggle-quick-terminal` | Drive a running instance. |
-| `+crash-report` | List/inspect crash reports. |
-| `+boo` | 👻 |
+| Action                                   | Purpose                                                                                                                                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `+version`                               | Version, channel, Zig version, build mode, runtime, font engine, renderer, libxev backend. Also how you check the **libadwaita version** on Linux.                        |
+| `+help`                                  | General help. `+<action> --help` for one action.                                                                                                                          |
+| `+show-config`                           | The fully resolved, merged config. `--default` for defaults, `--docs` to include doc comments. `+show-config --default --docs` is the canonical offline option reference. |
+| `+explain-config <key>`                  | Docs for a single option or action. `--option=` / `--keybind=` to disambiguate, `--no-pager` for scripting. Prints `Unknown: 'x'.` for a bad name.                        |
+| `+validate-config`                       | Validate. `--config-file=<path>` to check one file, `--config-default-files=false` to check it in isolation. Exit **1** with `file:line:key: message` per error.          |
+| `+edit-config`                           | Open the config in the default editor.                                                                                                                                    |
+| `+list-fonts`                            | All discoverable fonts via Ghostty's own discovery. `--family=` to filter.                                                                                                |
+| `+list-themes`                           | All themes (592 built-in + your own). `--plain` for scripting.                                                                                                            |
+| `+list-colors`                           | Named X11 colours accepted by colour options.                                                                                                                             |
+| `+list-keybinds`                         | Current binds; `--default` for the shipped set.                                                                                                                           |
+| `+list-actions`                          | All keybind actions; `--docs` for descriptions.                                                                                                                           |
+| `+show-face`                             | Which font face is chosen for given text/style — the tool for debugging fallback.                                                                                         |
+| `+ssh` / `+ssh-cache`                    | SSH wrapper and its terminfo cache (§4). Both present on the installed 1.3.2-main build (verified 2026-07-28).                                                            |
+| `+new-window` / `+toggle-quick-terminal` | Drive a running instance.                                                                                                                                                 |
+| `+crash-report`                          | List/inspect crash reports.                                                                                                                                               |
+| `+boo`                                   | 👻                                                                                                                                                                        |
 
 ### Bundled resources (macOS)
 
-```
+```text
 /Applications/Ghostty.app/Contents/Resources/
 ├── ghostty/
 │   ├── doc/{ghostty.1.md,ghostty.1.html,ghostty.5.md,ghostty.5.html}
@@ -52,41 +52,43 @@ Every config key is also a CLI flag: `ghostty --font-size=12 --font-family="Fira
 └── bat/syntaxes/ghostty.sublime-syntax     # bat highlighting for config.ghostty
 ```
 
-`ghostty.5.md` is the complete config + keybind-action reference in markdown; `ghostty.1.md` is the CLI
-reference. Both are version-matched to the installed build and are the fastest offline source.
+`ghostty.5.md` is the complete config + keybind-action reference in markdown; `ghostty.1.md` is the
+CLI reference. Both are version-matched to the installed build and are the fastest offline source.
 
 ### Environment variables Ghostty sets
 
-| Variable | Value on this machine |
-| --- | --- |
-| `TERM` | `xterm-ghostty` (configurable via `term`) |
-| `TERM_PROGRAM` | `ghostty` |
-| `TERM_PROGRAM_VERSION` | `1.3.2-main-+6e21f41c0` |
-| `COLORTERM` | `truecolor` |
-| `TERMINFO` | `…/Contents/Resources/terminfo` |
-| `GHOSTTY_RESOURCES_DIR` | `…/Contents/Resources/ghostty` |
-| `GHOSTTY_BIN_DIR` | `…/Contents/MacOS` |
-| `GHOSTTY_SURFACE_ID` | per-surface id, e.g. `0x0d0436a48ce1e39b` |
-| `GHOSTTY_SHELL_FEATURES` | the resolved `shell-integration-features`, e.g. `cursor:blink,path,sudo,title` |
-| `GHOSTTY_SHELL_INTEGRATION_XDG_DIR` | transient — see §3 |
-| `XDG_DATA_DIRS` / `MANPATH` | Ghostty's resource dir appended |
+| Variable                            | Value on this machine                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `TERM`                              | `xterm-ghostty` (configurable via `term`)                                      |
+| `TERM_PROGRAM`                      | `ghostty`                                                                      |
+| `TERM_PROGRAM_VERSION`              | `1.3.2-main-+6e21f41c0`                                                        |
+| `COLORTERM`                         | `truecolor`                                                                    |
+| `TERMINFO`                          | `…/Contents/Resources/terminfo`                                                |
+| `GHOSTTY_RESOURCES_DIR`             | `…/Contents/Resources/ghostty`                                                 |
+| `GHOSTTY_BIN_DIR`                   | `…/Contents/MacOS`                                                             |
+| `GHOSTTY_SURFACE_ID`                | per-surface id, e.g. `0x0d0436a48ce1e39b`                                      |
+| `GHOSTTY_SHELL_FEATURES`            | the resolved `shell-integration-features`, e.g. `cursor:blink,path,sudo,title` |
+| `GHOSTTY_SHELL_INTEGRATION_XDG_DIR` | transient — see §3                                                             |
+| `XDG_DATA_DIRS` / `MANPATH`         | Ghostty's resource dir appended                                                |
 
-Variables Ghostty **reads**: `XDG_CONFIG_HOME`, `LOCALAPPDATA` (Windows), `SHELL`, and `GHOSTTY_LOG`.
+Variables Ghostty **reads**: `XDG_CONFIG_HOME`, `LOCALAPPDATA` (Windows), `SHELL`, and
+`GHOSTTY_LOG`.
 
 ---
 
 ## 2. Logging and debugging
 
-`GHOSTTY_LOG` selects destinations: `stderr` and `macos` (the unified log). Comma-combine, `no-`-prefix
-to disable, `true`/`false` for all. Debug-optimized builds log debug to stderr; other builds don't.
+`GHOSTTY_LOG` selects destinations: `stderr` and `macos` (the unified log). Comma-combine,
+`no-`-prefix to disable, `true`/`false` for all. Debug-optimized builds log debug to stderr; other
+builds don't.
 
 ```sh
 sudo log stream --level debug --predicate 'subsystem=="com.mitchellh.ghostty"'   # macOS
 journalctl --user --unit app-com.mitchellh.ghostty.service                        # Linux systemd
 ```
 
-Config load messages appear in the first ~20 lines of debug output. Config errors are also shown in a
-dedicated window on macOS and GTK, and are never fatal — the bad key falls back to its default.
+Config load messages appear in the first ~20 lines of debug output. Config errors are also shown in
+a dedicated window on macOS and GTK, and are never fatal — the bad key falls back to its default.
 
 ---
 
@@ -95,31 +97,31 @@ dedicated window on macOS and GTK, and are never fatal — the bad key falls bac
 ### What it buys you
 
 - New terminals/tabs/splits inherit the working directory (OSC 7).
-- Prompt marking (OSC 133) → `jump_to_prompt`, prompt-aware resizing (the shell **redraws** rather than
-  reflows a complex prompt), triple-click+ctrl/cmd to select a command's output, alt/option+click to
-  move the cursor, and `cursor-click-to-move`.
+- Prompt marking (OSC 133) → `jump_to_prompt`, prompt-aware resizing (the shell **redraws** rather
+  than reflows a complex prompt), triple-click+ctrl/cmd to select a command's output,
+  alt/option+click to move the cursor, and `cursor-click-to-move`.
 - Closing a terminal sitting at a prompt skips the confirmation.
 - Bar cursor at the prompt.
 - Optional `sudo` wrapping to preserve terminfo, and `ssh` wrapping (both off by default).
 
 ### How injection works
 
-Ghostty supports `bash`, `elvish`, `fish`, `nushell`, `zsh`, detected by the **basename** of the command
-(`shell-integration = detect`). Force with `shell-integration = fish`; disable with `none`.
+Ghostty supports `bash`, `elvish`, `fish`, `nushell`, `zsh`, detected by the **basename** of the
+command (`shell-integration = detect`). Force with `shell-integration = fish`; disable with `none`.
 
-⚠ Ghostty injects the fish/zsh integration by **prepending its own directory to `XDG_DATA_DIRS`** and
-exporting `GHOSTTY_SHELL_INTEGRATION_XDG_DIR`, so the shell autoloads it from `vendor_conf.d`. The
-script's first act is `ghostty_restore_xdg_data_dir`, which **removes that entry again and erases the
-variable** — so by the time you inspect the environment, the injected path is already gone. Its absence
-is not evidence that injection didn't happen.
+⚠ Ghostty injects the fish/zsh integration by **prepending its own directory to `XDG_DATA_DIRS`**
+and exporting `GHOSTTY_SHELL_INTEGRATION_XDG_DIR`, so the shell autoloads it from `vendor_conf.d`.
+The script's first act is `ghostty_restore_xdg_data_dir`, which
+**removes that entry again and erases the variable** — so by the time you inspect the environment,
+the injected path is already gone. Its absence is not evidence that injection didn't happen.
 
-| Shell | Integration script (under `$GHOSTTY_RESOURCES_DIR`) |
-| --- | --- |
-| bash | `shell-integration/bash/ghostty.bash` |
-| elvish | `shell-integration/elvish/lib/ghostty-integration.elv` |
-| fish | `shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish` |
-| nushell | `shell-integration/nushell/vendor/autoload/ghostty.nu` |
-| zsh | `shell-integration/zsh/ghostty-integration` |
+| Shell   | Integration script (under `$GHOSTTY_RESOURCES_DIR`)                   |
+| ------- | --------------------------------------------------------------------- |
+| bash    | `shell-integration/bash/ghostty.bash`                                 |
+| elvish  | `shell-integration/elvish/lib/ghostty-integration.elv`                |
+| fish    | `shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish` |
+| nushell | `shell-integration/nushell/vendor/autoload/ghostty.nu`                |
+| zsh     | `shell-integration/zsh/ghostty-integration`                           |
 
 Notes: ⚠ **macOS's `/bin/bash` cannot be auto-integrated** — source the script manually or install a
 modern bash. Nushell provides title/cursor handling itself, so its integration only covers
@@ -130,7 +132,7 @@ resizing and prompt selection work even without the integration.
 
 Look for these log lines:
 
-```
+```text
 info(io_exec): using Ghostty resources dir from env var: /Applications/Ghostty.app/Contents/Resources
 info(io_exec): shell integration automatically injected shell=termio.shell_integration.Shell.fish
 ```
@@ -143,9 +145,9 @@ Bad signs: `ghostty terminfo not found, using xterm-256color` or
 
 ### Manual sourcing
 
-Automatic injection covers **only the initially launched shell**. Running `bash`, `nix-shell`, or any
-nested shell inside Ghostty loses it (the original shell keeps it). Manual sourcing fixes that, and
-should come **as early as possible** in the rc file (some configurations interfere with it):
+Automatic injection covers **only the initially launched shell**. Running `bash`, `nix-shell`, or
+any nested shell inside Ghostty loses it (the original shell keeps it). Manual sourcing fixes that,
+and should come **as early as possible** in the rc file (some configurations interfere with it):
 
 ```bash
 # top of ~/.bashrc
@@ -157,7 +159,7 @@ fi
 ⚠ **Guard on `$GHOSTTY_RESOURCES_DIR`.** Unguarded, the path collapses to `/shell-integration/…`
 outside Ghostty and every shell start prints:
 
-```
+```text
 source: Error encountered while sourcing file '/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish':
 source: No such file or directory
 ```
@@ -167,19 +169,20 @@ source: No such file or directory
 `ghostty-shell-integration.fish` (fish flavour, verified against this build):
 
 - Restores `XDG_DATA_DIRS` and erases `GHOSTTY_SHELL_INTEGRATION_XDG_DIR`; exits unless interactive.
-- Defers all real setup to `__ghostty_setup --on-event fish_prompt`, deliberately so it runs **last**,
-  after other prompt-modifying integrations.
+- Defers all real setup to `__ghostty_setup --on-event fish_prompt`, deliberately so it runs
+  **last**, after other prompt-modifying integrations.
 - Reads features from `$GHOSTTY_SHELL_FEATURES`.
-- Emits OSC 133 marks: `A` on `fish_prompt`/`fish_posterror` (with `;click_events=1` on **fish ≥ 4.1**),
-  `C` on `fish_preexec`, `D;$status` on `fish_postexec`.
-- Emits OSC 7 cwd on `--on-variable PWD` (fish has this built in, but only for an allowlist of terminals
-  that excludes Ghostty).
+- Emits OSC 133 marks: `A` on `fish_prompt`/`fish_posterror` (with `;click_events=1` on
+  **fish ≥ 4.1**), `C` on `fish_preexec`, `D;$status` on `fish_postexec`.
+- Emits OSC 7 cwd on `--on-variable PWD` (fish has this built in, but only for an allowlist of
+  terminals that excludes Ghostty).
 - Sets `fish_handle_reflow 1` so fish redraws the prompt on resize (Ghostty clears it).
 - `cursor` → `\e[5 q` (blinking bar) or `\e[6 q` with `cursor:steady`, skipped when
   `fish_vi_cursor_handle` exists; reset with `\e[0 q` on preexec.
 - `path` → `fish_add_path --global --path --append $GHOSTTY_BIN_DIR`.
-- `sudo` → a `sudo` function adding `--preserve-env=TERMINFO`, but **only** when `$TERMINFO` is set and
-  `sudo` is not already a function/alias. It skips the flag for `sudoedit` invocations (`-e`/`--edit`).
+- `sudo` → a `sudo` function adding `--preserve-env=TERMINFO`, but **only** when `$TERMINFO` is set
+  and `sudo` is not already a function/alias. It skips the flag for `sudoedit` invocations
+  (`-e`/`--edit`).
 - `ssh-env`/`ssh-terminfo` → an `ssh` function translating the feature flags into
   `"$GHOSTTY_BIN_DIR/ghostty" +ssh <flags> -- $argv`.
 
@@ -189,15 +192,15 @@ Ordering is **directory-major, not name-merged**: every file in `$XDG_CONFIG_HOM
 (alphabetically) *before* any `$XDG_DATA_DIRS/*/fish/vendor_conf.d` file — a user `zzz.fish` still
 beats a vendor `aaa.fish`.
 
-But `$__fish_vendor_confdirs` is computed at fish-init time, **before** any `conf.d` file runs, so the
-snippet stripping `XDG_DATA_DIRS` at step 5 does **not** stop fish sourcing the vendor copy at step 7.
-Consequences, both verified with a scratch config:
+But `$__fish_vendor_confdirs` is computed at fish-init time, **before** any `conf.d` file runs, so
+the snippet stripping `XDG_DATA_DIRS` at step 5 does **not** stop fish sourcing the vendor copy at
+step 7. Consequences, both verified with a scratch config:
 
 - `~/.config/fish/conf.d/_shell.fish` sources the snippet by hand, so the **top-level shell loads it
   twice**. The snippet is re-entrant, so this is harmless.
 - A **nested** fish (`fish` inside Ghostty, `nix-shell`, …) inherits the already-stripped
-  `XDG_DATA_DIRS` and gets **no** integration. That is the real reason the manual source has to stay —
-  it matches Ghostty's own "Switching Shells" guidance above.
+  `XDG_DATA_DIRS` and gets **no** integration. That is the real reason the manual source has to stay
+  — it matches Ghostty's own "Switching Shells" guidance above.
 
 ```sh
 GI=/Applications/Ghostty.app/Contents/Resources/ghostty/shell-integration
@@ -241,13 +244,12 @@ Symptoms: `missing or unsuitable terminal: xterm-ghostty`, `Error opening termin
 infocmp -x xterm-ghostty | ssh YOUR-SERVER -- tic -x -
 ```
 
-⚠ The remote `tic` warning `older tic versions may treat the description field as an alias` is safe to
-ignore.
-⚠ `tic` writes to `/usr/share/terminfo`; override with `$TERMINFO`, else it falls back to
-`$HOME/.terminfo` **if that already exists**.
-⚠ **macOS before Sonoma cannot use the system `infocmp`** — its ncurses is too old and emits an entry
-newer `tic` rejects with `Illegal character` errors. Use
-`/opt/homebrew/opt/ncurses/bin/infocmp` (`brew install ncurses`).
+⚠ The remote `tic` warning `older tic versions may treat the description field as an alias` is safe
+to ignore. ⚠ `tic` writes to `/usr/share/terminfo`; override with `$TERMINFO`, else it falls back to
+`$HOME/.terminfo` **if that already exists**. ⚠
+**macOS before Sonoma cannot use the system `infocmp`** — its ncurses is too old and emits an entry
+newer `tic` rejects with `Illegal character` errors. Use `/opt/homebrew/opt/ncurses/bin/infocmp`
+(`brew install ncurses`).
 
 **Option 2 — fall back** (needs **OpenSSH ≥ 8.7**):
 
@@ -282,11 +284,12 @@ alias ssh='ghostty +ssh --'
 
 - `--forward-env` (default `true`) — request `SendEnv` for `COLORTERM`, `TERM_PROGRAM`,
   `TERM_PROGRAM_VERSION`.
-- `--terminfo` (default `true`) — install the terminfo entry remotely via `tic` on first connect, then
-  set `TERM=xterm-ghostty`. On failure it logs a warning and falls back to `TERM=xterm-256color`.
+- `--terminfo` (default `true`) — install the terminfo entry remotely via `tic` on first connect,
+  then set `TERM=xterm-ghostty`. On failure it logs a warning and falls back to
+  `TERM=xterm-256color`.
 - `--cache=false` — bypass both cache read and write for one invocation (scripting, debugging).
-- `--ssh=PATH` — use a specific `ssh` binary. ⚠ If the path isn't executable, `+ssh` **fails** rather
-  than silently falling back to the `PATH` `ssh`.
+- `--ssh=PATH` — use a specific `ssh` binary. ⚠ If the path isn't executable, `+ssh` **fails**
+  rather than silently falling back to the `PATH` `ssh`.
 
 `ghostty +ssh-cache` manages the install cache, keyed `user@hostname` (the **resolved** host — post
 `HostName`, post `ProxyJump` — not a `~/.ssh/config` alias; user defaults to `$USER`):
@@ -305,8 +308,8 @@ A lookup matching nothing exits nonzero.
 
 ### ⚠ The shell wrapper is a *function*, so it is not inherited
 
-`shell-integration-features = ssh-env,ssh-terminfo` defines a shell function named `ssh`. It is **not**
-used by:
+`shell-integration-features = ssh-env,ssh-terminfo` defines a shell function named `ssh`. It is
+**not** used by:
 
 - Scripts run as `./script.sh` or `sh script.sh` — each gets a fresh non-interactive shell. Use
   `source script.sh` to stay in the current shell.
@@ -320,9 +323,9 @@ For those, call `ghostty +ssh` directly or configure `~/.ssh/config` as above.
 
 ## 5. Themes
 
-592 themes ship with Ghostty, sourced from [iterm2-color-schemes](https://iterm2colorschemes.com/) and
-refreshed weekly on `main`. New themes should be contributed upstream to iterm2-color-schemes; Ghostty
-picks them up automatically.
+592 themes ship with Ghostty, sourced from [iterm2-color-schemes](https://iterm2colorschemes.com/)
+and refreshed weekly on `main`. New themes should be contributed upstream to iterm2-color-schemes;
+Ghostty picks them up automatically.
 
 ```sh
 ghostty +list-themes            # interactive picker
@@ -353,8 +356,8 @@ Don't forget to reload after changing the theme.
 
 ## 6. AppleScript (macOS, since 1.3.0)
 
-Enabled by default; disable with `macos-applescript = false`. macOS TCC prompts before another app may
-control Ghostty.
+Enabled by default; disable with `macos-applescript = false`. macOS TCC prompts before another app
+may control Ghostty.
 
 ```sh
 sdef /Applications/Ghostty.app | less                  # the dictionary
@@ -363,16 +366,16 @@ osascript -e 'tell application "Ghostty" to get version'
 
 Object model: `application → windows → tabs → terminals`.
 
-| Object | Key properties | Elements |
-| --- | --- | --- |
-| `application` | `name`, `frontmost`, `front window`, `version` | `windows`, `terminals` |
-| `window` | `id`, `name`, `selected tab` | `tabs`, `terminals` |
-| `tab` | `id`, `name`, `index`, `selected`, `focused terminal` | `terminals` |
-| `terminal` | `id`, `name`, `working directory` | — |
+| Object        | Key properties                                        | Elements               |
+| ------------- | ----------------------------------------------------- | ---------------------- |
+| `application` | `name`, `frontmost`, `front window`, `version`        | `windows`, `terminals` |
+| `window`      | `id`, `name`, `selected tab`                          | `tabs`, `terminals`    |
+| `tab`         | `id`, `name`, `index`, `selected`, `focused terminal` | `terminals`            |
+| `terminal`    | `id`, `name`, `working directory`                     | —                      |
 
 **Creation/layout:** `new surface configuration` · `new window [with configuration cfg]` ·
-`new tab [in win] [with configuration cfg]` · `split <term> direction right|left|down|up [with configuration cfg]`
-(returns the new terminal).
+`new tab [in win] [with configuration cfg]` ·
+`split <term> direction right|left|down|up [with configuration cfg]` (returns the new terminal).
 
 **Focus/lifecycle:** `focus <term>` · `activate window <w>` · `select tab <t>` · `close <term>` ·
 `close tab <t>` · `close window <w>`.
@@ -383,8 +386,8 @@ Object model: `application → windows → tabs → terminals`.
 `perform action "toggle_fullscreen" on <term>`.
 
 For `send key` / `send mouse button`, `action` is `press` or `release` and `modifiers` is a
-comma-separated string of `shift`, `control`, `option`, `command`. `perform action` takes any keybind
-action name ([keybinds.md](keybinds.md)).
+comma-separated string of `shift`, `control`, `option`, `command`. `perform action` takes any
+keybind action name ([keybinds.md](keybinds.md)).
 
 **Surface configuration record fields:** `font size`, `initial working directory`, `command`,
 `initial input`, `wait after command`, `environment variables` (a list of `"KEY=VALUE"` strings).
@@ -421,9 +424,9 @@ interactive-only and loses everything set in `.zprofile`. **Put shell setup in `
 Linux practice. (Bash is the exception: it reads `.bashrc` only when interactive **and** non-login,
 which is why so much macOS bash setup historically ended up in `.profile`.)
 
-**Tiling window managers.** ⚠ Ghostty's tabs may render as separate windows under Yabai or Aerospace.
-macOS native tabs *are* separate windows in the window-manager API, so this cannot be fixed from
-Ghostty's side. A custom tabbing implementation is a longer-term goal. Workarounds:
+**Tiling window managers.** ⚠ Ghostty's tabs may render as separate windows under Yabai or
+Aerospace. macOS native tabs *are* separate windows in the window-manager API, so this cannot be
+fixed from Ghostty's side. A custom tabbing implementation is a longer-term goal. Workarounds:
 
 ```toml
 # Aerospace — try "layout floating" if tiling still splits tabs
@@ -440,20 +443,20 @@ yabai -m signal --add app='^Ghostty$' event=window_destroyed action='yabai -m sp
 
 **Secure keyboard entry.** Auto-enabled on detected password prompts (`macos-auto-secure-input`),
 manually via `Ghostty > Secure Keyboard Entry` or `toggle_secure_input`. An animated lock appears
-top-right while active. ⚠ Detection is heuristic and does **not** work over SSH. ⚠ `toggle_secure_input`
-is application-wide and stays on until untoggled or Ghostty quits.
+top-right while active. ⚠ Detection is heuristic and does **not** work over SSH. ⚠
+`toggle_secure_input` is application-wide and stays on until untoggled or Ghostty quits.
 
 ---
 
 ## 8. Screen tearing / flicker in TUI programs
 
 Not usually a Ghostty bug. Ghostty renders **faster than some programs update their cells**, so a
-program that erases and repaints large regions tears. Known-affected: Claude Code, Docker CLI, Ollama,
-Grok.
+program that erases and repaints large regions tears. Known-affected: Claude Code, Docker CLI,
+Ollama, Grok.
 
 The fix belongs upstream: implement the
 [Synchronized Output](https://github.com/contour-terminal/vt-extensions/blob/main/synchronized-output.md)
-protocol (DEC mode 2026 — Ghostty advertises it as terminfo `Sync`) to tell the terminal when a frame
-is complete. Best practice alongside it: update only the cells that changed — reposition with CUP and
-clear the remainder with EL, rather than erasing whole rows or the screen. See
+protocol (DEC mode 2026 — Ghostty advertises it as terminfo `Sync`) to tell the terminal when a
+frame is complete. Best practice alongside it: update only the cells that changed — reposition with
+CUP and clear the remainder with EL, rather than erasing whole rows or the screen. See
 [vt-sequences.md](vt-sequences.md).

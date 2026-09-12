@@ -50,21 +50,21 @@ gpgconf --kill gpg-agent               # hard restart (also required after some 
 
 Options that matter here:
 
-| Option | Default | Notes |
-| --- | --- | --- |
-| `pinentry-program <path>` | compiled-in `pinentry` | the whole Touch ID story hangs off this |
-| `default-cache-ttl <n>` | 600 s | idle timeout of a cached passphrase; resets on each use |
-| `max-cache-ttl <n>` | 7200 s | absolute ceiling regardless of use |
-| `default-cache-ttl-ssh <n>` | 1800 s | same, for keys served over `enable-ssh-support` |
-| `max-cache-ttl-ssh <n>` | 7200 s | |
-| `no-allow-external-cache` | *unset* | ⚠ **do not set** — it disables the pinentry keychain path that `pinentry-touchid` depends on |
-| `ignore-cache-for-signing` | off | forces a prompt for every signature; the opposite of what we want |
-| `enable-ssh-support` | off | ⚠ leave off — 1Password owns SSH here; enabling it fights for `SSH_AUTH_SOCK` |
-| `allow-preset-passphrase` | off | needed only for `gpg-preset-passphrase` |
+| Option                      | Default                | Notes                                                                                        |
+| --------------------------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| `pinentry-program <path>`   | compiled-in `pinentry` | the whole Touch ID story hangs off this                                                      |
+| `default-cache-ttl <n>`     | 600 s                  | idle timeout of a cached passphrase; resets on each use                                      |
+| `max-cache-ttl <n>`         | 7200 s                 | absolute ceiling regardless of use                                                           |
+| `default-cache-ttl-ssh <n>` | 1800 s                 | same, for keys served over `enable-ssh-support`                                              |
+| `max-cache-ttl-ssh <n>`     | 7200 s                 |                                                                                              |
+| `no-allow-external-cache`   | *unset*                | ⚠ **do not set** — it disables the pinentry keychain path that `pinentry-touchid` depends on |
+| `ignore-cache-for-signing`  | off                    | forces a prompt for every signature; the opposite of what we want                            |
+| `enable-ssh-support`        | off                    | ⚠ leave off — 1Password owns SSH here; enabling it fights for `SSH_AUTH_SOCK`                |
+| `allow-preset-passphrase`   | off                    | needed only for `gpg-preset-passphrase`                                                      |
 
 A reasonable starting file for this machine:
 
-```
+```text
 # use touch id, falling back to pinentry-mac
 pinentry-program /opt/homebrew/bin/pinentry-touchid
 
@@ -78,7 +78,7 @@ keychain behind Touch ID, so cache length only trades a Touch ID tap for wall-cl
 
 ## 4. The pinentry chain
 
-```
+```text
 gpg / git  →  gpg-agent  →  $pinentry-program  →  (pinentry-touchid)  →  pinentry-mac  →  GUI dialog
                                                           ↓
                                               macOS login keychain
@@ -87,14 +87,14 @@ gpg / git  →  gpg-agent  →  $pinentry-program  →  (pinentry-touchid)  → 
 `gpgconf --list-components | grep pinentry` reports the path gpg-agent will launch when
 `pinentry-program` is unset. On this machine:
 
-```
+```text
 pinentry:Passphrase Entry:/opt/homebrew/opt/pinentry/bin/pinentry
 ```
 
 ⚠ **That path is a symlink to `pinentry-curses`** — verified 2026-07-28 with
 `pinentry-touchid -check`, which reports:
 
-```
+```text
 ❌ /opt/homebrew/opt/pinentry/bin/pinentry is a symlink that resolves to
    /opt/homebrew/Cellar/pinentry/1.3.3/bin/pinentry-curses not to pinentry-mac
 ```
@@ -108,9 +108,9 @@ Two consequences:
 1. **Unconfigured GPG prompts on the TTY, not in a GUI.** No Touch ID, no dialog — which is why
    `pinentry-program` must be set explicitly even before any key exists.
 2. `pinentry-touchid -fix` would `os.Remove` that symlink (which belongs to the `pinentry` formula)
-   and replace it with one to `pinentry-mac`, leaving a modified Homebrew install. The hazard stands;
-   see [pinentry-touchid.md](pinentry-touchid.md) §Hazards. Setting `pinentry-program` achieves the
-   same result with no filesystem surgery.
+   and replace it with one to `pinentry-mac`, leaving a modified Homebrew install. The hazard
+   stands; see [pinentry-touchid.md](pinentry-touchid.md) §Hazards. Setting `pinentry-program`
+   achieves the same result with no filesystem surgery.
 
 ⚠ **`gpgconf --list-options gpg-agent` does not list `pinentry-program`** on 2.5.21 — it is not a
 gpgconf-managed option, so its absence there is not evidence the setting was ignored. Confirm the
@@ -128,12 +128,12 @@ echo GETPIN | pinentry           # should raise a dialog, not a TTY prompt
 `pinentry-mac` reads `NSUserDefaults` from its own domain **plus** the shared suite
 `org.gpgtools.common` (`AppDelegate.m` calls `addSuiteNamed:`). Keys it actually reads:
 
-| Key | Type | Effect |
-| --- | --- | --- |
-| `UseKeychain` | bool | tick *Save in Keychain* by default. **Registered default is `YES`** |
-| `DisableKeychain` | bool | hard-off: hides/ignores the keychain entirely, overriding `UseKeychain` |
-| `ShowPassphrase` | bool | reveal typed characters by default |
-| `KeychainPath` | string | use a non-default keychain file |
+| Key               | Type   | Effect                                                                  |
+| ----------------- | ------ | ----------------------------------------------------------------------- |
+| `UseKeychain`     | bool   | tick *Save in Keychain* by default. **Registered default is `YES`**     |
+| `DisableKeychain` | bool   | hard-off: hides/ignores the keychain entirely, overriding `UseKeychain` |
+| `ShowPassphrase`  | bool   | reveal typed characters by default                                      |
+| `KeychainPath`    | string | use a non-default keychain file                                         |
 
 ```sh
 defaults write org.gpgtools.common UseKeychain -bool yes

@@ -16,14 +16,57 @@ new_cwd = "follow"
 kitty_graphics = true
 
 [theme]
-# Inherit Ghostty's Laramie ANSI palette.
+# Base stays "terminal" so every token Herdr adds in a future release falls back to the host
+# ANSI palette (which is laramie) rather than to another theme's hardcoded hexes. Every token
+# that exists today is pinned below, so the base only governs what is not yet named here.
 name = "terminal"
 auto_switch = false
 
 [theme.custom]
-# ANSI black is Laramie's sunken surface; ANSI bright black is a text color.
-active_row_bg = "black"
-selection_bg = "black"
+# laramie bound to Herdr's 19 palette tokens. See .claude/skills/laramie/references/bindings.md.
+#
+# ⚠ The load-bearing fact, from src/ui/widgets.rs::panel_contrast_fg (v0.9.0): text drawn ON an
+# accent background - the focused tab, the active settings section, a selected choice, the
+# "apply" button, selected worktree rows - takes `panel_bg` as its foreground, or `surface_dim`
+# when `panel_bg` is Reset. Herdr never picks that colour for itself. So `surface_dim` must be a
+# DARK surface or every button and selected row is unreadable. It was ANSI bright black
+# (text.dim #8089af) on ANSI blue (accent.blue.base #6cb6fa): 1.59:1. It is now 8.09:1.
+#
+# ⚠ `panel_bg` deliberately stays Reset. Ghostty runs at background-opacity 0.92 with
+# macos-glass blur; an explicit hex here would paint the sidebar, tab bar and every modal as
+# opaque slabs floating on the glass. Reset keeps Herdr's chrome on the same translucent
+# surface as the panes, which is the look this machine is set up for.
+
+# Interactive accent: selected rows, active borders, focused tab, buttons.
+accent = "#6cb6fa"        # accent.blue.base - 7.19:1 as a foreground, 8.09:1 behind surface_dim
+
+# Surfaces. Reset = the Ghostty background (surface.base #1f2335), kept translucent.
+panel_bg = "reset"        # panels, tab bar, overlays - see the note above
+sidebar_bg = "reset"      # same glass as the panes; the sidebar is not a separate slab
+active_row_bg = "#292e43" # surface.raised  - active space / focused agent row LIFTS (1.16:1)
+selection_bg = "#343a55"  # surface.overlay - navigate-mode cursor row, one step above active.
+                          # ⚠ must differ from active_row_bg; both were ANSI black before, so
+                          # the cursor row was invisible and the active row read as sunken.
+surface0 = "#343a55"      # surface.overlay - input fields, unfocused tabs, the settings rule
+surface1 = "#444b6b"      # surface.border  - overlay rules, dragged-row background
+surface_dim = "#161925"   # surface.sunken  - scrollbar track AND the on-accent foreground
+
+# Text ramp. Four tiers, every one at or above AA against the background, ordered by lightness
+# exactly as the built-in themes order theirs: text > subtext0 > overlay1 > overlay0.
+text = "#c9d3f7"          # text.loud  10.48:1 - primary chrome text, headings, focused rows
+subtext0 = "#a9b1d6"      # text.base   7.37:1 - resting sidebar agent rows; matches pane text
+overlay1 = "#9099be"      # text.muted  5.54:1 - overlay body copy and footer hints
+overlay0 = "#8089af"      # text.dim    4.53:1 - unfocused pane borders, unknown state, numbers
+
+# Agent state and semantic accents, from the ANSI-16 contract so Herdr's dots read the same as
+# every other TUI here. Working/blocked/done/idle map to yellow/red/teal/green in shell.rs.
+mauve = "#cb92fc"         # accent.violet.base - branch names
+green = "#86c452"         # accent.green.base  - idle          (state.ok)
+yellow = "#e0a332"        # accent.amber.base  - working       (state.warn)
+red = "#fc8697"           # accent.red.base    - blocked       (state.error)
+blue = "#6cb6fa"          # accent.blue.base   - finished notifications (state.info)
+teal = "#3bc5ca"          # accent.cyan.base   - done
+peach = "#ffc55b"         # accent.amber.loud  - interrupted; louder amber than `yellow`
 
 [ui]
 # Keep Herdr's mouse UI, but let a drag stay a selection until Ctrl+C/Cmd+C copies it.

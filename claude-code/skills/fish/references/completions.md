@@ -10,13 +10,13 @@ Everything below was verified with `complete -C` under `/opt/homebrew/bin/fish -
 ## 1. Where completions live and when they load
 
 One file per command, named after the command: `~/.config/fish/completions/<cmd>.fish`. It is
-**autoloaded on the first completion attempt** for that command — same mechanism as `functions/`, but
-driven by `$fish_complete_path` instead of `$fish_function_path`. Nothing is read at startup, so a
-completion file costs zero startup time no matter how large.
+**autoloaded on the first completion attempt** for that command — same mechanism as `functions/`,
+but driven by `$fish_complete_path` instead of `$fish_function_path`. Nothing is read at startup, so
+a completion file costs zero startup time no matter how large.
 
 `$fish_complete_path`, in search order (first match for a given filename wins):
 
-```
+```text
 ~/.config/fish/completions/*/         <- added by conf.d/_init.fish (see config-layout.md)
 ~/.config/fish/completions
 /opt/homebrew/etc/fish/completions
@@ -26,35 +26,35 @@ completion file costs zero startup time no matter how large.
 ~/.cache/fish/generated_completions    <- scraped from man pages
 ```
 
-⚠ **Autoloading only happens if the command exists.** Verified: with
-`completions/deploy.fish` on the path, `complete -C 'deploy '` offers files until `deploy` resolves to
-an executable on `$PATH` or a defined function — then it offers the real candidates. When testing a
-completion for a command you have not written yet, `source` the completion file explicitly.
+⚠ **Autoloading only happens if the command exists.** Verified: with `completions/deploy.fish` on
+the path, `complete -C 'deploy '` offers files until `deploy` resolves to an executable on `$PATH`
+or a defined function — then it offers the real candidates. When testing a completion for a command
+you have not written yet, `source` the completion file explicitly.
 
-⚠ The `completions/*/` glob is expanded **once**, by `conf.d/_init.fish`, at startup — a subdirectory
-created afterwards is invisible until `exec fish`. Group into subdirectories only once a domain has
-≳3 files ([style-guide.md](style-guide.md) §6).
+⚠ The `completions/*/` glob is expanded **once**, by `conf.d/_init.fish`, at startup — a
+subdirectory created afterwards is invisible until `exec fish`. Group into subdirectories only once
+a domain has ≳3 files ([style-guide.md](style-guide.md) §6).
 
 ## 2. `complete` — full flag reference
 
-| Flag | Effect |
-| --- | --- |
-| `-c CMD` / `--command` | the command these completions are for. Repeatable to define the same completions for several commands |
-| `-p PATH` / `--path` | match by absolute path (globs allowed) instead of name. `--wraps` is ignored for these |
-| `-s C` / `--short-option` | a single-character option, `-x`. Groupable (`-la`) |
-| `-l NAME` / `--long-option` | a GNU long option, `--colour` |
-| `-o NAME` / `--old-option` | one leading dash, more than one character: `-Wall`, `-name`. Use this for any command that does not support option grouping or `-d9`-style attached values |
-| `-a STR` / `--arguments` | candidates, as **one string**, tokenized on space/tab at completion time with full expansion. With `-s`/`-l`/`-o` these become the *option's* arguments; alone they are the command's non-option arguments |
-| `-d STR` / `--description` | pager description. Options sharing a non-empty description are collapsed into one candidate |
-| `-f` / `--no-files` | this completion may not be followed by a filename |
-| `-F` / `--force-files` | re-enable filenames even though another `complete` said `--no-files` |
-| `-r` / `--require-parameter` | the option's argument is the *next* token, not just an attached `-xFoo` / `--foo=bar` |
-| `-x` / `--exclusive` | `-r` and `-f` together. The usual choice for an option with a fixed value set |
-| `-n CMD` / `--condition` | only offer this if CMD exits 0. Multiple `-n` are tried in order until one fails |
-| `-w CMD` / `--wraps` | inherit CMD's completions. Transitive |
-| `-k` / `--keep-order` | present `-a` candidates in the given order instead of sorted. Later `-k` calls display first |
-| `-e` / `--erase` | delete. `complete -c CMD -e` erases *everything* for CMD, including a global `-f` |
-| `-C STR` / `--do-complete` | print the candidates for STR. The test harness — see §7 |
+| Flag                         | Effect                                                                                                                                                                                                     |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-c CMD` / `--command`       | the command these completions are for. Repeatable to define the same completions for several commands                                                                                                      |
+| `-p PATH` / `--path`         | match by absolute path (globs allowed) instead of name. `--wraps` is ignored for these                                                                                                                     |
+| `-s C` / `--short-option`    | a single-character option, `-x`. Groupable (`-la`)                                                                                                                                                         |
+| `-l NAME` / `--long-option`  | a GNU long option, `--colour`                                                                                                                                                                              |
+| `-o NAME` / `--old-option`   | one leading dash, more than one character: `-Wall`, `-name`. Use this for any command that does not support option grouping or `-d9`-style attached values                                                 |
+| `-a STR` / `--arguments`     | candidates, as **one string**, tokenized on space/tab at completion time with full expansion. With `-s`/`-l`/`-o` these become the *option's* arguments; alone they are the command's non-option arguments |
+| `-d STR` / `--description`   | pager description. Options sharing a non-empty description are collapsed into one candidate                                                                                                                |
+| `-f` / `--no-files`          | this completion may not be followed by a filename                                                                                                                                                          |
+| `-F` / `--force-files`       | re-enable filenames even though another `complete` said `--no-files`                                                                                                                                       |
+| `-r` / `--require-parameter` | the option's argument is the *next* token, not just an attached `-xFoo` / `--foo=bar`                                                                                                                      |
+| `-x` / `--exclusive`         | `-r` and `-f` together. The usual choice for an option with a fixed value set                                                                                                                              |
+| `-n CMD` / `--condition`     | only offer this if CMD exits 0. Multiple `-n` are tried in order until one fails                                                                                                                           |
+| `-w CMD` / `--wraps`         | inherit CMD's completions. Transitive                                                                                                                                                                      |
+| `-k` / `--keep-order`        | present `-a` candidates in the given order instead of sorted. Later `-k` calls display first                                                                                                               |
+| `-e` / `--erase`             | delete. `complete -c CMD -e` erases *everything* for CMD, including a global `-f`                                                                                                                          |
+| `-C STR` / `--do-complete`   | print the candidates for STR. The test harness — see §7                                                                                                                                                    |
 
 ⚠ `-f` is scoped by whatever `-n` sits on the same line. `complete -c mycmd -f` with no condition is
 the global "this command never takes a filename" switch; `complete -c mycmd -f -n cond -a x` only
@@ -83,7 +83,8 @@ complete -c workon -f -a '(command ls $WORKON_HOME)'
 ```
 
 ⚠ Note the second case: unlike bash, fish performs **no** command substitution inside double quotes,
-so `"(cmd)"` is literal text. Single-quote anyway — it is the only form that also defers `$variables`.
+so `"(cmd)"` is literal text. Single-quote anyway — it is the only form that also defers
+`$variables`.
 
 Each output line is one candidate; anything after a **tab** on that line is its description, and
 overrides `-d`. `printf` with a cycling format is the tidiest generator:
@@ -94,8 +95,8 @@ function __deploy_targets --description 'list configured deploy targets'
 end
 ```
 
-⚠ Single-quoted fish strings do **not** interpret `\t` — `printf '%s\n' 'staging\tpre-prod'` yields a
-candidate literally named `staging\tpre-prod` (verified). Put the tab in the *format*.
+⚠ Single-quoted fish strings do **not** interpret `\t` — `printf '%s\n' 'staging\tpre-prod'` yields
+a candidate literally named `staging\tpre-prod` (verified). Put the tab in the *format*.
 
 ⚠ **Never run a slow or networked command in a generator without caching.** fishconf's
 `completions/gi.fish` is the cautionary example:
@@ -136,26 +137,26 @@ produces no candidates rather than an error in the pager.
 Every helper below was verified present in fish 4.8.1 with
 `fish --no-config -c 'functions -q NAME'`.
 
-| Helper | Use |
-| --- | --- |
-| `__fish_use_subcommand` | true while no subcommand has been given — the standard guard for a subcommand list |
-| `__fish_seen_subcommand_from a b c` | true if any of a/b/c already appears on the line |
-| `__fish_is_first_token` / `__fish_is_first_arg` | true while completing the first non-switch argument |
-| `__fish_is_nth_token N` | true while completing token N (1-based, command included) |
-| `__fish_seen_argument -s v -l verbose` | true if that option was already given |
-| `__fish_contains_opt [-s C] LONG…` | older equivalent; matches short and long forms |
-| `__fish_prev_arg_in --mode --target` | true when the token immediately before the cursor is one of these |
-| `__fish_complete_directories [STR DESC]` | directory-only path completion, each described |
-| `__fish_complete_path [STR DESC]` | plain path completion with a description |
-| `__fish_complete_suffix .md` | file completion sorting `.md` first; pair with `-k` |
-| `__fish_complete_users` / `__fish_complete_groups` | users with full names / groups with members |
-| `__fish_complete_pids` | PIDs described by command name |
-| `__fish_print_hostnames` | hosts from ssh known_hosts, `/etc/hosts`, fstab NFS entries |
-| `__fish_complete_command` | complete a command name plus its own arguments (for `sudo`-alikes) |
+| Helper                                             | Use                                                                                |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `__fish_use_subcommand`                            | true while no subcommand has been given — the standard guard for a subcommand list |
+| `__fish_seen_subcommand_from a b c`                | true if any of a/b/c already appears on the line                                   |
+| `__fish_is_first_token` / `__fish_is_first_arg`    | true while completing the first non-switch argument                                |
+| `__fish_is_nth_token N`                            | true while completing token N (1-based, command included)                          |
+| `__fish_seen_argument -s v -l verbose`             | true if that option was already given                                              |
+| `__fish_contains_opt [-s C] LONG…`                 | older equivalent; matches short and long forms                                     |
+| `__fish_prev_arg_in --mode --target`               | true when the token immediately before the cursor is one of these                  |
+| `__fish_complete_directories [STR DESC]`           | directory-only path completion, each described                                     |
+| `__fish_complete_path [STR DESC]`                  | plain path completion with a description                                           |
+| `__fish_complete_suffix .md`                       | file completion sorting `.md` first; pair with `-k`                                |
+| `__fish_complete_users` / `__fish_complete_groups` | users with full names / groups with members                                        |
+| `__fish_complete_pids`                             | PIDs described by command name                                                     |
+| `__fish_print_hostnames`                           | hosts from ssh known_hosts, `/etc/hosts`, fstab NFS entries                        |
+| `__fish_complete_command`                          | complete a command name plus its own arguments (for `sudo`-alikes)                 |
 
 ⚠ **`__fish_no_arguments` exists but is unusable.** Verified: inside a completion, `commandline -tc`
-yields a single empty element, so its loop always hits `case '*'` and it returns 1 — the completion is
-never offered. Use `__fish_use_subcommand` or `__fish_is_first_arg` instead.
+yields a single empty element, so its loop always hits `case '*'` and it returns 1 — the completion
+is never offered. Use `__fish_use_subcommand` or `__fish_is_first_arg` instead.
 
 ⚠ `-n` with `-a` and `-r` do not combine the way you expect. An `-a` list with only a condition
 supplies *non-option* arguments and is skipped while fish is completing the argument to a `-r`
@@ -203,7 +204,7 @@ complete -c deploy -n '__fish_seen_subcommand_from build' -l config -r -F -d 'co
 complete -c deploy -n '__fish_seen_subcommand_from rollback' -a '(__deploy_targets)' -d target
 ```
 
-```
+```text
 > complete -C 'deploy '
 build      compile the artifact
 push       upload the artifact
@@ -266,20 +267,20 @@ fish --no-config -c "source completions/deploy.fish; complete -C 'deploy '"
 `complete -c deploy` with no other flags lists the rules currently registered for `deploy` — the way
 to confirm a file loaded, and to see exactly what string a dynamic `-a` stored.
 
-⚠ `complete -C` matches the trailing token against the candidates, so **the trailing space matters**:
-`complete -C 'deploy push --target '` completes a new argument, `complete -C 'deploy push --target st'`
-filters to `staging`. Always test both.
+⚠ `complete -C` matches the trailing token against the candidates, so
+**the trailing space matters**: `complete -C 'deploy push --target '` completes a new argument,
+`complete -C 'deploy push --target st'` filters to `staging`. Always test both.
 
-Inside a generator, `commandline` reads the `complete -C` string rather than a real buffer — which is
-what makes generators testable at all. The canonical pair:
+Inside a generator, `commandline` reads the `complete -C` string rather than a real buffer — which
+is what makes generators testable at all. The canonical pair:
 
 ```fish
 set -l tokens (commandline --cut-at-cursor --tokens-expanded) # -cx: tokens completed so far
 set -l current (commandline --current-token --cut-at-cursor) # -ct: the token being typed
 ```
 
-Prefer printing every possibility and letting fish's own matching filter them; re-implementing prefix
-matching inside a generator defeats fish's infix and fuzzy matching.
+Prefer printing every possibility and letting fish's own matching filter them; re-implementing
+prefix matching inside a generator defeats fish's infix and fuzzy matching.
 
 ## 8. Checklist for adding a completion here
 

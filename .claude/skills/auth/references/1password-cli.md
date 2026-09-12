@@ -1,17 +1,17 @@
 # 1Password CLI (`op`)
 
-Distilled from www.1password.dev/cli (2026-07-28), verified against `op` 2.38.1-beta.01 on this
-machine. Command structure is noun-verb: `op <command> [subcommand] <flags>`.
+Distilled from <https://www.1password.dev/cli> (2026-07-28), verified against `op` 2.38.1-beta.01 on
+this machine. Command structure is noun-verb: `op <command> [subcommand] <flags>`.
 
 ## 1. Authentication
 
 Three ways `op` can authenticate. Only the first is set up here.
 
-| Method | How | Use for |
-| --- | --- | --- |
+| Method                      | How                                                               | Use for                                       |
+| --------------------------- | ----------------------------------------------------------------- | --------------------------------------------- |
 | **Desktop app integration** | 1Password → Settings → Developer → *Integrate with 1Password CLI* | everything interactive; unlocks with Touch ID |
-| **Service account** | `OP_SERVICE_ACCOUNT_TOKEN` env var | CI, headless, scripts that must not prompt |
-| **Manual sign-in** | `op signin` with account details in the config file | legacy; avoid |
+| **Service account**         | `OP_SERVICE_ACCOUNT_TOKEN` env var                                | CI, headless, scripts that must not prompt    |
+| **Manual sign-in**          | `op signin` with account details in the config file               | legacy; avoid                                 |
 
 With the app integration on, *any* `op` command triggers an authorization prompt (Touch ID, Apple
 Watch, or account password) and establishes a **session bound to the terminal window/tab**.
@@ -49,7 +49,7 @@ containing `config` and `op-daemon.sock`. Nothing to configure.
 
 ## 3. Secret references (`op://`)
 
-```
+```text
 op://<vault>/<item>/[<section>/]<field>
 op://<vault>/<item>/[<section>/]<file-name>        # file attachment
 ```
@@ -58,12 +58,12 @@ op://<vault>/<item>/[<section>/]<file-name>        # file attachment
   containing a space. Any component with an unsupported character must be referenced by its **ID**.
 - **IDs are more stable than names** — an item ID changes only when the item moves vaults, and ID
   lookups are faster. Names are more readable; pick per situation.
-- **Variables interpolate**: `op://$APP_ENV/mysql/password` resolves `$APP_ENV` from the environment,
-  which is how one `.env` template serves dev and prod.
+- **Variables interpolate**: `op://$APP_ENV/mysql/password` resolves `$APP_ENV` from the
+  environment, which is how one `.env` template serves dev and prod.
 
 ### Query parameters
 
-```
+```text
 op://<vault>/<item>/<field>?attribute=<attr>
 op://<vault>/<item>/<field>?ssh-format=openssh
 ```
@@ -135,8 +135,8 @@ op inject --in-file config.yml.tpl --out-file config.yml
 echo "token: op://dev/GitHub/token" | op inject
 ```
 
-Reads stdin / `-i`, writes stdout / `-o`, replacing every `op://` reference found. The `.tpl` file is
-safe to commit; the output is not — treat it as generated and gitignore it.
+Reads stdin / `-i`, writes stdout / `-o`, replacing every `op://` reference found. The `.tpl` file
+is safe to commit; the output is not — treat it as generated and gitignore it.
 
 ## 5. Shell plugins
 
@@ -173,7 +173,8 @@ gh() {
 `~/.config/fish/config.fish` — **would error on every fish start.** Upstream's fish support means
 `op plugin run` works under fish, not that `plugins.sh` is fish.
 
-**The fish path is one autoloaded function per CLI**, mirroring what `plugins.sh` would have defined:
+**The fish path is one autoloaded function per CLI**, mirroring what `plugins.sh` would have
+defined:
 
 ```fish
 # ~/.config/fish/functions/wrappers/gh.fish
@@ -205,10 +206,9 @@ shell wiring at all.
 
 ⚠ **Aliases and functions from `plugins.sh` can never serve agent shell tools.** Claude Code's Bash
 tool and Codex commands run non-interactive shells where Fish functions do not exist. Both current
-agents receive only `AGENT_INFRA_BROKER_SOCKET`, not the resolved infrastructure tokens. A conditional
-`~/.zshenv` bridge and the Fish launch wrappers connect them to the session credential broker
-documented above and in
-[1password-environments.md](1password-environments.md) §6.
+agents receive only `AGENT_INFRA_BROKER_SOCKET`, not the resolved infrastructure tokens. A
+conditional `~/.zshenv` bridge and the Fish launch wrappers connect them to the session credential
+broker documented above and in [1password-environments.md](1password-environments.md) §6.
 
 ### ⚠ The `claude` plugin switches Claude Code to API billing
 
@@ -251,16 +251,16 @@ from 1Password (`op run`), never from a dotfile.
 
 ## 7. Environment variables
 
-| Variable | Effect |
-| --- | --- |
-| `OP_ACCOUNT` | default account (shorthand, sign-in address, account ID, user ID) |
-| `OP_SERVICE_ACCOUNT_TOKEN` | authenticate as a service account |
-| `OP_BIOMETRIC_UNLOCK_ENABLED` | `true`/`false` — toggle the desktop app integration |
-| `OP_CONFIG_DIR` | override config directory |
-| `OP_FORMAT` | `human-readable` (default) or `json` |
-| `OP_CACHE` | `false` disables the daemon's encrypted in-memory cache (on by default on UNIX) |
-| `OP_DEBUG` | `true` enables debug output |
-| `OP_ISO_TIMESTAMPS` | ISO 8601 / RFC 3339 timestamps |
+| Variable                      | Effect                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `OP_ACCOUNT`                  | default account (shorthand, sign-in address, account ID, user ID)               |
+| `OP_SERVICE_ACCOUNT_TOKEN`    | authenticate as a service account                                               |
+| `OP_BIOMETRIC_UNLOCK_ENABLED` | `true`/`false` — toggle the desktop app integration                             |
+| `OP_CONFIG_DIR`               | override config directory                                                       |
+| `OP_FORMAT`                   | `human-readable` (default) or `json`                                            |
+| `OP_CACHE`                    | `false` disables the daemon's encrypted in-memory cache (on by default on UNIX) |
+| `OP_DEBUG`                    | `true` enables debug output                                                     |
+| `OP_ISO_TIMESTAMPS`           | ISO 8601 / RFC 3339 timestamps                                                  |
 
 Global flags mirror these: `--account`, `--cache`, `--config`, `--debug`, `--format`, `--session`,
 `--no-color`, `--encoding` (`gbk`, `shift-jis`).
@@ -268,8 +268,8 @@ Global flags mirror these: `--account`, `--cache`, `--config`, `--debug`, `--for
 ## 8. Command surface
 
 `account` · `completion` · `connect` · `document` · `environment` (beta) · `events-api` · `group` ·
-`inject` · `item` · `plugin` · `read` · `run` · `service-account` · `signin` · `signout` · `update` ·
-`user` · `vault` · `whoami`
+`inject` · `item` · `plugin` · `read` · `run` · `service-account` · `signin` · `signout` · `update`
+· `user` · `vault` · `whoami`
 
 Frequently useful:
 
@@ -294,13 +294,13 @@ op completion fish | source
 
 ## 9. Troubleshooting
 
-| Symptom | Cause / fix |
-| --- | --- |
-| `connectionreset`, "couldn't connect to the app" | System Settings → General → Login Items → *Allow in background* for 1Password; restart the app |
-| `LostConnectionToApp` | enable *Keep 1Password in the menu bar* |
-| `op signin` doesn't list an account | the account isn't added to the desktop app |
-| Prompted for account password instead of Touch ID | Touch ID isn't enabled for unlocking 1Password itself |
-| A plugin doesn't fire | `plugins.sh` isn't sourced in this shell; check `op plugin inspect <cli>` |
+| Symptom                                           | Cause / fix                                                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `connectionreset`, "couldn't connect to the app"  | System Settings → General → Login Items → *Allow in background* for 1Password; restart the app |
+| `LostConnectionToApp`                             | enable *Keep 1Password in the menu bar*                                                        |
+| `op signin` doesn't list an account               | the account isn't added to the desktop app                                                     |
+| Prompted for account password instead of Touch ID | Touch ID isn't enabled for unlocking 1Password itself                                          |
+| A plugin doesn't fire                             | `plugins.sh` isn't sourced in this shell; check `op plugin inspect <cli>`                      |
 
 The 1Password app keeps an encrypted CLI activity log: Developer → View CLI. Turn it off with
 *Record and display activity* if unwanted.

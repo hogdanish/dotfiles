@@ -5,8 +5,9 @@ description: "Ghostty 1.3.x-main: configuration, keybinds and actions, CLI, shel
 
 # Ghostty
 
-The terminal emulator on this machine. **Ghostty 1.3.2-main-+6e21f41c0**, channel `tip` (pre-release,
-auto-updating), installed at `/Applications/Ghostty.app`, renderer Metal, font engine CoreText.
+The terminal emulator on this machine. **Ghostty 1.3.2-main-+6e21f41c0**, channel `tip`
+(pre-release, auto-updating), installed at `/Applications/Ghostty.app`, renderer Metal, font engine
+CoreText.
 
 ⚠ **`tip` moves fast.** Options and actions appear between releases, and several documented features
 (`ghostty +ssh`, `window-padding-balance = equal`, `command-palette-entry = clear`) are marked
@@ -15,32 +16,32 @@ auto-updating), installed at `/Applications/Ghostty.app`, renderer Metal, font e
 
 ## The live setup
 
-| | |
-| --- | --- |
-| Config | `~/.config/ghostty/config.ghostty` — **edited in place**, this repo holds no mirror |
-| Theme | `~/.config/ghostty/themes/laramie` — user-authored, not a built-in |
-| Shell | **no `command`** — fish is the login shell (2026-09-12), so Ghostty's default `$SHELL`/passwd lookup finds it; `shell-integration = fish` |
-| Look | `theme = laramie`, `background-opacity = 0.92`, `background-blur = macos-glass-regular`, `alpha-blending = linear-corrected`, `window-colorspace = display-p3`, `minimum-contrast = 1.1`, `macos-titlebar-style = transparent` |
-| Font | CommitMono Nerd Font Mono with `ss01`–`ss04` + `cv02` |
-| Updates | `auto-update = download`, `auto-update-channel = tip` |
+|         |                                                                                                                                                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Config  | `~/.config/ghostty/config.ghostty` — **edited in place**, this repo holds no mirror                                                                                                                                            |
+| Theme   | `~/.config/ghostty/themes/laramie` — user-authored, not a built-in                                                                                                                                                             |
+| Shell   | **no `command`** — fish is the login shell (2026-09-12), so Ghostty's default `$SHELL`/passwd lookup finds it; `shell-integration = fish`                                                                                      |
+| Look    | `theme = laramie`, `background-opacity = 0.92`, `background-blur = macos-glass-regular`, `alpha-blending = linear-corrected`, `window-colorspace = display-p3`, `minimum-contrast = 1.1`, `macos-titlebar-style = transparent` |
+| Font    | CommitMono Nerd Font Mono with `ss01`–`ss04` + `cv02`                                                                                                                                                                          |
+| Updates | `auto-update = download`, `auto-update-channel = tip`                                                                                                                                                                          |
 
-⚠ The file is `config.ghostty`, **not** `config` — the name changed in 1.2.3. Both are still read, and
-so are two more paths under `~/Library/Application Support/com.mitchellh.ghostty/` which load **after**
-the XDG ones and would silently win. One of those (`config.ghostty`) exists and is empty; leave it that
-way.
+⚠ The file is `config.ghostty`, **not** `config` — the name changed in 1.2.3. Both are still read,
+and so are two more paths under `~/Library/Application Support/com.mitchellh.ghostty/` which load
+**after** the XDG ones and would silently win. One of those (`config.ghostty`) exists and is empty;
+leave it that way.
 
 ⚠ **`command` is deliberately unset, and must stay unset.** Until 2026-09-12 this config pinned
-`command = /opt/homebrew/bin/fish --login --interactive`; fish is now the login shell instead, so the
-default lookup (`$SHELL`, then the passwd entry) already resolves to it. macOS starts every terminal
-shell as a login shell by prefixing `argv[0]` with `-`, and fish honours that, so the
+`command = /opt/homebrew/bin/fish --login --interactive`; fish is now the login shell instead, so
+the default lookup (`$SHELL`, then the passwd entry) already resolves to it. macOS starts every
+terminal shell as a login shell by prefixing `argv[0]` with `-`, and fish honours that, so the
 `/usr/libexec/path_helper` step still runs — verified byte-identical to the old explicit `--login`.
 `scripts/audit-config.fish` fails if a `command` line reappears.
 
 ## Five things that are counter-intuitive
 
-1. **`theme` and `config-file` load at opposite ends.** A theme loads *before* your config (your config
-   wins); `config-file` is processed at the *end* of the enclosing file (the included file wins), no
-   matter where the directive appears in it.
+1. **`theme` and `config-file` load at opposite ends.** A theme loads *before* your config (your
+   config wins); `config-file` is processed at the *end* of the enclosing file (the included file
+   wins), no matter where the directive appears in it.
 2. **A theme can set any option, not just colours** — treat an untrusted theme as untrusted code.
 3. **Omitted list features keep their defaults.** `shell-integration-features = cursor,sudo,title`
    does *not* disable `path`; only `no-path` does. Same for `bell-features`, `font-shaping-break`,
@@ -53,19 +54,21 @@ shell as a login shell by prefixing `argv[0]` with `-`, and fish honours that, s
 
 ## The Ghostty ↔ fish seam
 
-Ghostty auto-injects shell integration by prepending its own directory to `XDG_DATA_DIRS`; the script's
-first act is to **remove that entry again**, so its absence from the environment is not evidence that
-injection failed. `~/.config/fish/conf.d/_shell.fish` also sources the script manually, guarded by
-`test -r` since 2026-07-28.
+Ghostty auto-injects shell integration by prepending its own directory to `XDG_DATA_DIRS`; the
+script's first act is to **remove that entry again**, so its absence from the environment is not
+evidence that injection failed. `~/.config/fish/conf.d/_shell.fish` also sources the script
+manually, guarded by `test -r` since 2026-07-28.
 
-⚠ The manual source is **not** redundant, but not for the obvious reason. `$__fish_vendor_confdirs` is
-computed before any `conf.d` file runs, so the strip does not prevent fish sourcing the vendor copy —
-the top-level shell loads the script **twice** (harmless; it is re-entrant). What the manual source
-actually buys is **nested** fish shells, which inherit the stripped `XDG_DATA_DIRS` and would otherwise
-get nothing. Verified both ways. Mechanics, what the script does, and the OSC marks it emits:
+⚠ The manual source is **not** redundant, but not for the obvious reason. `$__fish_vendor_confdirs`
+is computed before any `conf.d` file runs, so the strip does not prevent fish sourcing the vendor
+copy — the top-level shell loads the script **twice** (harmless; it is re-entrant). What the manual
+source actually buys is **nested** fish shells, which inherit the stripped `XDG_DATA_DIRS` and would
+otherwise get nothing. Verified both ways. Mechanics, what the script does, and the OSC marks it
+emits:
 [integration.md](references/integration.md).
 
-Editing the fish side of this is the **`fish` skill's** job; this skill owns what Ghostty injects and why.
+Editing the fish side of this is the **`fish` skill's** job; this skill owns what Ghostty injects
+and why.
 
 ## Verifying a change
 
@@ -77,40 +80,42 @@ ghostty +explain-config <key|action>                      # authoritative docs f
 .claude/skills/ghostty/scripts/ghostty-audit.sh           # config + skill-vs-binary drift
 ```
 
-⚠ `+validate-config` silently ignores a nonexistent `--config-file` path, so a typo'd path looks like
-success. Reload with `cmd+r`; a few options need a full quit.
+⚠ `+validate-config` silently ignores a nonexistent `--config-file` path, so a typo'd path looks
+like success. Reload with `cmd+r`; a few options need a full quit.
 
 ## Reference material
 
 Read the row that matches the task, in full — these are floors, not menus.
 
-| Task | Read |
-| --- | --- |
-| Any option, syntax, or file-loading question | `configuration.md` |
-| A keybind, action, leader key, or modal input | `keybinds.md` |
-| CLI, shell integration, terminfo, SSH, themes, AppleScript, macOS quirks | `integration.md` |
-| Escape sequences, prompt marking, TUI rendering, capability detection | `vt-sequences.md` |
+| Task                                                                     | Read               |
+| ------------------------------------------------------------------------ | ------------------ |
+| Any option, syntax, or file-loading question                             | `configuration.md` |
+| A keybind, action, leader key, or modal input                            | `keybinds.md`      |
+| CLI, shell integration, terminfo, SSH, themes, AppleScript, macOS quirks | `integration.md`   |
+| Escape sequences, prompt marking, TUI rendering, capability detection    | `vt-sequences.md`  |
 
 - [configuration.md](references/configuration.md) (856) — **the complete option reference.** File
-  format, the four load paths, `config-file` vs `theme` precedence, validation, then all **206** keys
-  grouped by domain with defaults, valid values, units, clamps, platform limits, reload behaviour and
-  ⚠ warnings. Also the two keys absent from `+show-config --default` (`quick-terminal-size`, `link`).
+  format, the four load paths, `config-file` vs `theme` precedence, validation, then all **206**
+  keys grouped by domain with defaults, valid values, units, clamps, platform limits, reload
+  behaviour and ⚠ warnings. Also the two keys absent from `+show-config --default`
+  (`quick-terminal-size`, `link`).
 - [keybinds.md](references/keybinds.md) (359) — trigger syntax (codepoint vs W3C physical code vs
-  `catch_all`), the four prefixes, key sequences, chained actions, key tables, all **85** actions with
-  their parameters, and the 93 default macOS binds.
+  `catch_all`), the four prefixes, key sequences, chained actions, key tables, all **85** actions
+  with their parameters, and the 93 default macOS binds.
 - [integration.md](references/integration.md) (439) — the `ghostty` CLI and bundled resources, env
   vars Ghostty sets, logging, shell integration (including exactly what the fish script does),
   `xterm-ghostty` terminfo, sudo and SSH terminfo propagation, `+ssh`/`+ssh-cache`, themes and theme
   authoring, the AppleScript object model and commands, macOS login shells, tiling-WM tab behaviour,
   secure input, and the screen-tearing explanation.
-- [vt-sequences.md](references/vt-sequences.md) (206) — control-sequence anatomy, the documented C0 /
-  ESC / CSI / OSC catalogue, **OSC 133** prompt marking and **OSC 7** cwd (the contract behind
+- [vt-sequences.md](references/vt-sequences.md) (206) — control-sequence anatomy, the documented C0
+  / ESC / CSI / OSC catalogue, **OSC 133** prompt marking and **OSC 7** cwd (the contract behind
   `jump_to_prompt`, cwd inheritance and `cursor-click-to-move`), terminal modes, the Kitty
   graphics/keyboard/colour protocols, and synchronized output.
 
 ## Where the authoritative data lives
 
-Everything here was generated from the installed build, not recalled. The same sources regenerate it:
+Everything here was generated from the installed build, not recalled. The same sources regenerate
+it:
 
 ```sh
 ghostty +show-config --default --docs      # every option + full doc comments
@@ -121,8 +126,9 @@ ghostty +list-themes --plain               # 592 built-in themes
 /Applications/Ghostty.app/Contents/Resources/ghostty/doc/ghostty.1.md   # CLI reference, markdown
 ```
 
-The bundled `doc/*.md` are version-matched to the installed build and are the fastest offline source —
-prefer them over ghostty.org, which documents the latest tip and may be ahead of or behind this build.
+The bundled `doc/*.md` are version-matched to the installed build and are the fastest offline source
+— prefer them over ghostty.org, which documents the latest tip and may be ahead of or behind this
+build.
 
 ## Maintenance
 
@@ -131,18 +137,19 @@ prefer them over ghostty.org, which documents the latest tip and may be ahead of
    direction. New keys go into `configuration.md` in the same change.
 2. **Changing `~/.config/ghostty/` updates this skill in the same change** — the live-setup table
    above, and the `laramie` palette wherever it is duplicated.
-3. **Colour values are the `laramie` skill's, not this one's.** `~/.config/ghostty/themes/laramie` is
-   the **ANSI-16 contract** (`laramie` skill → `references/spec.md` §4) and is the most leveraged file
-   in the theme: every tool that takes ANSI colour *names* inherits it, including ones laramie never
-   configures. Load that skill before changing a hex here, and never hex-code a tool that could use a
-   name instead.
-   ⚠ **`window-colorspace = display-p3` means Ghostty interprets the theme's sRGB hexes as P3**, so
-   everything renders more saturated than the spec's figures state. The spec's contrast and ΔE numbers
-   are therefore *nominal*. Deliberate — the palette was signed off as rendered this way.
+3. **Colour values are the `laramie` skill's, not this one's.** `~/.config/ghostty/themes/laramie`
+   is the **ANSI-16 contract** (`laramie` skill → `references/spec.md` §4) and is the most leveraged
+   file in the theme: every tool that takes ANSI colour *names* inherits it, including ones laramie
+   never configures. Load that skill before changing a hex here, and never hex-code a tool that
+   could use a name instead. ⚠
+   **`window-colorspace = display-p3` means Ghostty interprets the theme's sRGB hexes as P3**, so
+   everything renders more saturated than the spec's figures state. The spec's contrast and ΔE
+   numbers are therefore *nominal*. Deliberate — the palette was signed off as rendered this way.
 4. **Verify before writing anything down.** A claim about a `tip` build is worth nothing unless
-   `+explain-config`, `+show-config` or a real run produced it. Several ⚠ entries in these references
-   exist because the obvious assumption was wrong.
+   `+explain-config`, `+show-config` or a real run produced it. Several ⚠ entries in these
+   references exist because the obvious assumption was wrong.
 
 ---
+
 *Source of truth for Ghostty in this repo — update it in the same change as `~/.config/ghostty`.
 The fish side of the shell-integration seam belongs to the `fish` skill.*

@@ -5,10 +5,10 @@ description: "Gum 0.17.x for interactive and formatted terminal scripts: all 13 
 
 # gum — glamorous shell scripts
 
-**gum 0.17.x** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal formatting
-on this machine, in **any** directory and in **any** shell — fish, bash or zsh. It is a hard
-dependency here, not a nicety: `claude-code/CLAUDE.md` makes it the default for anything a human
-reads or answers.
+**gum 0.17.x** (`/opt/homebrew/bin/gum`) is the house toolkit for interaction and terminal
+formatting on this machine, in **any** directory and in **any** shell — fish, bash or zsh. It is a
+hard dependency here, not a nicety: `claude-code/CLAUDE.md` makes it the default for anything a
+human reads or answers.
 
 **Reading floor.** Writing a gum command you have not written before → read
 [commands.md](references/commands.md). Composing more than one gum call into a script or a layout →
@@ -17,8 +17,8 @@ read [recipes.md](references/recipes.md) too. Both are floors, not menus.
 ⚠ **Bash tool calls have no tty.** Every interactive gum command (`choose`, `filter`, `confirm`,
 `input`, `write`, `file`, `table` without `--print`, `pager`) fails with `could not open a new TTY`,
 exit 1. The non-interactive ones still work — `style`, `join`, `format`, `log`, `table --print`,
-`spin`, `version-check` — and you can drive an interactive one under `script -q /dev/null gum …` when
-you must see it render.
+`spin`, `version-check` — and you can drive an interactive one under `script -q /dev/null gum …`
+when you must see it render.
 
 ## The contract, in six lines
 
@@ -36,39 +36,39 @@ you must see it render.
 
 ## Command map
 
-| Need | Command |
-| --- | --- |
-| Pick 1 of a handful | `choose` |
-| Pick from a long/generated list | `filter` |
-| Multi-select | `choose --no-limit`, `filter --no-limit` |
-| Yes/no gate | `confirm` |
-| One-line answer / paragraph | `input` / `write` |
-| A path | `file` |
-| Tabular data, or a row from it | `table` (`--print` to just render) |
-| Show a long document | `format` → `pager` |
-| Wait on a slow command | `spin` |
-| Box, banner, coloured span | `style`, composed with `join` |
-| Status and progress messages | `log` |
-| Markdown, templates, code, emoji | `format` |
-| Guard against an old gum | `version-check` |
+| Need                             | Command                                  |
+| -------------------------------- | ---------------------------------------- |
+| Pick 1 of a handful              | `choose`                                 |
+| Pick from a long/generated list  | `filter`                                 |
+| Multi-select                     | `choose --no-limit`, `filter --no-limit` |
+| Yes/no gate                      | `confirm`                                |
+| One-line answer / paragraph      | `input` / `write`                        |
+| A path                           | `file`                                   |
+| Tabular data, or a row from it   | `table` (`--print` to just render)       |
+| Show a long document             | `format` → `pager`                       |
+| Wait on a slow command           | `spin`                                   |
+| Box, banner, coloured span       | `style`, composed with `join`            |
+| Status and progress messages     | `log`                                    |
+| Markdown, templates, code, emoji | `format`                                 |
+| Guard against an old gum         | `version-check`                          |
 
 ## Replace the primitives
 
 This table expands the global always-on convention:
 
-| Instead of | Use |
-| --- | --- |
-| `read -p` (bash) / `read -P` (fish) | `gum input`, `gum write` for multi-line |
-| `read -n1` y/n, `select` | `gum confirm`, `gum choose` |
-| `select` over a long list | `gum filter` |
-| `echo`/`printf` status, warnings, errors | `gum log --level <lvl>` |
-| ANSI escapes, `tput`, hand-drawn boxes | `gum style`, composed with `gum join` |
-| `column -t`, hand-aligned output | `gum table --print` |
-| `cat` a markdown file | `gum format`, piped to `gum pager` if long |
-| A bare `sleep` or a silent long command | `gum spin --title …` |
+| Instead of                               | Use                                        |
+| ---------------------------------------- | ------------------------------------------ |
+| `read -p` (bash) / `read -P` (fish)      | `gum input`, `gum write` for multi-line    |
+| `read -n1` y/n, `select`                 | `gum confirm`, `gum choose`                |
+| `select` over a long list                | `gum filter`                               |
+| `echo`/`printf` status, warnings, errors | `gum log --level <lvl>`                    |
+| ANSI escapes, `tput`, hand-drawn boxes   | `gum style`, composed with `gum join`      |
+| `column -t`, hand-aligned output         | `gum table --print`                        |
+| `cat` a markdown file                    | `gum format`, piped to `gum pager` if long |
+| A bare `sleep` or a silent long command  | `gum spin --title …`                       |
 
-Plain `echo`/`printf` stays correct for machine-readable output and for a script whose stdout is meant
-to be piped. Style the human-facing stream, not the data stream.
+Plain `echo`/`printf` stays correct for machine-readable output and for a script whose stdout is
+meant to be piped. Style the human-facing stream, not the data stream.
 
 ## Caveats — the ones that cost a debugging cycle
 
@@ -88,12 +88,13 @@ to show. `out=$(gum spin -- cmd)` therefore captures output with or without `--s
 ⚠ **Three-token padding silently becomes zero.** `--padding "1 2 3"` — or any non-integer token —
 parses to `0 0 0 0` with no error. Only 1, 2 and 4 tokens are valid.
 
-⚠ **`gum log` needs `--structured` for key/value pairs**, even with `--formatter json`. Without it the
-trailing arguments are appended to the message string. `--level fatal` styles a line; it does not exit.
+⚠ **`gum log` needs `--structured` for key/value pairs**, even with `--formatter json`. Without it
+the trailing arguments are appended to the message string. `--level fatal` styles a line; it does
+not exit.
 
-⚠ **fish command substitution splits multi-line gum output.** `set -l b (gum style --border rounded A)`
-yields a **3-element list**, so `gum join $b …` receives three arguments and the layout collapses. Pipe
-through `string collect` *inside* the substitution:
+⚠ **fish command substitution splits multi-line gum output.**
+`set -l b (gum style --border rounded A)` yields a **3-element list**, so `gum join $b …` receives
+three arguments and the layout collapses. Pipe through `string collect` *inside* the substitution:
 `set -l b (gum style --border rounded A | string collect)`. For `choose --no-limit` the splitting is
 exactly what you want.
 
@@ -107,8 +108,8 @@ restyle every `gum style` call in every script in the shell.
 
 ## House rules
 
-- **Guard before use**: `type -q gum` in fish, `command -v gum` in bash/zsh. A script that assumes gum
-  and dies with `command not found` is worse than one that falls back to `read`.
+- **Guard before use**: `type -q gum` in fish, `command -v gum` in bash/zsh. A script that assumes
+  gum and dies with `command not found` is worse than one that falls back to `read`.
 - **Guard the tty** when a script may run non-interactively: `isatty stdin` (fish) / `[[ -t 0 ]]`
   (bash).
 - **Propagate aborts.** `130` (ctrl+c) and `124` (timeout) must stop the script. In fish capture
@@ -116,16 +117,17 @@ restyle every `gum style` call in every script in the shell.
   `set -e`.
 - **`gum log`, not `echo`**, for status, warnings and errors in any script a human watches.
 - **Never prompt for a credential** 1Password can supply. `op run` / `op://` beats
-  `gum input --password` — the `auth` skill owns this. When a passphrase genuinely must be typed, pipe
-  it straight into the consumer, never into a variable.
-- **Do not re-specify colours per call.** `~/.config/fish/conf.d/gum.fish` already exports the laramie
-  palette, so a plain `gum choose`/`gum input` is themed in any fish-launched process. Pass
+  `gum input --password` — the `auth` skill owns this. When a passphrase genuinely must be typed,
+  pipe it straight into the consumer, never into a variable.
+- **Do not re-specify colours per call.** `~/.config/fish/conf.d/gum.fish` already exports the
+  laramie palette, so a plain `gum choose`/`gum input` is themed in any fish-launched process. Pass
   `--foreground`/`--border-foreground` only for semantic colour (a green PASS, a red FAIL), and take
   the hex from the `laramie` skill.
 
-⚠ **A bash or zsh script does not inherit that theming unless its parent shell was fish.** A script run
-from cron, launchd or a bare `zsh -c` gets gum's stock colours. Do not hardcode the palette to
-compensate — accept the default, or export the variables inside the script if the look is load-bearing.
+⚠ **A bash or zsh script does not inherit that theming unless its parent shell was fish.** A script
+run from cron, launchd or a bare `zsh -c` gets gum's stock colours. Do not hardcode the palette to
+compensate — accept the default, or export the variables inside the script if the look is
+load-bearing.
 
 ## Reference material
 
@@ -133,8 +135,8 @@ compensate — accept the default, or export the variables inside the script if 
   codes, the env-var scheme, value formats, every enum, and all 13 commands with every flag, default
   and `GUM_*` variable. Read the section for any command you are about to use.
 - [recipes.md](references/recipes.md) (278) — composition and practice: fish and bash script
-  skeletons, the fish idiom table, `style`+`join` layout, where colour disappears, glamour/markdown, a
-  laramie `GUM_*` theme block, and worked recipes (menus, conventional commit, progress, tables,
+  skeletons, the fish idiom table, `style`+`join` layout, where colour disappears, glamour/markdown,
+  a laramie `GUM_*` theme block, and worked recipes (menus, conventional commit, progress, tables,
   structured logging).
 
 ## The live configuration
@@ -144,14 +146,14 @@ theming is ~24 `GUM_<COMMAND>_<FLAG>` environment variables. It sets foreground 
 `ui.accent` (violet) cursors and selections, `ui.label` (blue) headers and prompts, `text.faint`
 placeholders — leaving every background at gum's default except `confirm`'s two pills.
 
-⚠ **The values are `$theme_*` variables, not literal hex.** `conf.d/colours.fish` sources the palette
-earlier and above its own interactive guard, so this is not a hand-maintained copy. **The `laramie`
-skill owns every colour value** — look one up in its `references/spec.md`, never pick a hex here. The
-file carries `set -q theme_violet_base; or return` so a failed palette load cannot export empty
-strings.
+⚠ **The values are `$theme_*` variables, not literal hex.** `conf.d/colours.fish` sources the
+palette earlier and above its own interactive guard, so this is not a hand-maintained copy.
+**The `laramie` skill owns every colour value** — look one up in its `references/spec.md`, never
+pick a hex here. The file carries `set -q theme_violet_base; or return` so a failed palette load
+cannot export empty strings.
 
-⚠ **It is deliberately *not* interactive-guarded.** A script calling `gum choose` is exactly the case
-that needs these variables. Do not "fix" it by adding a `status is-interactive` guard.
+⚠ **It is deliberately *not* interactive-guarded.** A script calling `gum choose` is exactly the
+case that needs these variables. Do not "fix" it by adding a `status is-interactive` guard.
 
 ⚠ **Two variables, one file.** `GLAMOUR_STYLE` (set by `conf.d/xdg-apps.fish`, for `gh`) and
 `GUM_FORMAT_THEME` (set by `conf.d/gum.fish`) both point at `~/.config/glamour/laramie.json`. **gum
@@ -161,8 +163,9 @@ remember both need changing to move the theme.
 ⚠ `gum format`'s markdown *chrome* is truecolour, but the fenced-code `chroma` path always quantizes
 to 256 colours regardless of `COLORTERM` — see the `laramie` skill's `bindings.md`.
 
-The block is not mirrored here — `~/.config` is the single source of truth. Read `conf.d/gum.fish` for
-the current values; [recipes.md](references/recipes.md) §6 covers the rationale and how to extend it.
+The block is not mirrored here — `~/.config` is the single source of truth. Read `conf.d/gum.fish`
+for the current values; [recipes.md](references/recipes.md) §6 covers the rationale and how to
+extend it.
 
 ## Maintenance
 
@@ -176,12 +179,12 @@ gum style --border double --padding '1 2' ok     # renders without a tty
 ```
 
 If a flag, default or enum here disagrees with `gum <cmd> --help`, **the binary wins** — fix
-[commands.md](references/commands.md) in the same turn and note the version bump here. Never correct a
-value from memory; every default in these files was dumped from this machine's binary and
+[commands.md](references/commands.md) in the same turn and note the version bump here. Never correct
+a value from memory; every default in these files was dumped from this machine's binary and
 cross-checked against the `v0.17.0` source.
 
-A gum behaviour that surprises you is a documentation defect: add it to the Caveats section above, or
-the matching reference, in the same turn.
+A gum behaviour that surprises you is a documentation defect: add it to the Caveats section above,
+or the matching reference, in the same turn.
 
 ---
 

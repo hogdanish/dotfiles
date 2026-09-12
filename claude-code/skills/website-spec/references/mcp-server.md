@@ -8,14 +8,14 @@ depends on this server being connected.
 
 ## The server
 
-| | |
-|---|---|
-| Endpoint | `https://mcp.specification.website/mcp` |
-| Transport | Streamable HTTP, stateless, wide-open CORS |
-| Auth | **none** — nothing for 1Password to hold, no `op://` reference, no token |
-| Protocol | `2026-07-28`; also answers `2025-11-25`, `2025-06-18`, `2025-03-26` via `initialize`, under a published Deprecation/Sunset |
-| Server card | `https://specification.website/.well-known/mcp/server-card.json` |
-| Source | <https://github.com/jdevalk/specification.website> — code MIT, content CC BY 4.0 |
+|             |                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Endpoint    | `https://mcp.specification.website/mcp`                                                                                    |
+| Transport   | Streamable HTTP, stateless, wide-open CORS                                                                                 |
+| Auth        | **none** — nothing for 1Password to hold, no `op://` reference, no token                                                   |
+| Protocol    | `2026-07-28`; also answers `2025-11-25`, `2025-06-18`, `2025-03-26` via `initialize`, under a published Deprecation/Sunset |
+| Server card | `https://specification.website/.well-known/mcp/server-card.json`                                                           |
+| Source      | <https://github.com/jdevalk/specification.website> — code MIT, content CC BY 4.0                                           |
 
 Tools — `search` · `list_topics` · `get_topic` · `get_checklist` · `get_categories` ·
 `get_changes`. Prompt — `audit_url(url, focus?)`. Full argument contract:
@@ -67,14 +67,14 @@ project `config.toml` only in a **trusted** repository, so a first run there wil
 
 Every surface is plain Markdown over HTTPS, no auth, so `WebFetch` covers all of it:
 
-| Want | Fetch |
-|---|---|
-| One spec page | `https://specification.website/spec/<category>/<slug>.md` |
-| The full checklist | already vendored — [checklist.md](checklist.md) |
-| Every page, one file | `https://specification.website/llms-full.txt` |
-| Index of every page | `https://specification.website/llms.txt` |
-| What changed | `https://specification.website/changelog/rss.xml` (entries tagged added/changed/status/removed) |
-| Every machine-readable endpoint | `https://specification.website/.well-known/api-catalog` (RFC 9727) |
+| Want                            | Fetch                                                                                           |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| One spec page                   | `https://specification.website/spec/<category>/<slug>.md`                                       |
+| The full checklist              | already vendored — [checklist.md](checklist.md)                                                 |
+| Every page, one file            | `https://specification.website/llms-full.txt`                                                   |
+| Index of every page             | `https://specification.website/llms.txt`                                                        |
+| What changed                    | `https://specification.website/changelog/rss.xml` (entries tagged added/changed/status/removed) |
+| Every machine-readable endpoint | `https://specification.website/.well-known/api-catalog` (RFC 9727)                              |
 
 Content negotiation works too: `Accept: text/markdown` on the canonical slash-terminated URL
 returns the Markdown body with `200`, `Content-Location` pointing at the `.md` path and

@@ -14,14 +14,15 @@ firewall attachment, backups, rescue, transfer, and attached resources.
 - Destructive: `delete`, `disk-delete`, `config-delete`, interface/IP deletion, backup cancellation,
   password resets.
 
-Creating from an image normally requires `region`, `type`, `image`, and a credential path. Never pass
-a root password in an agent command. Prefer authorized users/keys already managed by the account and
-inspect live help because interface schemas change frequently.
+Creating from an image normally requires `region`, `type`, `image`, and a credential path. Never
+pass a root password in an agent command. Prefer authorized users/keys already managed by the
+account and inspect live help because interface schemas change frequently.
 
 ## Images, volumes, kernels, placement
 
 - `images`: list/view, create from disk, upload, update, replicate, delete, and image share groups.
-- `volumes`: list/view/types, create/clone/resize, attach/detach, update/delete. Volumes are billable.
+- `volumes`: list/view/types, create/clone/resize, attach/detach, update/delete. Volumes are
+  billable.
 - `kernels`: list/view available kernels.
 - `placement`: list/view/create/update/delete groups and assign/unassign Linodes.
 - `image-sharegroups`: share-group, member, token, and shared-image lifecycle. Tokens and membership
@@ -38,16 +39,16 @@ connectivity. Read the current Linode/interface plus target VPC/subnet before wr
 
 ## Firewalls
 
-`firewalls` owns firewall lifecycle, rules, device attachments, default firewall settings, templates,
-and rule-version history. Use `rules-list` before `rules-update`; a rules update replaces policy/rule
-sets, so preserve intended existing rules. Use templates only as input to an explicitly requested
-change. Verify device attachments independently.
+`firewalls` owns firewall lifecycle, rules, device attachments, default firewall settings,
+templates, and rule-version history. Use `rules-list` before `rules-update`; a rules update replaces
+policy/rule sets, so preserve intended existing rules. Use templates only as input to an explicitly
+requested change. Verify device attachments independently.
 
 ## NodeBalancers and transfer
 
-`nodebalancers` covers balancer lifecycle, configs, backend nodes, VPC configs, firewalls, and types.
-Creation is billable. Config rebuilds, node changes, protocol/health-check changes, and firewall
-changes can shift production traffic.
+`nodebalancers` covers balancer lifecycle, configs, backend nodes, VPC configs, firewalls, and
+types. Creation is billable. Config rebuilds, node changes, protocol/health-check changes, and
+firewall changes can shift production traffic.
 
 `network-transfer prices` is read-only pricing data. Linode and Object Storage groups expose current
 transfer usage. Do not infer future cost from one metric without checking the relevant type/region.

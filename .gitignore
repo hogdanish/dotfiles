@@ -23,6 +23,7 @@
 !/AGENTS.md
 !/.betterleaks.toml
 !/lefthook.yml
+!/.rumdl.toml
 !/.claude/
 # transient agent worktrees; git tracks them via .git/worktrees, not here
 /.claude/worktrees/
@@ -46,6 +47,7 @@
 !/glamour/
 !/npm/
 !/ripgrep/
+!/rumdl/
 !/ssh/
 !/uv/
 !/xh/

@@ -23,6 +23,12 @@
             "command": "\"$HOME/.config/claude-code/hooks/fish-validate.sh\"",
             "timeout": 30,
             "statusMessage": "Validating Fish"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.config/claude-code/hooks/markdown-format.sh\"",
+            "timeout": 30,
+            "statusMessage": "Formatting Markdown"
           }
         ]
       }

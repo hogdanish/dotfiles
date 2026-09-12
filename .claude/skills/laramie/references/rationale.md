@@ -7,16 +7,16 @@ arguing with `spec.md`.
 
 laramie was assembled by eye from Tokyo Night Storm without a colour model. Measured in OKLCH:
 
-- **One flat lightness ring.** All eight accents sat at L 0.719–0.822 — a spread of **0.10**. Nothing
-  could recede or advance, so nothing could carry hierarchy.
+- **One flat lightness ring.** All eight accents sat at L 0.719–0.822 — a spread of **0.10**.
+  Nothing could recede or advance, so nothing could carry hierarchy.
 - **Blue and violet were nearly the foreground.** ΔE2000 vs `text.base`: blue **12.7**, violet
   **11.8**. Six values sat within 12° of hue 274 — the neutral axis, the foreground, blue and violet
   all in one neighbourhood.
 - **Contrast failures on the most-read surfaces.** Comments `#565f89` at **2.51:1**; autosuggestions
   and gutters `#737aa2` at **3.73:1**; ANSI 8 `#414868` at **1.74:1**.
 - **Six wasted ANSI slots** — brights 9–14 were byte-identical to normals 1–6.
-- **Lumpy hue distribution.** Four values crowded 182°–236° (all "some kind of cyan"), then a 52° gap
-  to green.
+- **Lumpy hue distribution.** Four values crowded 182°–236° (all "some kind of cyan"), then a 52°
+  gap to green.
 - **15 off-palette hexes**, each appearing in exactly one file.
 
 ## 2. OKLCH as a tool, not a target
@@ -25,8 +25,8 @@ The article that prompted this rebuild — <https://tonsky.me/blog/syntax-highli
 attacks OKLCH-uniform palettes:
 
 > If you make all colors the same lightness and chroma, they will look very similar to each other,
-> and it'll be hard to tell them apart. … our eyes are way more sensitive to differences in lightness
-> than in color, and we should use it, not try to negate it.
+> and it'll be hard to tell them apart. … our eyes are way more sensitive to differences in
+> lightness than in color, and we should use it, not try to negate it.
 
 He is right, and laramie had arrived at that failure _by accident_ rather than by design. The
 resolution: **OKLCH is the measurement and derivation space, never the output constraint.** It is
@@ -36,8 +36,8 @@ chroma per hue by nearly 2× (green 0.160, cyan 0.114).
 
 ## 3. Why the syntax layer has three colours, not four
 
-The plan called for Alabaster's four (literal, constant, definition, comment). It shipped with three.
-This was forced by measurement, and it is the single most important finding of the rebuild.
+The plan called for Alabaster's four (literal, constant, definition, comment). It shipped with
+three. This was forced by measurement, and it is the single most important finding of the rebuild.
 
 **A syntax token sits inline among body text**, so what matters is ΔE against `text.base` — not
 contrast against the background. Four roles need four hues. Red is reserved for errors. That leaves
@@ -53,7 +53,8 @@ amber, green, cyan, blue, violet — and blue and violet fail:
 ⚠ **This cannot be tuned away.** Both were swept against hue and chroma:
 
 - Desaturating `text.base` from C 0.054 all the way to C 0.020 — a fully neutral grey foreground,
-  which would cost the entire Tokyo Night cast — moves blue only from ΔE 11.9 to **17.0**. Still short.
+  which would cost the entire Tokyo Night cast — moves blue only from ΔE 11.9 to **17.0**. Still
+  short.
 - Widening the blue↔violet hue gap helps them separate _from each other_, and does nothing for
   either against the foreground.
 
@@ -62,9 +63,9 @@ blue-violet foreground shares both the hue neighbourhood _and_ the lightness of 
 accent that is legible on a dark background. Three usable hues is the honest answer.
 
 **Constants merged into literals** on principle, not just convenience — `true`, `null`, `42` and
-`"x"` are all literal values, and one colour for "a literal appears here" is more memorable than two.
-**Declarations merged into definitions** for the same reason after the two-tier split measured ΔE 8.8
-(`cyan.loud` vs `cyan.base`), too subtle to function as a hierarchy cue.
+`"x"` are all literal values, and one colour for "a literal appears here" is more memorable than
+two. **Declarations merged into definitions** for the same reason after the two-tier split measured
+ΔE 8.8 (`cyan.loud` vs `cyan.base`), too subtle to function as a hierarchy cue.
 
 The result is more restrained than Alabaster, which is the direction the article argues for.
 
@@ -84,8 +85,8 @@ The article's most contentious recommendation, adopted in full:
 > Comments should be highlighted, not hidden away. … use bold colors, draw attention to them.
 
 `syntax.comment` is `accent.amber.loud` at **9.92:1** — brighter than body text. Greying comments is
-a habit from when people were paid by the line; a good comment explains something the code cannot.
-⚠ **Commented-out code is the opposite case** and stays grey at `syntax.dead` (`text.faint`, 3.12:1).
+a habit from when people were paid by the line; a good comment explains something the code cannot. ⚠
+**Commented-out code is the opposite case** and stays grey at `syntax.dead` (`text.faint`, 3.12:1).
 A syntax theme that cannot distinguish the two should favour the bright treatment.
 
 ⚠ **If this proves annoying in daily use, it is a one-token change**: repoint `syntax.comment` at
@@ -122,8 +123,8 @@ problem, and it would break the inheritance that makes the other tools work.
 
 1. ⚠ **`window-colorspace = display-p3`** in `config.ghostty` means Ghostty interprets these sRGB
    hexes as P3, rendering everything more saturated than authored. Every figure in `spec.md` is
-   therefore _nominal_. Settle this with the `ghostty` skill before assuming a measured value is what
-   reaches the eye.
+   therefore _nominal_. Settle this with the `ghostty` skill before assuming a measured value is
+   what reaches the eye.
 2. ⚠ **`background-opacity = 0.92` + blur** means the real backdrop is not `#1f2335`. At 0.92 the
    contrast error is small, but the numbers are not lab-grade.
 3. **`text.faint` at 3.12:1 is below AA on purpose.** It is only for content the reader is meant to

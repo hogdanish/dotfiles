@@ -1,9 +1,9 @@
 # Fish — variables, scope, and the special-variable catalogue
 
 Everything about `set`: the five scopes and how fish resolves a read, the complete flag reference,
-export semantics, universal variables (and the live `fish_user_paths` problem in this config), lists,
-`PATH`, and the full catalogue of variables fish reads or writes. Expansion *syntax* (`$var`, slices,
-`$$var`, quoting) lives in [language.md](language.md); the `fish_color_*` palette lives in
+export semantics, universal variables (and the live `fish_user_paths` problem in this config),
+lists, `PATH`, and the full catalogue of variables fish reads or writes. Expansion *syntax* (`$var`,
+slices, `$$var`, quoting) lives in [language.md](language.md); the `fish_color_*` palette lives in
 [prompt-and-colours.md](prompt-and-colours.md); the `fish_add_path` flag table lives in
 [builtins.md](builtins.md).
 
@@ -11,13 +11,13 @@ House rules for scope are law, not taste: [style-guide.md](style-guide.md) §0 a
 
 ## The scope model
 
-| Scope | Create with | Lifetime | Visible to |
-| --- | --- | --- | --- |
-| block-local | `set -l` inside a `begin`/`if`/`for`/`while`/`switch`/`function` block | until the enclosing `end` | that block and nested blocks only |
-| function | `set -f` (or bare `set` on a new name inside a function) | until the function returns | the whole function body, all its blocks |
-| global | `set -g` | the fish session | every function and every `conf.d` file in this session |
-| universal | `set -U` — **forbidden in config**, see below | forever; written to `fish_variables` | every fish session of this user on this machine |
-| exported | `-x` — **not a scope**, an attribute on top of one of the above | as its scope | child processes |
+| Scope       | Create with                                                            | Lifetime                             | Visible to                                             |
+| ----------- | ---------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------ |
+| block-local | `set -l` inside a `begin`/`if`/`for`/`while`/`switch`/`function` block | until the enclosing `end`            | that block and nested blocks only                      |
+| function    | `set -f` (or bare `set` on a new name inside a function)               | until the function returns           | the whole function body, all its blocks                |
+| global      | `set -g`                                                               | the fish session                     | every function and every `conf.d` file in this session |
+| universal   | `set -U` — **forbidden in config**, see below                          | forever; written to `fish_variables` | every fish session of this user on this machine        |
+| exported    | `-x` — **not a scope**, an attribute on top of one of the above        | as its scope                         | child processes                                        |
 
 Outside any block, `-l` and `-f` are the same thing. Outside any function, a bare `set` with a new
 name creates a **global** — which is why `conf.d` files that forget `-l` leak globals silently:
@@ -49,7 +49,7 @@ end
 echo "after: $colour"
 ```
 
-```
+```text
 top: blue
 block: red
 $colour: set in local scope, unexported, with 1 elements
@@ -65,24 +65,24 @@ after: blue
 
 `set` requires all options before any other argument. `set flags -l` sets `$flags` to `-l`.
 
-| Flag | Long | Effect |
-| --- | --- | --- |
-| `-l` | `--local` | scope to the innermost block; outside a block == `--function` |
-| `-f` | `--function` | scope to the executing function; outside a function it does not go out of scope |
-| `-g` | `--global` | scope to the session |
-| `-U` | `--universal` | persist to `fish_variables`, shared across sessions — **forbidden here** |
-| `-x` | `--export` | mark exported (environment variable) |
-| `-u` | `--unexport` | mark not exported |
-| `-a` | `--append` | append values to the existing list |
-| `-p` | `--prepend` | prepend values; may be combined with `-a` |
-| `-e` | `--erase` | erase the variable, or `NAME[INDEX]` to erase list elements |
-| `-q` | `--query` | test definedness; **return value == number of names that were *not* found** |
-| `-n` | `--names` | print names only, sorted; honours scope/attribute filters |
-| `-S` | `--show` | describe a name in every scope it exists in; no other flag may be combined |
-| `-L` | `--long` | do not abbreviate long values when printing |
-| — | `--path` | treat as a path variable: split on `:`, joined by `:` when quoted or exported |
-| — | `--unpath` | stop treating as a path variable |
-| — | `--no-event` | suppress the `--on-variable` event (only inside a handler for that variable) |
+| Flag | Long          | Effect                                                                          |
+| ---- | ------------- | ------------------------------------------------------------------------------- |
+| `-l` | `--local`     | scope to the innermost block; outside a block == `--function`                   |
+| `-f` | `--function`  | scope to the executing function; outside a function it does not go out of scope |
+| `-g` | `--global`    | scope to the session                                                            |
+| `-U` | `--universal` | persist to `fish_variables`, shared across sessions — **forbidden here**        |
+| `-x` | `--export`    | mark exported (environment variable)                                            |
+| `-u` | `--unexport`  | mark not exported                                                               |
+| `-a` | `--append`    | append values to the existing list                                              |
+| `-p` | `--prepend`   | prepend values; may be combined with `-a`                                       |
+| `-e` | `--erase`     | erase the variable, or `NAME[INDEX]` to erase list elements                     |
+| `-q` | `--query`     | test definedness; **return value == number of names that were *not* found**     |
+| `-n` | `--names`     | print names only, sorted; honours scope/attribute filters                       |
+| `-S` | `--show`      | describe a name in every scope it exists in; no other flag may be combined      |
+| `-L` | `--long`      | do not abbreviate long values when printing                                     |
+| —    | `--path`      | treat as a path variable: split on `:`, joined by `:` when quoted or exported   |
+| —    | `--unpath`    | stop treating as a path variable                                                |
+| —    | `--no-event`  | suppress the `--on-variable` event (only inside a handler for that variable)    |
 
 ⚠ **In assignment mode `set` does not touch `$status`** — it passes through whatever the previous
 command left, which is what makes `if set -l out (some-cmd)` work. A command substitution in the
@@ -126,11 +126,11 @@ count $l # 5 — element 4 is now the empty string
 The unset / empty-list / one-empty-string distinction matters because `test` and `count` disagree
 with intuition. All three verified:
 
-| State | `set -q` status | `count $v` | `"$v"` as an argument |
-| --- | --- | --- | --- |
-| `set -l v` (zero elements) | **0** — it *is* defined | 0 | one empty argument |
-| `set -l v ''` (one empty element) | 0 | 1 | one empty argument |
-| never set | 1 | 0 | one empty argument |
+| State                             | `set -q` status         | `count $v` | `"$v"` as an argument |
+| --------------------------------- | ----------------------- | ---------- | --------------------- |
+| `set -l v` (zero elements)        | **0** — it *is* defined | 0          | one empty argument    |
+| `set -l v ''` (one empty element) | 0                       | 1          | one empty argument    |
+| never set                         | 1                       | 0          | one empty argument    |
 
 ⚠ The first row is the trap: a variable set to zero elements passes `set -q`, so the house
 conditional-default idiom will *not* fill it in. See House idioms below.
@@ -233,9 +233,10 @@ Two facts, both read from disk:
 final `set $scope fish_user_paths $newvar` is a bare `set`, which resolves to the narrowest existing
 scope: **universal**. `conf.d/brew.fish` is therefore a config file that writes `fish_variables`.
 
-Current resulting `$PATH` (verified with `/opt/homebrew/bin/fish -c 'echo $fish_user_paths; echo $PATH'`):
+Current resulting `$PATH` (verified with
+`/opt/homebrew/bin/fish -c 'echo $fish_user_paths; echo $PATH'`):
 
-```
+```text
 $fish_user_paths = /opt/homebrew/bin /opt/homebrew/sbin /bin /sbin
 $PATH            = /opt/homebrew/bin /opt/homebrew/sbin /bin /sbin
                    /usr/local/bin /System/Cryptexes/App/usr/bin /usr/bin /usr/sbin …
@@ -244,16 +245,16 @@ $PATH            = /opt/homebrew/bin /opt/homebrew/sbin /bin /sbin
 How the universal value interferes, reproduced in a sandbox config dir with the *original* ordering
 `/bin /sbin /opt/homebrew/bin /opt/homebrew/sbin`:
 
-| `brew.fish` line | resulting `$PATH[1..4]` | `fish_variables` after |
-| --- | --- | --- |
+| `brew.fish` line                       | resulting `$PATH[1..4]`                           | `fish_variables` after                          |
+| -------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
 | `fish_add_path …/bin …/sbin` (no `-m`) | `/bin /sbin /opt/homebrew/bin /opt/homebrew/sbin` | unchanged — entries already present are skipped |
-| `fish_add_path -m …/bin …/sbin` | `/opt/homebrew/bin /opt/homebrew/sbin /bin /sbin` | **rewritten** to the new order |
+| `fish_add_path -m …/bin …/sbin`        | `/opt/homebrew/bin /opt/homebrew/sbin /bin /sbin` | **rewritten** to the new order                  |
 
 So `-m` is doing real work — without it `/bin/*` shadows the Homebrew binaries — but it achieves it
 by permanently reordering a universal variable. The value on disk today is the *output* of past
-`brew.fish` runs, not something anyone typed. Because `-m` always finds both entries already present,
-`fish_add_path` issues the `set` on **every** startup — whether that reaches disk when the value is
-unchanged is an implementation detail, and not one to rely on.
+`brew.fish` runs, not something anyone typed. Because `-m` always finds both entries already
+present, `fish_add_path` issues the `set` on **every** startup — whether that reaches disk when the
+value is unchanged is an implementation detail, and not one to rely on.
 
 Two further consequences worth naming:
 
@@ -287,15 +288,15 @@ set -eU fish_user_paths
 Every fish variable is a list. There are no scalars, and lists cannot nest (fake it with
 `$$name` dereferencing — see [language.md](language.md)).
 
-| Operation | Form |
-| --- | --- |
-| index | `$l[1]` — ⚠ **1-based**; `$l[-1]` is the last |
-| slice | `$l[2..3]`, `$l[-2..-1]`, `$l[-1..1]` reverses |
-| length | `count $l` — returns status 1 when the count is 0 |
-| membership | `contains -- $x $l`; `contains -i -- $x $l` prints the 1-based index |
+| Operation        | Form                                                                             |
+| ---------------- | -------------------------------------------------------------------------------- |
+| index            | `$l[1]` — ⚠ **1-based**; `$l[-1]` is the last                                    |
+| slice            | `$l[2..3]`, `$l[-2..-1]`, `$l[-1..1]` reverses                                   |
+| length           | `count $l` — returns status 1 when the count is 0                                |
+| membership       | `contains -- $x $l`; `contains -i -- $x $l` prints the 1-based index             |
 | append / prepend | `set -a l x`, `set -p l x`, or both at once: `set -a -p l x y` → `x y <old> x y` |
-| erase element | `set -e l[2]`, `set -e l[-1]` |
-| iterate | `for i in $l` — never `for i in (seq (count $l))` |
+| erase element    | `set -e l[2]`, `set -e l[-1]`                                                    |
+| iterate          | `for i in $l` — never `for i in (seq (count $l))`                                |
 
 ⚠ An invalid index expands to **no argument at all**, not an empty string. `echo "n:"$l[9]"|"`
 prints an empty line — the whole concatenated word vanishes.
@@ -349,79 +350,79 @@ set -gx CDPATH . $PROJECTS
 
 ### Read by fish, set by you
 
-| Variable | Kind | What it does |
-| --- | --- | --- |
-| `fish_greeting` | list, `-g` | startup greeting. Set empty to silence. Also overridable as a function of the same name |
-| `fish_key_bindings` | `-g` | name of the function that installs key bindings (`fish_default_key_bindings`, `fish_vi_key_bindings`, `fish_hybrid_key_bindings`, or your own) |
-| `fish_escape_delay_ms` | `-g` | ms fish waits after `escape` to tell the key from a sequence. Default 30 |
-| `fish_sequence_key_delay_ms` | `-g` | ms fish waits for the next key of a multi-key binding before treating the first as complete |
-| `fish_autosuggestion_enabled` | `-g` | `0` disables autosuggestions; anything else enables. Default on |
-| `fish_complete_path` | list, `-g` | directories searched for completions. `_init.fish` prepends `completions/*/`; `brew.fish` appends Homebrew's |
-| `fish_function_path` | list, `-g` | directories searched for autoloaded functions. `_init.fish` prepends `functions/*/` |
-| `fish_user_paths` | list | prepended to `$PATH`. **Keep it global here** — see the trap above |
-| `fish_features` | list | opt-in feature flags (`status features` lists them). ⚠ Only read at startup, and only if universal or **exported** — with `-U` banned, the only config-legal route is `set -gx fish_features …` before fish re-execs, i.e. effectively `fish --features` |
-| `fish_history` | `-g` | history session name → separate history file. Empty string = do not persist history |
-| `fish_trace` | `-g` | non-empty traces commands to stderr (bash `set -x`). `all` also traces bindings, event handlers, prompt and title functions |
-| `fish_cursor_default`, `_insert`, `_replace`, `_replace_one`, `_visual`, `_external` | `-g` | cursor shape per editor mode: `block`, `line`, `underscore` (optionally `blink`) |
-| `fish_cursor_selection_mode` | `-g` | `inclusive` or `exclusive` (default) — does the selection include the character under the cursor |
-| `fish_ambiguous_width` | `-g` | computed width of ambiguous-width characters: `1` (typical) or `2` |
-| `fish_emoji_width` | `-g` | `1` or `2` cells per emoji. Defaults to 2 (Unicode 9 semantics) |
-| `fish_handle_reflow` | `-g` | `1` repaints the commandline on terminal resize; anything else disables. Disable in terminals that reflow themselves |
-| `fish_transient_prompt` | `-g` | `1` re-renders the prompt with `--final-rendering` before running a command |
-| `fish_term24bit` / `fish_term256` | `-g` | `0` downgrades true colour to 256, then to 16 |
-| `fish_prompt_pwd_dir_length` | `-g` | characters per path component in `prompt_pwd`. Default 1; `0` disables shortening |
-| `fish_read_limit` | `-g` | byte ceiling for `read` and command substitution |
-| `umask` | `-g` | file creation mask; prefer the `umask` function |
-| `FISH_DEBUG` / `FISH_DEBUG_OUTPUT` | exported | debug categories and the file debug/`fish_trace` output goes to |
-| `SHELL_PROMPT_PREFIX` / `SHELL_PROMPT_SUFFIX` / `SHELL_WELCOME` | exported | strings a session manager can inject around the left prompt / after the greeting |
-| `fish_color_*`, `fish_pager_color_*` | `-g` | syntax-highlighting and pager palettes — the full list and this repo's `laramie` values are in [prompt-and-colours.md](prompt-and-colours.md) |
+| Variable                                                                             | Kind       | What it does                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fish_greeting`                                                                      | list, `-g` | startup greeting. Set empty to silence. Also overridable as a function of the same name                                                                                                                                                                  |
+| `fish_key_bindings`                                                                  | `-g`       | name of the function that installs key bindings (`fish_default_key_bindings`, `fish_vi_key_bindings`, `fish_hybrid_key_bindings`, or your own)                                                                                                           |
+| `fish_escape_delay_ms`                                                               | `-g`       | ms fish waits after `escape` to tell the key from a sequence. Default 30                                                                                                                                                                                 |
+| `fish_sequence_key_delay_ms`                                                         | `-g`       | ms fish waits for the next key of a multi-key binding before treating the first as complete                                                                                                                                                              |
+| `fish_autosuggestion_enabled`                                                        | `-g`       | `0` disables autosuggestions; anything else enables. Default on                                                                                                                                                                                          |
+| `fish_complete_path`                                                                 | list, `-g` | directories searched for completions. `_init.fish` prepends `completions/*/`; `brew.fish` appends Homebrew's                                                                                                                                             |
+| `fish_function_path`                                                                 | list, `-g` | directories searched for autoloaded functions. `_init.fish` prepends `functions/*/`                                                                                                                                                                      |
+| `fish_user_paths`                                                                    | list       | prepended to `$PATH`. **Keep it global here** — see the trap above                                                                                                                                                                                       |
+| `fish_features`                                                                      | list       | opt-in feature flags (`status features` lists them). ⚠ Only read at startup, and only if universal or **exported** — with `-U` banned, the only config-legal route is `set -gx fish_features …` before fish re-execs, i.e. effectively `fish --features` |
+| `fish_history`                                                                       | `-g`       | history session name → separate history file. Empty string = do not persist history                                                                                                                                                                      |
+| `fish_trace`                                                                         | `-g`       | non-empty traces commands to stderr (bash `set -x`). `all` also traces bindings, event handlers, prompt and title functions                                                                                                                              |
+| `fish_cursor_default`, `_insert`, `_replace`, `_replace_one`, `_visual`, `_external` | `-g`       | cursor shape per editor mode: `block`, `line`, `underscore` (optionally `blink`)                                                                                                                                                                         |
+| `fish_cursor_selection_mode`                                                         | `-g`       | `inclusive` or `exclusive` (default) — does the selection include the character under the cursor                                                                                                                                                         |
+| `fish_ambiguous_width`                                                               | `-g`       | computed width of ambiguous-width characters: `1` (typical) or `2`                                                                                                                                                                                       |
+| `fish_emoji_width`                                                                   | `-g`       | `1` or `2` cells per emoji. Defaults to 2 (Unicode 9 semantics)                                                                                                                                                                                          |
+| `fish_handle_reflow`                                                                 | `-g`       | `1` repaints the commandline on terminal resize; anything else disables. Disable in terminals that reflow themselves                                                                                                                                     |
+| `fish_transient_prompt`                                                              | `-g`       | `1` re-renders the prompt with `--final-rendering` before running a command                                                                                                                                                                              |
+| `fish_term24bit` / `fish_term256`                                                    | `-g`       | `0` downgrades true colour to 256, then to 16                                                                                                                                                                                                            |
+| `fish_prompt_pwd_dir_length`                                                         | `-g`       | characters per path component in `prompt_pwd`. Default 1; `0` disables shortening                                                                                                                                                                        |
+| `fish_read_limit`                                                                    | `-g`       | byte ceiling for `read` and command substitution                                                                                                                                                                                                         |
+| `umask`                                                                              | `-g`       | file creation mask; prefer the `umask` function                                                                                                                                                                                                          |
+| `FISH_DEBUG` / `FISH_DEBUG_OUTPUT`                                                   | exported   | debug categories and the file debug/`fish_trace` output goes to                                                                                                                                                                                          |
+| `SHELL_PROMPT_PREFIX` / `SHELL_PROMPT_SUFFIX` / `SHELL_WELCOME`                      | exported   | strings a session manager can inject around the left prompt / after the greeting                                                                                                                                                                         |
+| `fish_color_*`, `fish_pager_color_*`                                                 | `-g`       | syntax-highlighting and pager palettes — the full list and this repo's `laramie` values are in [prompt-and-colours.md](prompt-and-colours.md)                                                                                                            |
 
 ### Set by fish, read by you
 
 Most are read-only; `set -S` marks them. Do not try to assign to a read-only one — `set -e` on it
 fails too.
 
-| Variable | Kind | What it holds |
-| --- | --- | --- |
-| `status` | read-only | exit status of the last foreground job. `128 + signum` when signalled. Special values: 121 bad arguments, 123 invalid command name, 124 no wildcard match, 125 not executable by the OS, 126 not executable, 127 not found |
-| `status_generation` | read-only | incremented only when a command produced an explicit status — lets you tell "same status" from "ran again" |
-| `pipestatus` | list, read-only | one status per process in the last pipeline. `not` applies to `$status` only |
-| `argv` | list, writable | arguments to the current function or script. Only defined inside a function or when fish was given arguments |
-| `argv_opts` | list, writable | options `argparse` successfully parsed, option-arguments included |
-| `PWD` | read-only, exported | current working directory |
-| `dirprev` / `dirnext` | `-g` | `cd` history, 25 deep — what `prevd`/`nextd`/`cdh`/`dirh` manipulate |
-| `OLDPWD` | exported, writable | ⚠ **not maintained by fish** — it is only passed through from the parent environment. Verified: `cd` leaves it untouched. Use `$dirprev[-1]` or `prevd` |
-| `CMD_DURATION` | `-g` | runtime of the last command, milliseconds |
-| `SHLVL` | exported | shell nesting depth; fish increments it in interactive shells only |
-| `fish_pid` | read-only | this shell's PID (replaces `%self`) |
-| `last_pid` | `-g` | PID of the most recent background process |
-| `fish_kill_signal` | `-g` | signal that killed the last foreground job, else 0 |
-| `fish_killring` | list, `-g` | the kill-ring entries |
-| `hostname` | read-only | machine hostname |
-| `USER` / `HOME` / `EUID` | exported, writable | username, home directory, effective uid |
-| `COLUMNS` / `LINES` | `-g` | terminal size. Only *used* by fish when the OS does not report it, and then both must be set or 80×24 is assumed |
-| `version` / `FISH_VERSION` | read-only | `4.8.1` on this machine; the two names are aliases |
-| `history` | list, read-only | recent commandlines. Prefer the `history` builtin |
-| `fish_terminal_color_theme` | read-only | `light`, `dark`, or `unknown`. Only populated after the first interactive prompt; intended as an `--on-variable` trigger |
-| `IFS` | writable | separator for `read`. Empty string also disables line splitting in command substitution |
-| `_` | read-only | name of the running command — deprecated, use `status current-command` |
+| Variable                    | Kind                | What it holds                                                                                                                                                                                                              |
+| --------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`                    | read-only           | exit status of the last foreground job. `128 + signum` when signalled. Special values: 121 bad arguments, 123 invalid command name, 124 no wildcard match, 125 not executable by the OS, 126 not executable, 127 not found |
+| `status_generation`         | read-only           | incremented only when a command produced an explicit status — lets you tell "same status" from "ran again"                                                                                                                 |
+| `pipestatus`                | list, read-only     | one status per process in the last pipeline. `not` applies to `$status` only                                                                                                                                               |
+| `argv`                      | list, writable      | arguments to the current function or script. Only defined inside a function or when fish was given arguments                                                                                                               |
+| `argv_opts`                 | list, writable      | options `argparse` successfully parsed, option-arguments included                                                                                                                                                          |
+| `PWD`                       | read-only, exported | current working directory                                                                                                                                                                                                  |
+| `dirprev` / `dirnext`       | `-g`                | `cd` history, 25 deep — what `prevd`/`nextd`/`cdh`/`dirh` manipulate                                                                                                                                                       |
+| `OLDPWD`                    | exported, writable  | ⚠ **not maintained by fish** — it is only passed through from the parent environment. Verified: `cd` leaves it untouched. Use `$dirprev[-1]` or `prevd`                                                                    |
+| `CMD_DURATION`              | `-g`                | runtime of the last command, milliseconds                                                                                                                                                                                  |
+| `SHLVL`                     | exported            | shell nesting depth; fish increments it in interactive shells only                                                                                                                                                         |
+| `fish_pid`                  | read-only           | this shell's PID (replaces `%self`)                                                                                                                                                                                        |
+| `last_pid`                  | `-g`                | PID of the most recent background process                                                                                                                                                                                  |
+| `fish_kill_signal`          | `-g`                | signal that killed the last foreground job, else 0                                                                                                                                                                         |
+| `fish_killring`             | list, `-g`          | the kill-ring entries                                                                                                                                                                                                      |
+| `hostname`                  | read-only           | machine hostname                                                                                                                                                                                                           |
+| `USER` / `HOME` / `EUID`    | exported, writable  | username, home directory, effective uid                                                                                                                                                                                    |
+| `COLUMNS` / `LINES`         | `-g`                | terminal size. Only *used* by fish when the OS does not report it, and then both must be set or 80×24 is assumed                                                                                                           |
+| `version` / `FISH_VERSION`  | read-only           | `4.8.1` on this machine; the two names are aliases                                                                                                                                                                         |
+| `history`                   | list, read-only     | recent commandlines. Prefer the `history` builtin                                                                                                                                                                          |
+| `fish_terminal_color_theme` | read-only           | `light`, `dark`, or `unknown`. Only populated after the first interactive prompt; intended as an `--on-variable` trigger                                                                                                   |
+| `IFS`                       | writable            | separator for `read`. Empty string also disables line splitting in command substitution                                                                                                                                    |
+| `_`                         | read-only           | name of the running command — deprecated, use `status current-command`                                                                                                                                                     |
 
 ### fish internals (`__fish_*`)
 
 Global, unexported, and the five path ones are read-only. Real values on **this** machine (printed
 with plain `/opt/homebrew/bin/fish -c 'echo $__fish_…'`, i.e. with the user's config loaded):
 
-| Variable | Value here |
-| --- | --- |
-| `__fish_config_dir` | `/Users/ethan/.config/fish` |
-| `__fish_data_dir` | `/opt/homebrew/Cellar/fish/4.8.1/share/fish` |
-| `__fish_sysconf_dir` | `/opt/homebrew/etc/fish` |
-| `__fish_user_data_dir` | `/Users/ethan/.local/share/fish` |
-| `__fish_bin_dir` | `/opt/homebrew/Cellar/fish/4.8.1/bin` |
-| `__fish_vendor_confdirs` | `~/.local/share/fish/vendor_conf.d` `/usr/local/share/fish/vendor_conf.d` `/usr/share/fish/vendor_conf.d` `/Applications/Ghostty.app/Contents/Resources/ghostty/../fish/vendor_conf.d` `/opt/homebrew/share/fish/vendor_conf.d` |
-| `__fish_vendor_functionsdirs` | the same five roots, `vendor_functions.d` |
-| `__fish_vendor_completionsdirs` | the same five roots, `vendor_completions.d` |
-| `__fish_initialized` | **unset.** fish 4.8.1 stopped creating this universal variable; it exists only as a leftover on machines upgraded from earlier versions, where `set --erase __fish_initialized` removes it |
+| Variable                        | Value here                                                                                                                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `__fish_config_dir`             | `/Users/ethan/.config/fish`                                                                                                                                                                                                     |
+| `__fish_data_dir`               | `/opt/homebrew/Cellar/fish/4.8.1/share/fish`                                                                                                                                                                                    |
+| `__fish_sysconf_dir`            | `/opt/homebrew/etc/fish`                                                                                                                                                                                                        |
+| `__fish_user_data_dir`          | `/Users/ethan/.local/share/fish`                                                                                                                                                                                                |
+| `__fish_bin_dir`                | `/opt/homebrew/Cellar/fish/4.8.1/bin`                                                                                                                                                                                           |
+| `__fish_vendor_confdirs`        | `~/.local/share/fish/vendor_conf.d` `/usr/local/share/fish/vendor_conf.d` `/usr/share/fish/vendor_conf.d` `/Applications/Ghostty.app/Contents/Resources/ghostty/../fish/vendor_conf.d` `/opt/homebrew/share/fish/vendor_conf.d` |
+| `__fish_vendor_functionsdirs`   | the same five roots, `vendor_functions.d`                                                                                                                                                                                       |
+| `__fish_vendor_completionsdirs` | the same five roots, `vendor_completions.d`                                                                                                                                                                                     |
+| `__fish_initialized`            | **unset.** fish 4.8.1 stopped creating this universal variable; it exists only as a leftover on machines upgraded from earlier versions, where `set --erase __fish_initialized` removes it                                      |
 
 Prefer `$__fish_config_dir` over `$XDG_CONFIG_HOME/fish` when a script needs the fish config root —
 it is what fish itself resolved, including a `--config-dir` override. The vendor dirs are writable,
@@ -430,20 +431,20 @@ rather than relying on that).
 
 ### Locale and environment fish treats specially
 
-| Variable | Notes |
-| --- | --- |
-| `LANG` | the locale for every category not otherwise set. Encoding is ignored — fish always assumes UTF-8 |
-| `LC_ALL` | overrides `LANG` and all `LC_*`. Temporary overrides only |
-| `LC_MESSAGES` | language of messages (see the `_` builtin) |
-| `LC_NUMERIC` | number formatting for `printf` |
-| `LC_TIME` | date/time rendering, used by `history --show-time` |
-| `LANGUAGE` | like `LC_MESSAGES` but a **path variable** — a `:`-priority list of translation languages |
-| `TERM` | ⚠ since the `ignore-terminfo` flag became mandatory (4.5) fish no longer looks `$TERM` up in terminfo. It still matters to other programs |
+| Variable                     | Notes                                                                                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANG`                       | the locale for every category not otherwise set. Encoding is ignored — fish always assumes UTF-8                                                                                     |
+| `LC_ALL`                     | overrides `LANG` and all `LC_*`. Temporary overrides only                                                                                                                            |
+| `LC_MESSAGES`                | language of messages (see the `_` builtin)                                                                                                                                           |
+| `LC_NUMERIC`                 | number formatting for `printf`                                                                                                                                                       |
+| `LC_TIME`                    | date/time rendering, used by `history --show-time`                                                                                                                                   |
+| `LANGUAGE`                   | like `LC_MESSAGES` but a **path variable** — a `:`-priority list of translation languages                                                                                            |
+| `TERM`                       | ⚠ since the `ignore-terminfo` flag became mandatory (4.5) fish no longer looks `$TERM` up in terminfo. It still matters to other programs                                            |
 | `COLORTERM` / `TERM_PROGRAM` | not read by fish 4.8.1 for colour decisions (`set_color` emits 24-bit regardless; use `fish_term24bit` to override). `_shell.fish` exports `COLORTERM=truecolor` for **other** tools |
-| `EDITOR` / `VISUAL` | `funced`, `alt-e` and `alt-o` use `$VISUAL` first, then `$EDITOR`, then the built-in editor |
-| `PAGER` | used by `alt-p`, `history`, and `--help` output (`$MANPAGER` wins for `--help`). Set in `_init.fish` |
-| `BROWSER` | which browser `help` opens the fish documentation in. Set in `_init.fish` |
-| `TMPDIR` | ⚠ **not** a fish special variable — it appears nowhere in the 4.8.1 manual. Honoured only by whatever program reads it |
+| `EDITOR` / `VISUAL`          | `funced`, `alt-e` and `alt-o` use `$VISUAL` first, then `$EDITOR`, then the built-in editor                                                                                          |
+| `PAGER`                      | used by `alt-p`, `history`, and `--help` output (`$MANPAGER` wins for `--help`). Set in `_init.fish`                                                                                 |
+| `BROWSER`                    | which browser `help` opens the fish documentation in. Set in `_init.fish`                                                                                                            |
+| `TMPDIR`                     | ⚠ **not** a fish special variable — it appears nowhere in the 4.8.1 manual. Honoured only by whatever program reads it                                                               |
 
 ## House idioms
 

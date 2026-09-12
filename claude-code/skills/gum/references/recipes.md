@@ -1,7 +1,7 @@
 # gum recipes — patterns, layout, theming
 
-Working patterns for this machine: fish first (the interactive shell), bash second (portable scripts).
-Flag semantics live in [commands.md](commands.md); this file is about *composition*.
+Working patterns for this machine: fish first (the interactive shell), bash second (portable
+scripts). Flag semantics live in [commands.md](commands.md); this file is about *composition*.
 
 ---
 
@@ -39,8 +39,8 @@ gum confirm --default=false "Tag a $kind release?"; or _die aborted
 gum spin --title "Tagging $kind…" -- git tag -a "v$kind" -m "$notes"
 ```
 
-⚠ Capture `$status` **immediately** — `set -l kind (...)` then `or exit $status` is correct; anything
-between them clobbers it.
+⚠ Capture `$status` **immediately** — `set -l kind (...)` then `or exit $status` is correct;
+anything between them clobbers it.
 
 ### bash
 
@@ -65,16 +65,16 @@ write `gum confirm … || <handler>` so the negative branch is explicit.
 
 Command substitution in fish splits on newlines, which cuts both ways.
 
-| Situation | Wrong | Right |
-| --- | --- | --- |
-| Multi-line block for `gum join` | `set -l b (gum style --border rounded A)` → a **3-element list**, and `gum join $b` receives three arguments | `set -l b (gum style --border rounded A \| string collect)` |
-| Multi-line text from `gum write` | `set -l t (gum write)` → one element per line | `set -l t (gum write \| string collect)` |
-| Multi-select from `choose`/`filter` | — | `set -l picks (gum choose --no-limit a b c)` — the split **is** what you want; `$picks` is a proper list |
-| Boolean gate | `gum confirm && cmd` | `gum confirm; and cmd` — or just `if gum confirm "…"` |
-| Exit status | `$?` | `$status`, captured on the very next line |
+| Situation                           | Wrong                                                                                                        | Right                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Multi-line block for `gum join`     | `set -l b (gum style --border rounded A)` → a **3-element list**, and `gum join $b` receives three arguments | `set -l b (gum style --border rounded A \| string collect)`                                              |
+| Multi-line text from `gum write`    | `set -l t (gum write)` → one element per line                                                                | `set -l t (gum write \| string collect)`                                                                 |
+| Multi-select from `choose`/`filter` | —                                                                                                            | `set -l picks (gum choose --no-limit a b c)` — the split **is** what you want; `$picks` is a proper list |
+| Boolean gate                        | `gum confirm && cmd`                                                                                         | `gum confirm; and cmd` — or just `if gum confirm "…"`                                                    |
+| Exit status                         | `$?`                                                                                                         | `$status`, captured on the very next line                                                                |
 
-⚠ `string collect` must be **inside** the substitution. `(string join \n -- $b)` re-splits at the outer
-substitution and breaks the layout again.
+⚠ `string collect` must be **inside** the substitution. `(string join \n -- $b)` re-splits at the
+outer substitution and breaks the layout again.
 
 Abbreviations and functions that wrap gum belong in `~/.config/fish/functions/` with a
 `--description`; never `alias`. See the `fish` skill.
@@ -109,19 +109,19 @@ Rules that save debugging time:
 
 ## 4. Colour, and where it disappears
 
-gum reads its colour profile from **stderr**, then `internal/tty` strips ANSI from *selection results*
-when stdout is not a tty. In practice:
+gum reads its colour profile from **stderr**, then `internal/tty` strips ANSI from
+*selection results* when stdout is not a tty. In practice:
 
-| Context | Colour in `gum style` output? |
-| --- | --- |
-| Interactive terminal | yes |
-| `X=$(gum style …)` in an interactive terminal | yes — stderr is still a tty |
-| `gum style … \| cat`, CI, a Claude Code Bash call | **no** — plain text |
-| Any of the above with `CLICOLOR_FORCE=1` | yes |
-| Anything with `NO_COLOR=1` | no — it beats `CLICOLOR_FORCE` |
+| Context                                           | Colour in `gum style` output?  |
+| ------------------------------------------------- | ------------------------------ |
+| Interactive terminal                              | yes                            |
+| `X=$(gum style …)` in an interactive terminal     | yes — stderr is still a tty    |
+| `gum style … \| cat`, CI, a Claude Code Bash call | **no** — plain text            |
+| Any of the above with `CLICOLOR_FORCE=1`          | yes                            |
+| Anything with `NO_COLOR=1`                        | no — it beats `CLICOLOR_FORCE` |
 
-`FORCE_COLOR` is not honoured. If a script's output is meant to be piped somewhere that renders ANSI,
-set `CLICOLOR_FORCE=1` explicitly rather than hoping.
+`FORCE_COLOR` is not honoured. If a script's output is meant to be piped somewhere that renders
+ANSI, set `CLICOLOR_FORCE=1` explicitly rather than hoping.
 
 ---
 
@@ -130,10 +130,10 @@ set `CLICOLOR_FORCE=1` explicitly rather than hoping.
 glamour v0.10.0 is vendored into gum, and there is no `glow` binary. `gh` embeds its own copy for
 issue/PR bodies, so the machine has **two glamour surfaces with two separate variables**:
 
-| Renderer | Variable | Set by |
-| --- | --- | --- |
-| `gum format` | `GUM_FORMAT_THEME` | `conf.d/gum.fish` |
-| `gh issue/pr view` | `GLAMOUR_STYLE` | `conf.d/xdg-apps.fish` (guarded, `set -q`-respecting) |
+| Renderer           | Variable           | Set by                                                |
+| ------------------ | ------------------ | ----------------------------------------------------- |
+| `gum format`       | `GUM_FORMAT_THEME` | `conf.d/gum.fish`                                     |
+| `gh issue/pr view` | `GLAMOUR_STYLE`    | `conf.d/xdg-apps.fish` (guarded, `set -q`-respecting) |
 
 Both point at `~/.config/glamour/laramie.json`. ⚠ **gum does not read `GLAMOUR_STYLE`** — setting it
 alone changes `gh` and nothing else, and moving the theme file means editing both snippets.
@@ -143,34 +143,34 @@ gum format < CHANGELOG.md | gum pager                 # rendered laramie, scroll
 gum format --theme dark -- '# Heading' '- point one'  # one-off override
 ```
 
-Built-in theme names: `pink` (default) `ascii` `auto` `dark` `dracula` `light` `notty` `tokyo-night`.
-`laramie` is Tokyo Night-derived, so `tokyo-night` is the closest built-in fallback.
+Built-in theme names: `pink` (default) `ascii` `auto` `dark` `dracula` `light` `notty`
+`tokyo-night`. `laramie` is Tokyo Night-derived, so `tokyo-night` is the closest built-in fallback.
 
 ---
 
 ## 6. Theming gum with laramie
 
-**Live and installed: `~/.config/fish/conf.d/gum.fish`** (2026-07-29). Read that file for the current
-values — this repo mirrors no config. gum has no config file of its own, so theming is ~24
+**Live and installed: `~/.config/fish/conf.d/gum.fish`** (2026-07-29). Read that file for the
+current values — this repo mirrors no config. gum has no config file of its own, so theming is ~24
 `GUM_<COMMAND>_<FLAG>` environment variables, which is why it earns its own `conf.d` snippet rather
 than a stanza in `colours.fish` (which now carries a ⚠ pointer saying so).
 
 What it does, and the decisions worth not re-litigating:
 
-| Decision | Why |
-| --- | --- |
-| `type -q gum; or return` at the top | one concern per file, so the bare `return` is safe |
-| **No** `status is-interactive` guard | a *script* calling `gum choose` is precisely the case that needs the palette; `functions/reload.fish` is one such caller |
-| `set -q theme_violet_base; or return` | ⚠ **added 2026-07-30.** The values are now `$theme_*`, not literal hex — see below. Without this guard a failed palette load would export empty strings, which gum renders unstyled rather than erroring |
-| Foreground accents only | `ui.accent` (violet) for cursors/indicators/spinners/selections, `ui.label` (blue) for headers/prompts, `text.faint` for placeholders. Backgrounds stay at gum's defaults except `confirm`'s two pills |
-| `GUM_FORMAT_THEME` set here, `GLAMOUR_STYLE` set in `xdg-apps.fish` | two renderers, two variables, one JSON file — see §5 |
-| Unprefixed `$FOREGROUND`/`$BORDER`/`$PADDING` deliberately absent | not namespaced; exporting them would restyle every `gum style` call on the machine |
+| Decision                                                            | Why                                                                                                                                                                                                      |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type -q gum; or return` at the top                                 | one concern per file, so the bare `return` is safe                                                                                                                                                       |
+| **No** `status is-interactive` guard                                | a *script* calling `gum choose` is precisely the case that needs the palette; `functions/reload.fish` is one such caller                                                                                 |
+| `set -q theme_violet_base; or return`                               | ⚠ **added 2026-07-30.** The values are now `$theme_*`, not literal hex — see below. Without this guard a failed palette load would export empty strings, which gum renders unstyled rather than erroring |
+| Foreground accents only                                             | `ui.accent` (violet) for cursors/indicators/spinners/selections, `ui.label` (blue) for headers/prompts, `text.faint` for placeholders. Backgrounds stay at gum's defaults except `confirm`'s two pills   |
+| `GUM_FORMAT_THEME` set here, `GLAMOUR_STYLE` set in `xdg-apps.fish` | two renderers, two variables, one JSON file — see §5                                                                                                                                                     |
+| Unprefixed `$FOREGROUND`/`$BORDER`/`$PADDING` deliberately absent   | not namespaced; exporting them would restyle every `gum style` call on the machine                                                                                                                       |
 
-⚠ **The values are `$theme_*` variables, not literal hex — changed 2026-07-30.** `conf.d/colours.fish`
-sources the palette *above* its own interactive guard and sorts earlier (`c` < `g`), so the palette is
-always present here. This removed 23 hardcoded hexes and one whole copy of the palette; benchmarked as
-marginally faster than the literals it replaced (30 runs, `hyperfine`), since variable expansion forks
-nothing.
+⚠ **The values are `$theme_*` variables, not literal hex — changed 2026-07-30.**
+`conf.d/colours.fish` sources the palette *above* its own interactive guard and sorts earlier (`c` <
+`g`), so the palette is always present here. This removed 23 hardcoded hexes and one whole copy of
+the palette; benchmarked as marginally faster than the literals it replaced (30 runs, `hyperfine`),
+since variable expansion forks nothing.
 
 Extending it: add the `GUM_<COMMAND>_<KEY>_FOREGROUND` line ([commands.md](commands.md) lists every
 style key per command), set it to the `$theme_*` primitive named by the **`laramie` skill's**
@@ -254,25 +254,25 @@ gum input --password --header 'Vault passphrase' | sudo -nS true
 ```
 
 ⚠ For anything credential-shaped, prefer `op run` / `op://` references over prompting at all. See
-`.claude/skills/auth/SKILL.md` and the `auth` skill — a prompted secret in a shell variable is a plaintext
-secret.
+`.claude/skills/auth/SKILL.md` and the `auth` skill — a prompted secret in a shell variable is a
+plaintext secret.
 
 ---
 
 ## 8. Choosing the right command
 
-| Need | Use |
-| --- | --- |
-| Pick 1 of a handful | `choose` |
-| Pick from a long or generated list | `filter` |
-| Multi-select | `choose --no-limit` / `filter --no-limit` |
-| Yes/no gate | `confirm` (`--default=false` if destructive) |
-| One-line answer | `input` |
-| Paragraph | `write` |
-| A path | `file` (`--directory` for folders) |
-| A row of CSV | `table` |
-| Show a long document | `format` → `pager` |
-| Wait on a command | `spin` |
-| A box, banner or coloured span | `style` (+ `join`) |
-| Status / progress messages | `log` |
-| Render markdown | `format` |
+| Need                               | Use                                          |
+| ---------------------------------- | -------------------------------------------- |
+| Pick 1 of a handful                | `choose`                                     |
+| Pick from a long or generated list | `filter`                                     |
+| Multi-select                       | `choose --no-limit` / `filter --no-limit`    |
+| Yes/no gate                        | `confirm` (`--default=false` if destructive) |
+| One-line answer                    | `input`                                      |
+| Paragraph                          | `write`                                      |
+| A path                             | `file` (`--directory` for folders)           |
+| A row of CSV                       | `table`                                      |
+| Show a long document               | `format` → `pager`                           |
+| Wait on a command                  | `spin`                                       |
+| A box, banner or coloured span     | `style` (+ `join`)                           |
+| Status / progress messages         | `log`                                        |
+| Render markdown                    | `format`                                     |

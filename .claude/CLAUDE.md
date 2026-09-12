@@ -575,6 +575,14 @@ next `Edit`'s `old_string` misses and the turn derails. It stays quiet when the 
 clean. ⚠ `additionalContext` on exit 0 is the only channel that reaches the model without erroring —
 exit 2 **blocks** the write, and plain stdout reaches the debug log and nothing else.
 
+⚠ **Format the working tree BEFORE staging, never after** — `rumdl fmt .`, then `git add`. Partial
+staging of an *unformatted* file breaks the lefthook job, and it is not a clean failure: lefthook
+hides the unstaged remainder, the job reformats the staged copy, the hidden patch no longer applies
+(`Unable to restore previously hidden unstaged changes`), and lefthook **discards that remainder** —
+unstaged edits to other files are lost, with no stash left behind. Cost a whole repo-wide reflow on
+2026-09-12, the day this was wired. A second `git commit` then succeeds, which is what makes it
+easy to mistake for a transient hiccup.
+
 ⚠ **`rumdl fmt`, never `rumdl check --fix`,** in all three. `fmt` exits 0 even when something is
 left unfixable; `check` exits 1 and would turn every surface into a blocker.
 

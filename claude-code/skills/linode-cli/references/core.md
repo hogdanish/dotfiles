@@ -28,19 +28,19 @@ required values, nullable values, nested objects, conflicts, and defaults.
 
 ## Output and pagination
 
-| Need | Flags |
-| --- | --- |
-| Agent or script | `--json --all-columns` |
-| Readable JSON | `--json --all-columns --pretty` |
-| Stable selected fields | `--json --format id,label,status` |
-| Delimited text | `--text --delimiter $'\t' --no-headers` |
-| Markdown for a user | `--markdown` |
-| Every field in a table | `--all-columns` |
-| Avoid clipped values | `--no-truncation` |
-| One complex response table | `--single-table` |
-| Select nested table(s) | `--table NAME` |
-| Page manually | `--page N --page-size 25..500` |
-| Fetch all pages | `--all-rows` |
+| Need                       | Flags                                   |
+| -------------------------- | --------------------------------------- |
+| Agent or script            | `--json --all-columns`                  |
+| Readable JSON              | `--json --all-columns --pretty`         |
+| Stable selected fields     | `--json --format id,label,status`       |
+| Delimited text             | `--text --delimiter $'\t' --no-headers` |
+| Markdown for a user        | `--markdown`                            |
+| Every field in a table     | `--all-columns`                         |
+| Avoid clipped values       | `--no-truncation`                       |
+| One complex response table | `--single-table`                        |
+| Select nested table(s)     | `--table NAME`                          |
+| Page manually              | `--page N --page-size 25..500`          |
+| Fetch all pages            | `--all-rows`                            |
 
 `--all` is deprecated; use `--all-columns`. Prefer JSON plus `jq` to parsing tables. Use
 `--suppress-warnings` only in automation that handles warnings separately. The CLI retries selected
@@ -61,17 +61,17 @@ binary through that broker.
 
 Supported environment variables:
 
-| Variable | Purpose |
-| --- | --- |
-| `LINODE_CLI_TOKEN` | PAT; skips token setup |
-| `LINODE_CLI_CONFIG` | alternate config path |
-| `LINODE_CLI_CA` | custom CA file |
-| `LINODE_CLI_API_HOST` | API host override |
-| `LINODE_CLI_API_VERSION` | API version override, such as `v4beta` |
-| `LINODE_CLI_API_SCHEME` | scheme override |
-| `LINODE_CLI_SUPPRESS_VERSION_WARNING` | suppress API-version warning |
-| `LINODE_CLI_OBJ_ACCESS_KEY` | bundled `obj` plugin access key |
-| `LINODE_CLI_OBJ_SECRET_KEY` | bundled `obj` plugin secret key |
+| Variable                              | Purpose                                |
+| ------------------------------------- | -------------------------------------- |
+| `LINODE_CLI_TOKEN`                    | PAT; skips token setup                 |
+| `LINODE_CLI_CONFIG`                   | alternate config path                  |
+| `LINODE_CLI_CA`                       | custom CA file                         |
+| `LINODE_CLI_API_HOST`                 | API host override                      |
+| `LINODE_CLI_API_VERSION`              | API version override, such as `v4beta` |
+| `LINODE_CLI_API_SCHEME`               | scheme override                        |
+| `LINODE_CLI_SUPPRESS_VERSION_WARNING` | suppress API-version warning           |
+| `LINODE_CLI_OBJ_ACCESS_KEY`           | bundled `obj` plugin access key        |
+| `LINODE_CLI_OBJ_SECRET_KEY`           | bundled `obj` plugin secret key        |
 
 Do not change host, version, scheme, CA, or config path unless the task explicitly requires a test
 endpoint. Never print any secret-bearing variable.

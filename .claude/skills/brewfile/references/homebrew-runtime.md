@@ -32,9 +32,9 @@ shell whose environment you want; nothing else is inherited.
 ## 2. The App Store is off-limits to agents
 
 `mas update` requires root and hangs without a GUI session, so no agent and no timer touches it.
-`fish/functions/brewup.fish` is the human path: `brew update`/`upgrade` → `sudo mas upgrade` **only**
-when `mas outdated` is non-empty → `brew cleanup`. It replaced the `brewup` abbreviation, because an
-abbr cannot hold the conditional.
+`fish/functions/brewup.fish` is the human path: `brew update`/`upgrade` → `sudo mas upgrade`
+**only** when `mas outdated` is non-empty → `brew cleanup`. It replaced the `brewup` abbreviation,
+because an abbr cannot hold the conditional.
 
 ⚠ **Never "fix" this with a `NOPASSWD` sudoers rule for `mas`.** It lives in user-writable
 `/opt/homebrew/bin`, so that rule is a trivial root escalation.

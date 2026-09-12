@@ -10,7 +10,8 @@ client exposed to agents on this machine. Use SSH for work inside an instance.
 
 ## Non-negotiable safety rules
 
-1. Run read-only list, view, status, type, region, event, metric, and availability operations freely.
+1. Run read-only list, view, status, type, region, event, metric, and availability operations
+   freely.
 2. Never create, clone, resize, rebuild, restore, migrate, or enable a Linode or any other billable
    service unless Ethan explicitly requests that operation in the current request. This includes
    Backups, Managed, LKE, Managed Databases, NodeBalancers, Object Storage, and paid Volumes.
@@ -18,7 +19,8 @@ client exposed to agents on this machine. Use SSH for work inside an instance.
    firewall/routing changes, credential changes, and account/billing changes as consequential.
    Resolve exact IDs with a read-only command first and act only when the request authorizes it.
 4. Never run `linode-cli --debug`; HTTP debug output can expose authorization headers in the
-   transcript. Never print, pass, or persist a PAT. Never read the CLI config to inspect credentials.
+   transcript. Never print, pass, or persist a PAT. Never read the CLI config to inspect
+   credentials.
 5. Never put a password, private key, Object Storage secret, or PAT on the command line. Use the
    inherited `LINODE_CLI_TOKEN`, 1Password, SSH agent, or another non-printing consumer.
 6. Prefer JSON for agent processing and tables for humans. Do not scrape Unicode tables.
@@ -54,8 +56,8 @@ client exposed to agents on this machine. Use SSH for work inside an instance.
 ⚠ **Agent authentication path, verified with Codex CLI 0.147.0 and Claude Code 2.1.232 on
 2026-08-14.** The Fish launch wrappers start a session-scoped credential broker: one launch-time
 `op run` resolves the PAT, the broker keeps it only in memory, and a session-local `linode-cli` shim
-forwards arguments to `/opt/homebrew/bin/linode-cli` over a mode-0600 Unix socket. The wrapper removes
-the resolved credential from the agent environment before it starts.
+forwards arguments to `/opt/homebrew/bin/linode-cli` over a mode-0600 Unix socket. The wrapper
+removes the resolved credential from the agent environment before it starts.
 
 ```sh
 linode-cli linodes view 102470771 --json
@@ -71,4 +73,5 @@ plugin. Never run `configure`, request a PAT, or use `--debug` to work around an
 failure.
 
 SSH to `cg-test-ord-01` uses a host-scoped OpenSSH control connection that persists for 12 hours.
-The first connection can require 1Password SSH approval; later commands reuse the existing transport.
+The first connection can require 1Password SSH approval; later commands reuse the existing
+transport.

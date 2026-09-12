@@ -45,8 +45,8 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
   their required/recommended/optional/avoid status — so an audit never needs the network. Report
   the spec's status, never a promoted one; a `required` gap is a defect.
 - **Tools** — built-in web search/fetch first; Firecrawl only for crawling, extraction or a failed
-  built-in path because it is metered. Context7 is for named versioned libraries; Cloudflare docs/API
-  outrank generic web for Cloudflare work.
+  built-in path because it is metered. Context7 is for named versioned libraries; Cloudflare
+  docs/API outrank generic web for Cloudflare work.
 - **Notifications** — use the available push tool for long work, blockers, decisions and before a
   1Password prompt; skip routine noise. Codex provides turn-ended notifications only.
 

@@ -11,33 +11,33 @@ Verified against **fish 4.8.1** under `fish --no-config`. `test`, `argparse` and
 
 ## 1. Translation table
 
-| Unix pipeline | fish builtin |
-| --- | --- |
-| `grep pat` | `string match -e pat` (glob) / `string match -er pat` (regex) |
-| `grep -v pat` | `string match -ev pat` / `string match -erv pat` |
-| `grep -c pat` | `cmd \| string match -e pat \| count` |
-| `grep -o pat` | `string match -r pat` — regex `match` prints only the match; `-a` for all |
-| `sed 's/a/b/'` | `string replace a b` |
-| `sed 's/a/b/g'` | `string replace -a a b` |
-| `sed -E 's/re/x/'` | `string replace -r re x` |
-| `sed -n 's/re/x/p'` | `string replace -rf re x` (`-f`/`--filter`: only changed lines) |
-| `cut -d: -f2` | `string split -f2 : $line` (`-f2-4` for a span) |
-| `awk '{print $2}'` | `string split -n " " -f2 $line`, or `string match -rg '^\S+\s+(\S+)'` |
-| `tr '[:upper:]' '[:lower:]'` | `string lower` |
-| `tr -d abc` | `string replace -ra '[abc]' ''` — or `string trim -c abc` for edges only |
-| `wc -l` | `cmd \| count` |
-| `head -n1` | `cmd \| read -l first`, or `string match -rm1 '.*'` |
-| `basename $p` | `path basename $p` |
-| `basename $p .gz` | `path basename -E $p` (strips the *last* extension; fish 4.0.0+) |
-| `dirname $p` | `path dirname $p` |
-| `realpath $p` / `readlink -f $p` | `path resolve $p` — for a nonexistent path it resolves as far as it can |
-| `test -f $f` | `test -f $f` — already a builtin; for a **list** use `path filter -f` / `path is -f` |
-| `test -d $d` | `path is -d $d` |
-| `[ -x $f ]` | `path is -x $f` (`path is -fx` to also require a regular file) |
-| `echo -n "$x"` | `printf %s $x` — see the `echo -n` trap below |
-| `printf` | `printf` (builtin, GNU coreutils 6.9 semantics) |
-| `bc` / `expr` | `math` |
-| `expr $a / $b` (integer) | `math -s0 $a/$b` — see the `math` ⚠ |
+| Unix pipeline                    | fish builtin                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `grep pat`                       | `string match -e pat` (glob) / `string match -er pat` (regex)                        |
+| `grep -v pat`                    | `string match -ev pat` / `string match -erv pat`                                     |
+| `grep -c pat`                    | `cmd \| string match -e pat \| count`                                                |
+| `grep -o pat`                    | `string match -r pat` — regex `match` prints only the match; `-a` for all            |
+| `sed 's/a/b/'`                   | `string replace a b`                                                                 |
+| `sed 's/a/b/g'`                  | `string replace -a a b`                                                              |
+| `sed -E 's/re/x/'`               | `string replace -r re x`                                                             |
+| `sed -n 's/re/x/p'`              | `string replace -rf re x` (`-f`/`--filter`: only changed lines)                      |
+| `cut -d: -f2`                    | `string split -f2 : $line` (`-f2-4` for a span)                                      |
+| `awk '{print $2}'`               | `string split -n " " -f2 $line`, or `string match -rg '^\S+\s+(\S+)'`                |
+| `tr '[:upper:]' '[:lower:]'`     | `string lower`                                                                       |
+| `tr -d abc`                      | `string replace -ra '[abc]' ''` — or `string trim -c abc` for edges only             |
+| `wc -l`                          | `cmd \| count`                                                                       |
+| `head -n1`                       | `cmd \| read -l first`, or `string match -rm1 '.*'`                                  |
+| `basename $p`                    | `path basename $p`                                                                   |
+| `basename $p .gz`                | `path basename -E $p` (strips the *last* extension; fish 4.0.0+)                     |
+| `dirname $p`                     | `path dirname $p`                                                                    |
+| `realpath $p` / `readlink -f $p` | `path resolve $p` — for a nonexistent path it resolves as far as it can              |
+| `test -f $f`                     | `test -f $f` — already a builtin; for a **list** use `path filter -f` / `path is -f` |
+| `test -d $d`                     | `path is -d $d`                                                                      |
+| `[ -x $f ]`                      | `path is -x $f` (`path is -fx` to also require a regular file)                       |
+| `echo -n "$x"`                   | `printf %s $x` — see the `echo -n` trap below                                        |
+| `printf`                         | `printf` (builtin, GNU coreutils 6.9 semantics)                                      |
+| `bc` / `expr`                    | `math`                                                                               |
+| `expr $a / $b` (integer)         | `math -s0 $a/$b` — see the `math` ⚠                                                  |
 
 ## 2. `string`
 
@@ -61,8 +61,8 @@ string length --visible (set_color red)foobar # -> 6, the colour escape is disco
 
 ### `sub`
 
-`string sub [-s START] [-e END | -l LENGTH] [-q] [STRING ...]` — 1-based; negative indices count from
-the end. `--length` and `--end` are mutually exclusive.
+`string sub [-s START] [-e END | -l LENGTH] [-q] [STRING ...]` — 1-based; negative indices count
+from the end. `--length` and `--end` are mutually exclusive.
 
 ```fish
 string sub -s 2 -l 3 abcdef # -> bcd
@@ -86,14 +86,14 @@ string split '' abc # -> a, b, c  (empty SEP splits characters)
 string split -m1 = 'KEY=a=b' # -> KEY, a=b  (keeps the value intact)
 ```
 
-`split0` splits on NUL and its output is **not** re-split in a command substitution, which is how you
-consume `find -print0` safely: `set -l files (find $dir -type f -print0 | string split0)`.
-⚠ Never `string split0 (find . -print0)`: arguments cannot hold NUL, so it must be a pipe.
+`split0` splits on NUL and its output is **not** re-split in a command substitution, which is how
+you consume `find -print0` safely: `set -l files (find $dir -type f -print0 | string split0)`. ⚠
+Never `string split0 (find . -print0)`: arguments cannot hold NUL, so it must be a pipe.
 
 ### `join` / `join0`
 
-`string join [-q] [-n] [--] SEP [STRING ...]` — status 0 if at least one join happened; `-n` excludes
-empty strings. `join0` uses NUL and appends a trailing one, for `sort -z`.
+`string join [-q] [-n] [--] SEP [STRING ...]` — status 0 if at least one join happened; `-n`
+excludes empty strings. `join0` uses NUL and appends a trailing one, for `sort -z`.
 
 ```fish
 string join , a b c # -> a,b,c
@@ -148,15 +148,15 @@ string unescape --style=url 'a%20b%2Fc' # -> a b/c
 
 `string match [-a] [-e] [-i] [-g] [-r] [-n] [-q] [-v] [-m MAX] PATTERN [STRING ...]`
 
-| Flag | Effect |
-| --- | --- |
-| `-r`/`--regex` | PCRE2 instead of glob; **does not** have to match the whole string |
-| `-a`/`--all` | report every match, not just the first per string |
-| `-e`/`--entire` | print the whole string, prefix and suffix included — `grep` without `-o` |
-| `-g`/`--groups-only` | print only capture groups, skipping the full match. Requires `-r`; the cutting tool |
-| `-v`/`--invert` | select the non-matching strings — `grep -v` |
-| `-q`/`--quiet` | status only, exits early |
-| `-i` / `-n` / `-m MAX` | case-insensitive / report `start length` pairs / stop after MAX matches (4.0.0+) |
+| Flag                   | Effect                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `-r`/`--regex`         | PCRE2 instead of glob; **does not** have to match the whole string                  |
+| `-a`/`--all`           | report every match, not just the first per string                                   |
+| `-e`/`--entire`        | print the whole string, prefix and suffix included — `grep` without `-o`            |
+| `-g`/`--groups-only`   | print only capture groups, skipping the full match. Requires `-r`; the cutting tool |
+| `-v`/`--invert`        | select the non-matching strings — `grep -v`                                         |
+| `-q`/`--quiet`         | status only, exits early                                                            |
+| `-i` / `-n` / `-m MAX` | case-insensitive / report `start length` pairs / stop after MAX matches (4.0.0+)    |
 
 ⚠ Default mode is **glob**, and a glob must match the *entire* string. ⚠ Glob `*` crosses `/` —
 `string match -q '*.fish' -- a/b/c.fish` is true, unlike filename globbing.
@@ -176,11 +176,11 @@ printf '%s\n' a=1 '# c' '' b=2 | string match -rv '^\s*(#|$)' # -> a=1, b=2
 
 `string replace [-a] [-f] [-i] [-r] [-q] [-m MAX] PATTERN REPLACEMENT [STRING ...]`
 
-| Flag | Effect |
-| --- | --- |
-| `-r`/`--regex` | PCRE2 pattern; REPLACEMENT may use `$1`, `${1}`, named groups and `\n`/`\t` |
-| `-a`/`--all` | replace every occurrence, not just the first (`sed` `/g`) |
-| `-f`/`--filter` | print only strings that actually changed (`sed -n …/p`) |
+| Flag            | Effect                                                                      |
+| --------------- | --------------------------------------------------------------------------- |
+| `-r`/`--regex`  | PCRE2 pattern; REPLACEMENT may use `$1`, `${1}`, named groups and `\n`/`\t` |
+| `-a`/`--all`    | replace every occurrence, not just the first (`sed` `/g`)                   |
+| `-f`/`--filter` | print only strings that actually changed (`sed -n …/p`)                     |
 
 ⚠ Default `PATTERN` is a **literal substring**, not a regex — the opposite default from `match`.
 ⚠ Like `sed s///`, non-matching strings are still printed; `-f` suppresses them.
@@ -243,12 +243,12 @@ string shorten -m6 -c '' abcdefgh # -> abcdef
 
 The dialect is **PCRE2** — `grep -P`, not `grep -E`, and definitely not `sed`.
 
-| | fish `-r` | `sed` BRE |
-| --- | --- | --- |
-| Grouping | `(…)` capturing, `(?:…)` non-capturing | `\(…\)` |
-| Repetition | `+ ? {n,m}` are metacharacters by default | need backslashes |
-| Shorthand classes | `\d \D \s \S \w \W \b \B` | unavailable |
-| Group in the *replacement* | `$1` / `${1}` (`\1` in the *pattern*) | `\1` in both |
+|                            | fish `-r`                                 | `sed` BRE        |
+| -------------------------- | ----------------------------------------- | ---------------- |
+| Grouping                   | `(…)` capturing, `(?:…)` non-capturing    | `\(…\)`          |
+| Repetition                 | `+ ? {n,m}` are metacharacters by default | need backslashes |
+| Shorthand classes          | `\d \D \s \S \w \W \b \B`                 | unavailable      |
+| Group in the *replacement* | `$1` / `${1}` (`\1` in the *pattern*)     | `\1` in both     |
 
 `^`/`$` anchor the start/end of each input string, matched separately. `.` excludes newline.
 POSIX named classes work inside brackets: `[[:alnum:]] [[:alpha:]] [[:ascii:]] [[:blank:]]
@@ -279,18 +279,18 @@ accepts a list. The string-only ones (`basename`, `dirname`, `extension`, `chang
 ⚠ **`path`'s output is split correctly in a command substitution even for paths containing
 newlines** — `for f in (path filter -f $dir/*)` is safe where `for f in (ls $dir)` is not.
 
-| Subcommand | Result | Status 0 when |
-| --- | --- | --- |
-| `basename [-E]` | last component; `-E` also strips the last extension | there was a basename |
-| `dirname` | everything before the last `/` | there was a dirname |
-| `extension` | last `.` and after, empty line if none | there was an extension |
-| `change-extension EXT` | swap the extension; `''` strips it; leading dot optional | any path was given |
-| `normalize` | squash `//`, collapse `..`, drop `.` — string-only, stays relative | ⚠ a change was made |
-| `resolve` | normalize + resolve symlinks + absolutize (`realpath`) | ⚠ a change was made |
-| `filter` | the paths passing the filters | at least one passed |
-| `is` | nothing (≡ `filter -q`) | at least one passed |
-| `mtime [-R]` | mtime in epoch seconds; `-R` seconds *ago* | any read succeeded |
-| `sort [-r] [-u] [--key=]` | glob order, digit runs compared numerically | any path was given |
+| Subcommand                | Result                                                             | Status 0 when          |
+| ------------------------- | ------------------------------------------------------------------ | ---------------------- |
+| `basename [-E]`           | last component; `-E` also strips the last extension                | there was a basename   |
+| `dirname`                 | everything before the last `/`                                     | there was a dirname    |
+| `extension`               | last `.` and after, empty line if none                             | there was an extension |
+| `change-extension EXT`    | swap the extension; `''` strips it; leading dot optional           | any path was given     |
+| `normalize`               | squash `//`, collapse `..`, drop `.` — string-only, stays relative | ⚠ a change was made    |
+| `resolve`                 | normalize + resolve symlinks + absolutize (`realpath`)             | ⚠ a change was made    |
+| `filter`                  | the paths passing the filters                                      | at least one passed    |
+| `is`                      | nothing (≡ `filter -q`)                                            | at least one passed    |
+| `mtime [-R]`              | mtime in epoch seconds; `-R` seconds *ago*                         | any read succeeded     |
+| `sort [-r] [-u] [--key=]` | glob order, digit runs compared numerically                        | any path was given     |
 
 ⚠ `normalize` and `resolve` return **1 when the path was already canonical**: `path normalize /etc`
 prints `/etc` and exits 1. Never use their status as an existence or success test.
@@ -316,8 +316,8 @@ path sort -u --key=basename a/x b/x c/y # -> a/x, c/y
 `-f`/`-d`/`-l` are `--type=file|dir|link`; `-r`/`-w`/`-x` are `--perm=read|write|exec`. Other types
 (`block`, `char`, `fifo`, `socket`) and permissions (`suid`, `sgid`, `user`, `group`) need the long
 form. A path must be **any** of the given types but have **all** of the given permissions; links
-count as their target's type. `-v`/`--invert` passes what would fail, *including non-existent paths*.
-`path filter -fx $PATH/*` lists every command fish could run.
+count as their target's type. `-v`/`--invert` passes what would fail,
+*including non-existent paths*. `path filter -fx $PATH/*` lists every command fish could run.
 Because it takes a list and returns only what exists, it replaces the whole
 `if test -x A; …; else if test -x B; …` cascade:
 
@@ -330,8 +330,8 @@ end
 ```
 
 ⚠ `path is A B` (≡ `path filter -q`) is true if **any** argument passes — it is not
-`test -f A -a -f B`. For "all of them" use `path filter --all` (status only, no output), equivalently
-`not path filter -v`.
+`test -f A -a -f B`. For "all of them" use `path filter --all` (status only, no output),
+equivalently `not path filter -v`.
 
 ```fish
 path filter -f /etc/hosts /etc # -> /etc/hosts
@@ -342,16 +342,18 @@ path is /nope /etc # status 0 — /etc passed
 path filter --all /nope /etc # status 1 — /nope did not
 ```
 
-`test -f`/`-d`/`-x` remain fine for a single known path (`test` is a builtin, nothing forks); reach for
-`path filter`/`path is` for a list, a type+permission combination, or a fallback chain.
+`test -f`/`-d`/`-x` remain fine for a single known path (`test` is a builtin, nothing forks); reach
+for `path filter`/`path is` for a list, a type+permission combination, or a fallback chain.
 
 ## 5. `math`
 
-`math [-s N] [-b BASE] [-m MODE] EXPRESSION ...` — tinyexpr since fish 3.0.0, no `bc` fork. Arguments
-are joined with a space, so `math 2 +2` and `math "2 + 2"` are identical; no `--` needed before a
-leading minus. Status is 1 on overflow, NaN or division by zero (which also writes to stderr).
+`math [-s N] [-b BASE] [-m MODE] EXPRESSION ...` — tinyexpr since fish 3.0.0, no `bc` fork.
+Arguments are joined with a space, so `math 2 +2` and `math "2 + 2"` are identical; no `--` needed
+before a leading minus. Status is 1 on overflow, NaN or division by zero (which also writes to
+stderr).
 
-⚠ **`math` is floating point and defaults to 6 decimal places — `math 10/3` is `3.333333`, not `3`.**
+⚠
+**`math` is floating point and defaults to 6 decimal places — `math 10/3` is `3.333333`, not `3`.**
 There is no integer type; get integers deliberately. `-m`/`--scale-mode` is
 `truncate|round|floor|ceiling`, defaulting to `round` at non-zero scale and `truncate` at scale 0.
 
@@ -364,15 +366,15 @@ math 'floor(10/3)' # -> 3 ;  ceil(10/3) -> 4 ;  round(10/3) -> 3
 math -s3 10/6 # -> 1.667  (non-zero scale rounds)
 ```
 
-| | |
-| --- | --- |
-| Operators | `+ - * / ^ %`, `x` for multiply, `( )` for grouping |
-| Quoting | ⚠ `*` is a glob, `()` is command substitution — quote or escape: `math '3 * 4'`, `math 3 \* 4`. Function parens are optional, but a comma binds to the inner function, so parenthesize when nesting |
-| `x` caveat | must be followed by whitespace: `math 0 x 3` is 0×3, `math 0x3` is hex 3 |
-| Constants | `e`, `pi`, `tau` — no `$` |
-| Input | decimal, `0xFF` hex, `10e5` scientific, `1_000_000` separators. Octal is **not** read |
-| Output base | `-b hex` → `0xc0`, `-b octal` → `010`; implies scale 0 |
-| Functions | `abs ceil floor round sqrt exp ln log log10 log2 pow fac min max ncr npr`, `sin cos tan asin acos atan atan2 sinh cosh tanh` (radians), `bitand bitor bitxor` (no `bitnot` — mask with `bitxor`) |
+|             |                                                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Operators   | `+ - * / ^ %`, `x` for multiply, `( )` for grouping                                                                                                                                                 |
+| Quoting     | ⚠ `*` is a glob, `()` is command substitution — quote or escape: `math '3 * 4'`, `math 3 \* 4`. Function parens are optional, but a comma binds to the inner function, so parenthesize when nesting |
+| `x` caveat  | must be followed by whitespace: `math 0 x 3` is 0×3, `math 0x3` is hex 3                                                                                                                            |
+| Constants   | `e`, `pi`, `tau` — no `$`                                                                                                                                                                           |
+| Input       | decimal, `0xFF` hex, `10e5` scientific, `1_000_000` separators. Octal is **not** read                                                                                                               |
+| Output base | `-b hex` → `0xc0`, `-b octal` → `010`; implies scale 0                                                                                                                                              |
+| Functions   | `abs ceil floor round sqrt exp ln log log10 log2 pow fac min max ncr npr`, `sin cos tan asin acos atan atan2 sinh cosh tanh` (radians), `bitand bitor bitxor` (no `bitnot` — mask with `bitxor`)    |
 
 ```fish
 math '2^10' # -> 1024
@@ -422,16 +424,16 @@ stdout, which is what makes `mysql -p(read)` work. It returns 1 at EOF, which te
 `while read` loop. Input is capped at `$fish_read_limit` (100 MiB); over it, the variable is emptied
 and the status is 122.
 
-| Flag | Effect |
-| --- | --- |
-| `-l`/`--local` | block-local — the default choice ([style-guide.md](style-guide.md) §3) |
-| `-g`/`--global` | global; `-f` function-scoped, `-x` exported. ⚠ Never `-U` in config |
-| `-d`/`--delimiter STR` | split on STR as a whole string, not a character set |
-| `-t`/`--tokenize` | split by shell tokenization rules — honours quotes and escapes, ignores `IFS` |
-| `-a`/`--list` | collect all tokens into one list variable (only one name allowed) |
-| `-z`/`--null` | NUL-terminated instead of newline; also reads a whole file in one go |
-| `-n`/`--nchars N` | stop after N characters or end of line |
-| `-L`/`--line` | fill each variable with a whole *untokenized* line |
+| Flag                    | Effect                                                                                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-l`/`--local`          | block-local — the default choice ([style-guide.md](style-guide.md) §3)                                                                                            |
+| `-g`/`--global`         | global; `-f` function-scoped, `-x` exported. ⚠ Never `-U` in config                                                                                               |
+| `-d`/`--delimiter STR`  | split on STR as a whole string, not a character set                                                                                                               |
+| `-t`/`--tokenize`       | split by shell tokenization rules — honours quotes and escapes, ignores `IFS`                                                                                     |
+| `-a`/`--list`           | collect all tokens into one list variable (only one name allowed)                                                                                                 |
+| `-z`/`--null`           | NUL-terminated instead of newline; also reads a whole file in one go                                                                                              |
+| `-n`/`--nchars N`       | stop after N characters or end of line                                                                                                                            |
+| `-L`/`--line`           | fill each variable with a whole *untokenized* line                                                                                                                |
 | `-P`/`--prompt-str STR` | literal prompt (`-p CMD` runs a command for it); `-s` masks typed input. Interactive-only, so unverifiable non-interactively: `read -ls -P 'passphrase: ' secret` |
 
 Without `-d`/`-t`/`-L`, splitting uses `IFS` (space, tab, newline). ⚠ `IFS` reliance is deprecated

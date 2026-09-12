@@ -48,7 +48,8 @@ They do full duty in ANSI and UI chrome, where they sit against the _background_
 
 ## Invariants
 
-- Every hex in the repo must appear in `spec.md` (32 values). Any other value is drift, by definition.
+- Every hex in the repo must appear in `spec.md` (32 values). Any other value is drift, by
+  definition.
 - Contrast floors vs `surface.base`: text ramp 10.5/7.4/5.5/4.5/3.1, accents 3.0 `deep` / 4.5 `base`
   / 7.0 `loud`. ⚠ `text.faint` is deliberately sub-AA — only for content meant to be skipped.
 - Separation floors (ΔE2000): ≥20 between syntax roles and `text.base`, ≥20 between ANSI hues within
@@ -73,6 +74,6 @@ bat cache --build                     # ⚠ mandatory after editing the tmTheme,
 fish -c 'set -U --names'              # must print nothing
 ```
 
-⚠ Colour cannot be verified by parsers. Look at it in Ghostty: `bat` a long source file, `git diff` a
-real change, `gum format` a README, `btop`, `atuin` (ctrl-r), the fish pager. The article's own test
-is the one that matters — _can you find the definitions at a glance?_
+⚠ Colour cannot be verified by parsers. Look at it in Ghostty: `bat` a long source file, `git diff`
+a real change, `gum format` a README, `btop`, `atuin` (ctrl-r), the fish pager. The article's own
+test is the one that matters — _can you find the definitions at a glance?_

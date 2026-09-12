@@ -20,13 +20,13 @@ it encodes house preference, not fish capability.
 
 ## 1. Formatting
 
-| Rule | Value |
-| --- | --- |
-| Indent | 4 spaces, never tabs — `fish_indent` default, non-negotiable |
-| Line ending / encoding | LF, UTF-8, final newline present |
-| Trailing whitespace | none |
-| Line length | *prefer* ≤100 columns; wrap with `\` only when a pipeline genuinely needs it |
-| Formatter | `fish_indent -w <file>`; `fish_indent --check <file>` must exit 0 |
+| Rule                   | Value                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| Indent                 | 4 spaces, never tabs — `fish_indent` default, non-negotiable                 |
+| Line ending / encoding | LF, UTF-8, final newline present                                             |
+| Trailing whitespace    | none                                                                         |
+| Line length            | *prefer* ≤100 columns; wrap with `\` only when a pipeline genuinely needs it |
+| Formatter              | `fish_indent -w <file>`; `fish_indent --check <file>` must exit 0            |
 
 Comments are **all-lowercase**, terse, and explain *why* — never restate the code:
 
@@ -45,26 +45,27 @@ fish_add_path -m "$HOMEBREW_PREFIX/bin"
 set -gx HOMEBREW_NO_ANALYTICS 1
 ```
 
-Flags: *prefer* short flags for the everyday set (`set -l`, `set -gx`, `abbr -a`, `test -r`) and long
-flags where the short form is cryptic (`--description`, `--on-event`, `--prepend --move`, `--exclusive`).
-Never mix `-d` and `--description` within one file.
+Flags: *prefer* short flags for the everyday set (`set -l`, `set -gx`, `abbr -a`, `test -r`) and
+long flags where the short form is cryptic (`--description`, `--on-event`, `--prepend --move`,
+`--exclusive`). Never mix `-d` and `--description` within one file.
 
 ## 2. Naming
 
-| Thing | Convention | Example |
-| --- | --- | --- |
-| `conf.d/` snippet | one tool per file, lowercase, hyphenated | `conf.d/zoxide.fish` |
-| Ordering prefix | `_` for foundational snippets others depend on | `conf.d/_init.fish` |
-| Autoloaded function | file basename **must equal** the function name | `functions/reload.fish` → `function reload` |
-| Private helper | `__` + namespace + name | `__laramie_hex` |
-| Local variable | lowercase, `_` separated | `set -l brew_prefix` |
-| Global/exported | `SCREAMING_SNAKE` for env vars, lowercase for fish-internal globals | `GIT_CONFIG_GLOBAL`, `fish_user_paths` |
-| Private global | `__` prefix so it never collides with a tool's namespace | `__git_config_dir` |
+| Thing               | Convention                                                          | Example                                     |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
+| `conf.d/` snippet   | one tool per file, lowercase, hyphenated                            | `conf.d/zoxide.fish`                        |
+| Ordering prefix     | `_` for foundational snippets others depend on                      | `conf.d/_init.fish`                         |
+| Autoloaded function | file basename **must equal** the function name                      | `functions/reload.fish` → `function reload` |
+| Private helper      | `__` + namespace + name                                             | `__laramie_hex`                             |
+| Local variable      | lowercase, `_` separated                                            | `set -l brew_prefix`                        |
+| Global/exported     | `SCREAMING_SNAKE` for env vars, lowercase for fish-internal globals | `GIT_CONFIG_GLOBAL`, `fish_user_paths`      |
+| Private global      | `__` prefix so it never collides with a tool's namespace            | `__git_config_dir`                          |
 
-⚠ **Sort order in `conf.d/` is `digits` → `_` → `letters`** (verified empirically on fish 4.8.1).
-So `_init.fish` beats `abbrs.fish`, and a numeric prefix (`00-`) beats `_`. Reserve digits for
-something that must load before the `_` files — currently nothing does, so **do not introduce numeric
-prefixes**; extend the `_` set instead. `config.fish` always sources **last**, after all of `conf.d/`.
+⚠ **Sort order in `conf.d/` is `digits` → `_` → `letters`** (verified empirically on fish 4.8.1). So
+`_init.fish` beats `abbrs.fish`, and a numeric prefix (`00-`) beats `_`. Reserve digits for
+something that must load before the `_` files — currently nothing does, so
+**do not introduce numeric prefixes**; extend the `_` set instead. `config.fish` always sources
+**last**, after all of `conf.d/`.
 
 ## 3. Variables and scope
 
@@ -76,24 +77,30 @@ set -U  anything    # FORBIDDEN in config files
 ```
 
 - **Let the environment win.** Defaults are conditional, never unconditional:
+
   ```fish
   set -q XDG_CONFIG_HOME; or set -gx XDG_CONFIG_HOME $HOME/.config
   ```
+
   Writing `set -gx XDG_CONFIG_HOME $HOME/.config` unconditionally overrides a value the user
   deliberately exported.
   ⚠ `set -q` returns 0 for a variable set to an *empty list*, so this idiom will not repair
   `set -gx EDITOR ''`. When an empty value must also be replaced, test the value:
   `test -n "$EDITOR"; or set -gx EDITOR code-insiders`. See [variables.md](variables.md).
-- **`PATH` is only ever touched with `fish_add_path`.** It deduplicates and respects `$fish_user_paths`.
-  `set -gx PATH ...` is forbidden. Use `-m`/`--move` when the entry must jump to the front:
+- **`PATH` is only ever touched with `fish_add_path`.** It deduplicates and respects
+  `$fish_user_paths`. `set -gx PATH ...` is forbidden. Use `-m`/`--move` when the entry must jump to
+  the front:
+
   ```fish
   fish_add_path -m "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin"
   ```
-- **Quoting.** fish does not word-split, so quotes are about *empty* and *list* semantics, not safety:
+
+- **Quoting.** fish does not word-split, so quotes are about *empty* and *list* semantics, not
+  safety:
   - `"$var"` — you need exactly one argument, even if empty. Use for `test`, and for paths.
   - `$var` — you want list elements splatted as separate arguments (and nothing at all if empty).
-  - ⚠ `test -n $var` is a **silent inversion** when `$var` is unset — not an error. The list expands to
-    nothing, `test` sees the single argument `-n`, takes the one-argument form, and reports that
+  - ⚠ `test -n $var` is a **silent inversion** when `$var` is unset — not an error. The list expands
+    to nothing, `test` sees the single argument `-n`, takes the one-argument form, and reports that
     non-empty *string* as true. So `test -n $unset` returns **0**. Always `test -n "$var"`.
 - `$status` is clobbered by the next command. Capture it immediately: `set -l rc $status`.
 
@@ -121,14 +128,17 @@ exit and is preferred over wrapping the whole body in `if status is-interactive 
 - Branch with `if`/`else if`/`else`. Chain short guards with `; and` / `; or` on one line.
 - *Prefer* the word forms `and` / `or` / `not` over `&&` / `||` / `!` — they read as fish, and
   `fish_indent` formats them consistently. Be consistent within a file.
-- `switch` + `case` beats a chain of `if` string comparisons; quote the case globs (`case "*.tar.gz"`).
+- `switch` + `case` beats a chain of `if` string comparisons; quote the case globs
+  (`case "*.tar.gz"`).
 - Errors go to **stderr** and set a **non-zero return**:
+
   ```fish
   if not type -q gum
       echo >&2 "reload: gum is required"
       return 1
   end
   ```
+
 - Iterate lists directly — `for f in $files` — never `for i in (seq (count $files))`.
 
 ## 6. Functions
@@ -145,6 +155,7 @@ exit and is preferred over wrapping the whole body in `if status is-interactive 
   currently has no subdirectories.
 - Arguments: `argparse` for anything with flags; `-a`/`--argument-names` for a fixed positional
   signature; raw `$argv` only for pure pass-through.
+
   ```fish
   function bak --description 'copy a file to <file>.bak'
       argparse h/help -- $argv; or return
@@ -157,12 +168,15 @@ exit and is preferred over wrapping the whole body in `if status is-interactive 
       end
   end
   ```
+
 - Shadowing a command requires `command` inside the body, or you get infinite recursion:
+
   ```fish
   function ping --description 'ping with a sane default count'
       command ping -c 5 $argv
   end
   ```
+
 - ⚠ **`--on-event`, `--on-variable`, `--on-signal`, `--on-job-exit` handlers only register when the
   file is sourced.** Autoloading does not fire them, so they belong in `conf.d/`. (Official wording:
   *"event handlers only become active when a function is loaded, which means you need to otherwise
@@ -184,8 +198,10 @@ Startup cost is the one thing worth optimizing; everything else is noise.
 - Never fork a process at startup when a builtin will do (`string`, `path`, `test`, `math`).
 - `tool init fish | source` forks. Cache it to a file and source the cache instead.
 - Prefer autoloading (`functions/`) over defining functions in `conf.d/` — an autoloaded function
-  costs nothing until first call. `conf.d/` is for *wiring*: variables, `abbr`, `bind`, event handlers.
+  costs nothing until first call. `conf.d/` is for *wiring*: variables, `abbr`, `bind`, event
+  handlers.
 - Measure, don't guess:
+
   ```fish
   fish --profile-startup=/tmp/fishprof.txt -c exit
   awk 'NR==1 || $3==">"{print}' /tmp/fishprof.txt
@@ -363,19 +379,20 @@ script -q /dev/null fish --login --interactive -c exit   # a real startup, on a 
 ```
 
 ⚠ **That third check is a no-stray-output test, not an exit-status test.** A snippet ending in the
-house idiom `set -q VAR; or set -gx VAR val` exits **1** whenever `VAR` was unset, because a successful
-`set` preserves the previous `$status` rather than clearing it ([caveats.md](caveats.md)). Silence is
-the pass condition; `conf.d` discards the status anyway.
+house idiom `set -q VAR; or set -gx VAR val` exits **1** whenever `VAR` was unset, because a
+successful `set` preserves the previous `$status` rather than clearing it
+([caveats.md](caveats.md)). Silence is the pass condition; `conf.d` discards the status anyway.
 
-⚠ `--no-config` has two blind spots: it leaves `$fish_function_path` **unset**, so it cannot exercise
-autoloading (a function your file calls will appear missing), and it **demotes `set -U` to global**, so
-it hides universal-variable behaviour entirely. Use it to prove a file is self-contained and quiet; use
-a real `exec fish` to prove it works. See [config-layout.md](config-layout.md), [variables.md](variables.md).
+⚠ `--no-config` has two blind spots: it leaves `$fish_function_path` **unset**, so it cannot
+exercise autoloading (a function your file calls will appear missing), and it
+**demotes `set -U` to global**, so it hides universal-variable behaviour entirely. Use it to prove a
+file is self-contained and quiet; use a real `exec fish` to prove it works. See
+[config-layout.md](config-layout.md), [variables.md](variables.md).
 
 ⚠ **All three of the first checks redirect stdin, so none of them runs on a tty** — which is why the
 fourth line is not optional for a `conf.d` file. A bare `source $var` whose variable is empty reads
-stdin, hits EOF and exits 0 under every redirected check, and errors only in a real window. That exact
-bug lived in `conf.d/theme.fish` while passing this checklist ([caveats.md](caveats.md)).
+stdin, hits EOF and exits 0 under every redirected check, and errors only in a real window. That
+exact bug lived in `conf.d/theme.fish` while passing this checklist ([caveats.md](caveats.md)).
 
 - [ ] `fish_indent --check` exits 0
 - [ ] `fish -n` clean

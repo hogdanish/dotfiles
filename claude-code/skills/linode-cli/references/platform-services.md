@@ -20,14 +20,15 @@ without current product/pricing documentation.
 
 The generated `object-storage` group manages account service state, endpoints/clusters/types, access
 keys, TLS certificates, transfer, and quotas. The bundled `obj` plugin manages buckets and objects.
-Enabling/canceling service, creating keys, deleting keys, and certificate operations are consequential;
-bucket/object deletion can be irreversible. Treat returned key secrets as write-only credentials.
+Enabling/canceling service, creating keys, deleting keys, and certificate operations are
+consequential; bucket/object deletion can be irreversible. Treat returned key secrets as write-only
+credentials.
 
 ## DNS Manager
 
-`domains` covers domain create/import/clone/list/view/update/delete, zone files, and record lifecycle.
-DNS writes can cause outages even when they are not billable. Read the zone and exact record first;
-verify name, type, target, TTL, priority, and domain ID after changes.
+`domains` covers domain create/import/clone/list/view/update/delete, zone files, and record
+lifecycle. DNS writes can cause outages even when they are not billable. Read the zone and exact
+record first; verify name, type, target, TTL, priority, and domain ID after changes.
 
 ## Monitoring and managed service
 

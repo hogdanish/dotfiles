@@ -688,6 +688,57 @@ function __check_onepassword_mcp --description '1Password MCP is wired at user s
     __say info '1Password MCP is wired at user scope'
 end
 
+function __check_markdown_format --description 'markdown formatting is wired for editor, agents and commits'
+    if not type -q rumdl
+        __fail 'rumdl is not installed — markdown is formatted by nothing (it is in ./Brewfile)'
+        return
+    end
+
+    # the style lives one level down because $XDG_CONFIG_HOME/rumdl/ is ALSO this machine's
+    # user-level rumdl config. the root file exists only to pull it in with `extends`.
+    for f in .rumdl.toml rumdl/rumdl.toml
+        test -f $REPO/$f; or __fail "$f is missing — markdown would lint with rumdl's defaults"
+    end
+
+    # ⚠ prove the extends chain actually resolves rather than trusting that it is written.
+    #   `rumdl config file` prints every config that contributed, innermost last.
+    # ⚠ unquoted on purpose. it prints one path per line, so $loaded is a LIST; quoting it
+    #   would join both paths into one string and the trailing-anchor pattern could never match.
+    set -l loaded (cd $REPO; and rumdl config file 2>/dev/null)
+    string match -q '*rumdl/rumdl.toml' -- $loaded
+    or __fail 'the repo config does not extend rumdl/rumdl.toml — the house style is not applied'
+
+    # the write-time half. same rule as fish-validate.sh: wired by absolute path, never linked.
+    set -l hook $REPO/claude-code/hooks/markdown-format.sh
+    if not test -x $hook
+        __fail 'claude-code/hooks/markdown-format.sh is missing or not executable'
+    else if test -L $hook
+        __fail 'markdown-format.sh is a symlink — hooks are wired by absolute path, not linked'
+    end
+
+    # both agents, or an agent silently writes unformatted markdown.
+    string match -q '*markdown-format.sh*' <$REPO/claude-code/settings.json
+    or __fail 'claude-code/settings.json does not run markdown-format.sh on Write|Edit'
+    string match -q '*markdown-format.sh*' <$REPO/codex/hooks.json
+    or __fail 'codex/hooks.json omits the markdown-format.sh adapter'
+
+    # the commit-time net. it formats and re-stages; it must never be able to block a commit.
+    if not string match -q '*markdown-format*' <$REPO/lefthook.yml
+        __fail 'lefthook.yml has no markdown-format job'
+    else if string match -qr 'rumdl (check|lint)' <$REPO/lefthook.yml
+        __fail 'lefthook runs `rumdl check`, which BLOCKS a commit — it must be `rumdl fmt`'
+    end
+
+    # ⚠ outside the repo, and the one place markdown can silently go back to Prettier.
+    set -l vscode "$HOME/Library/Application Support/Code - Insiders/User/settings.json"
+    if test -r $vscode
+        string match -q '*rvben.rumdl*' <$vscode
+        or __fail 'VS Code does not use rvben.rumdl for markdown — Prettier is reformatting it'
+    end
+
+    __say info 'markdown formatting wired: editor, both agents, commits'
+end
+
 function main --description 'audit tracked config, links and Codex parity'
     __say info "auditing $REPO"
     __check_new_arrivals
@@ -708,6 +759,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_rust_links
     __check_permissions
     __check_universals
+    __check_markdown_format
 
     if test $ISSUES -eq 0
         __say info 'audit clean'

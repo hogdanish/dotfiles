@@ -1,0 +1,44 @@
+# rumdl — this repo's markdown.
+#
+# the style itself lives one directory down, in rumdl/rumdl.toml, because that path is ALSO
+# this machine's user-level rumdl config ($XDG_CONFIG_HOME/rumdl/). one file, two jobs: it is
+# the fallback for stray markdown anywhere on this machine, and — through `extends` — the base
+# this repo is formatted with. edit the style there, not here.
+#
+# ⚠ this file must exist even though the style is next door. the user-level config is only a
+#   FALLBACK, consulted when no project config is found; a repo is a project, so without this
+#   `extends` the repo's own markdown would be linted with rumdl's stock defaults.
+#
+# what belongs here: excludes, and nothing else.
+
+extends = "rumdl/rumdl.toml"
+
+[global]
+exclude = [
+  # ── vendored verbatim, and machine-diffed ────────────────────────────────
+  # ⚠ every path below is re-fetched and compared line-for-line by a sync script. formatting
+  #   one would show up as upstream drift and the script would report a change that never
+  #   happened. see .claude/CLAUDE.md — never hand-edit these, run the sync script.
+  "claude-code/skills/simple-english/**", # scripts/simple-english-sync.sh
+  "claude-code/output-styles/simple-english.md", # scripts/simple-english-sync.sh
+  "claude-code/skills/website-spec/references/checklist.md", # scripts/website-spec-sync.sh
+  "claude-code/skills/website-spec/references/upstream-skill.md", # scripts/website-spec-sync.sh
+
+  # ── not ours ─────────────────────────────────────────────────────────────
+  ".claude/worktrees/**", # transient agent checkouts of this same repo
+]
+
+# ── narrow, named exceptions ────────────────────────────────────────────────
+# ⚠ this list is the only place a rule is switched off for one file. keep the reason on the
+#   line; an unexplained entry here is how a strict config rots into a permissive one.
+[per-file-ignores]
+# reproduces an upstream README verbatim beneath this repo's own title, so the file carries two
+# `# pinentry-touchid` h1s on purpose — and therefore two identical anchors.
+".claude/skills/auth/references/pinentry-touchid.md" = ["MD024", "MD025"]
+
+# `---` then `# Part` opens a second document section. MD025's allow-document-sections models
+# that idiom in the ghostty references but not here; the structure is deliberate either way.
+"claude-code/skills/fish/references/style-guide.md" = ["MD025"]
+
+# an agent SKILL.md is YAML frontmatter followed by body prose. an h1 is not part of the format.
+"**/SKILL.md" = ["MD041"]

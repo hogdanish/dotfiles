@@ -38,12 +38,12 @@ machine**, which projects it is live in, and the exact fallback when it is not c
 
 ## The four statuses are the contract
 
-| Status | Meaning | How to treat it |
-|---|---|---|
-| **required** | The platform contract breaks without it. | A missing one is a defect. Lead with these. |
-| **recommended** | A modern site should do it. | Flag every gap; the user decides. |
-| **optional** | Depends on context. | Mention only where the context applies. |
-| **avoid** | Outdated or harmful. | If the site does it, flag it as a defect. |
+| Status          | Meaning                                  | How to treat it                             |
+| --------------- | ---------------------------------------- | ------------------------------------------- |
+| **required**    | The platform contract breaks without it. | A missing one is a defect. Lead with these. |
+| **recommended** | A modern site should do it.              | Flag every gap; the user decides.           |
+| **optional**    | Depends on context.                      | Mention only where the context applies.     |
+| **avoid**       | Outdated or harmful.                     | If the site does it, flag it as a defect.   |
 
 ⚠ **Never silently promote `recommended` to `required`.** The bar for `required` is *the platform
 breaks*, not *this is a good idea*. Report the spec's status, then your own opinion separately if
@@ -54,7 +54,8 @@ you have one.
 `foundations` · `seo` · `accessibility` · `security` · `well-known` · `agent-readiness` ·
 `performance` · `privacy` · `resilience` · `i18n`
 
-The category slug is part of every spec URL: `https://specification.website/spec/<category>/<slug>/`.
+The category slug is part of every spec URL:
+`https://specification.website/spec/<category>/<slug>/`.
 
 ## Auditing with it
 
