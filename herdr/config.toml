@@ -3,8 +3,12 @@ onboarding = false
 
 [terminal]
 # No default_shell: fish is the login shell as of 2026-09-12. Herdr resolves the shell through
-# portable_pty::cmdbuilder, whose chain is $SHELL, then the passwd entry, then /bin/sh - both of
-# the first two are now fish, so pinning it here would only be a second place to keep in sync.
+# portable_pty::cmdbuilder, whose chain is $SHELL, then the passwd entry, then /bin/sh - the passwd
+# entry is fish, so pinning it here would only be a second place to keep in sync.
+# The catch, found 2026-09-12: $SHELL is inherited and nothing re-reads passwd after login, so the
+# pre-chsh /bin/zsh survived in the GUI session (Ghostty starts fish through `login -flp`, and -p
+# preserves the environment) and every new Herdr pane opened zsh. fish/conf.d/_init.fish now
+# exports $SHELL from the running fish, which fixes it at the source rather than per tool.
 # shell_mode stays: it is orthogonal to which shell, and login mode is what makes fish run
 # path_helper over /etc/paths.d.
 shell_mode = "login"

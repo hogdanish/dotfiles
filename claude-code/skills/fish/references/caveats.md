@@ -27,6 +27,23 @@ file too** and note it here. Keep entries under ~6 lines.
 These were each asserted confidently during this skill's authoring and then disproved. Assume a model
 will get them wrong again.
 
+### `chsh` changed the login shell, but every tool still opened zsh — `$SHELL` never updated
+
+`2026-09-12` · a new Herdr space spawned a zsh pane hours after fish became the login shell
+
+- **Cause** — `$SHELL` is **inherited, never derived**. Nothing re-reads the passwd entry after
+  login, so a GUI session already running (loginwindow, and Ghostty under it) keeps the value from
+  before the `chsh`. Ghostty then starts the shell with `login -flp`, and `-p` *preserves the
+  environment*, so the stale `/bin/zsh` reaches fish itself. `dscl` said fish, `$SHELL` said zsh, and
+  everything resolving `$SHELL` first (Herdr via `portable_pty::cmdbuilder`, VS Code, tmux) got zsh.
+- **Do** — publish it from the shell that knows: `conf.d/_init.fish` ends with
+  `set -l __fish_bin (command -s fish)` then
+  `test -n "$__fish_bin"; and status is-login; and set -gx SHELL $__fish_bin`. ⚠ Not
+  `status fish-path` — that returns the **Cellar** path (`…/Cellar/fish/4.9.3/bin/fish`), which
+  `brew cleanup` deletes under a long-running process that cached it.
+- **Verified** — `fish --login -c 'echo $SHELL'` prints `/opt/homebrew/bin/fish`;
+  `ps -Eww -o command -p <pid>` on the old Herdr showed `SHELL=/bin/zsh` under a fish parent.
+
 ### `--no-config` also skips fish's **embedded** `config.fish`, so a login shell gets no `path_helper`
 
 `2026-09-12` · proving Ghostty would still build `$PATH` correctly after the login shell became fish

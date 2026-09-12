@@ -334,6 +334,18 @@ terminal shell as a login shell by prefixing `argv[0]` with `-`; fish honours th
 the old explicit `--login` did. ⚠ Homebrew now owns the login shell binary, so never remove or
 break `fish` without a fallback — Terminal.app is set to `/bin/zsh` as the lifeboat.
 
+⚠ **`$SHELL` does not follow `chsh`, and that made the per-tool pins look load-bearing again**
+(found 2026-09-12, same day). `$SHELL` is inherited, never derived: nothing re-reads the passwd
+entry after login, so a GUI session that was already running kept the pre-`chsh` `/bin/zsh` — and
+Ghostty starts the shell through `login -flp`, where `-p` *preserves the environment*, so the stale
+value survived into every fish. The passwd entry said fish while `$SHELL` said zsh, and every tool
+that reads the first entry of that chain — Herdr through `portable_pty`, VS Code, tmux — opened
+**zsh** panes inside a fish login shell. The fix is one line in `fish/conf.d/_init.fish`, not a pin:
+a login fish exports `$SHELL` from `command -s fish`, so the value cannot be older than the process
+publishing it. ⚠ Not `status fish-path` — that is the version-pinned Cellar path, which
+`brew cleanup` deletes out from under a Herdr that has been running across an upgrade.
+`audit-config.fish` asserts a login fish exports it.
+
 **zsh is still not configured, and is still not meant to be — but it is no longer dead weight.**
 `~/.zshrc` and `~/.zprofile` hold Homebrew's `shellenv` plus state relocation — `HISTFILE` →
 `$XDG_STATE_HOME/zsh/history` and `SHELL_SESSIONS_DISABLE=1`. The one conditional exception is
@@ -464,7 +476,10 @@ fish -c 'set -U --names'                                  # must print nothing �
 script -q /dev/null fish --login --interactive -c exit    # a real startup, on a tty
 dscl . -read ~/ UserShell                                 # ⚠ must be /opt/homebrew/bin/fish
 rg '^\s*command\s*=' ghostty/config.ghostty              # ⚠ must print NOTHING — no per-tool pin
-ghostty +show-config | rg '^command'                      # ...and this RESOLVES to fish anyway
+fish --login -c 'echo $SHELL'                             # ⚠ must be fish — chsh does NOT set this
+ghostty +show-config | rg '^command'                      # ⚠ resolves from the CALLER's $SHELL:
+                                                          #   fish under fish, /bin/zsh under a
+                                                          #   Bash tool call. not a config check.
 fish -c fishprof                                          # startup cost, attributed line by line
 git config --file ~/.config/git/.gitconfig --list         # gitconfig parses
 ghostty +validate-config                                  # ghostty config is valid

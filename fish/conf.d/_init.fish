@@ -57,3 +57,14 @@ set -gx VISUAL code-insiders --new-window --wait
 # falling back to vi. conditional so an exported value wins; `test -n` also repairs an empty one.
 test -n "$EDITOR"; or set -gx EDITOR micro
 set -gx BROWSER open
+
+# ⚠ $SHELL is inherited, never derived — nothing re-reads the passwd entry after login, so `chsh`
+# does not reach a gui session that is already running. ghostty starts the shell through
+# `login -flp` and `-p` *preserves the environment*, so the stale `/bin/zsh` captured at the last
+# macos login survived into every fish started since the 2026-09-12 chsh. anything resolving a
+# shell from $SHELL (herdr through portable-pty, vs code, tmux) therefore spawned zsh. fish is the
+# one process that knows which fish is running, so it is the right place to publish it.
+# ⚠ not `status fish-path` — that is the version-pinned cellar path, which `brew cleanup` deletes
+# out from under a long-running herdr. login-only: a nested non-login fish is not the user's shell.
+set -l __fish_bin (command -s fish)
+test -n "$__fish_bin"; and status is-login; and set -gx SHELL $__fish_bin

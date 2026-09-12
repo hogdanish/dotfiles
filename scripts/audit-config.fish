@@ -121,7 +121,15 @@ function __check_login_shell --description 'fish is the login shell, and no tool
         __fail 'herdr/config.toml pins default_shell again — $SHELL already resolves to fish'
     end
 
-    __say info 'no per-tool shell pins'
+    # ⚠ and the reason no pin is needed: fish publishes $SHELL itself. `chsh` does not reach a gui
+    # session that is already running, and ghostty's `login -flp` preserves the stale value, so
+    # before conf.d/_init.fish exported it every herdr pane opened zsh under a fish login shell.
+    set -l published (fish --login -c 'echo $SHELL' 2>/dev/null)
+    if test "$published" != "$want"
+        __fail "a login fish exports SHELL='$published', not $want — \$SHELL is what herdr, vs code and tmux resolve a shell from (conf.d/_init.fish)"
+    end
+
+    __say info 'no per-tool shell pins; login fish exports $SHELL'
 end
 
 function __check_claude_links --description 'authored claude config is still symlinked, not detached'

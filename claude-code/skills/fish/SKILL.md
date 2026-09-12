@@ -10,7 +10,10 @@ any script a human runs. This skill covers **all** fish work in **any** director
 project, a one-off function, a port from bash, a debugging session — not only `~/.config/fish`.
 
 ⚠ fish became the login shell on **2026-09-12** (`chsh`), replacing `/bin/zsh`. Nothing pins it per
-tool any more — Ghostty, Herdr and VS Code resolve it from `$SHELL` then the passwd entry. `/bin/zsh`
+tool any more — Ghostty, Herdr and VS Code resolve it from `$SHELL` then the passwd entry. ⚠ `chsh`
+does **not** update `$SHELL`, and a GUI session that predates it keeps the old value, so
+`conf.d/_init.fish` exports `$SHELL` from the running fish — without that line those same tools open
+**zsh** while `dscl` reports fish (`caveats.md`). `/bin/zsh`
 is still installed and still deliberately unconfigured, but it is no longer inert: Claude Code and
 Codex both force `/bin/zsh` for their own tool shells regardless of `$SHELL`, so `~/.zshenv`,
 `~/.zshrc` and `~/.zprofile` must stay exactly where they are.
