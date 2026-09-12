@@ -20,6 +20,7 @@ tap "domt4/autoupdate", trusted: {command: "autoupdate"}
 
 ## shell & terminal
 brew "fish"       # main shell
+brew "herdr"      # claude/codex: persistent terminal workspaces
 brew "starship"   # prompt
 brew "atuin"      # ctrl-r: searchable shell history
 brew "fzf"        # fuzzy finder

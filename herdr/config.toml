@@ -1,0 +1,70 @@
+# Local Claude Code and Codex workspaces in Ghostty.
+onboarding = false
+
+[terminal]
+# No default_shell: fish is the login shell as of 2026-09-12. Herdr resolves the shell through
+# portable_pty::cmdbuilder, whose chain is $SHELL, then the passwd entry, then /bin/sh - both of
+# the first two are now fish, so pinning it here would only be a second place to keep in sync.
+# shell_mode stays: it is orthogonal to which shell, and login mode is what makes fish run
+# path_helper over /etc/paths.d.
+shell_mode = "login"
+new_cwd = "follow"
+kitty_graphics = true
+
+[theme]
+# Inherit Ghostty's Laramie ANSI palette.
+name = "terminal"
+auto_switch = false
+
+[theme.custom]
+# ANSI black is Laramie's sunken surface; ANSI bright black is a text color.
+active_row_bg = "black"
+selection_bg = "black"
+
+[ui]
+# Keep Herdr's mouse UI, but let a drag stay a selection until Ctrl+C/Cmd+C copies it.
+copy_on_select = false
+sidebar_width = 30
+sidebar_max_width = 36
+agent_panel_sort = "priority"
+status_indicators = "symbols"
+hide_tab_bar_when_single_tab = true
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+delivery = "terminal"
+delay_seconds = 1
+
+[ui.sound]
+enabled = false
+
+[ui.sidebar]
+
+[ui.sidebar.agents]
+row_gap = 0 # herdr-agent-quota
+# Sidebar fg accepts only hex: Laramie state.ok / state.warn / state.error.
+rows = [["state_icon", "machine", "workspace", "tab"], [{ token = "$quota_provider_model", bold = true, dim = false }], [{ token = "$quota_error", fg = "#e0a332", bold = false, dim = false }], [{ token = "$quota_context", bold = false, dim = false }, { token = "$quota_week_inline_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_inline_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_inline_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_inline_unknown", bold = false, dim = false }], [{ token = "$quota_5h_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_5h_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_5h_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_5h_unknown", bold = false, dim = false }, { token = "$quota_week_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_unknown", bold = false, dim = false }]] # herdr-agent-quota-row
+
+[session]
+resume_agents_on_restore = true
+
+[worktrees]
+directory = "~/Projects/herdr-worktrees"
+
+[experimental]
+pane_history = false
+
+[keys]
+# Keep native config reload on prefix+shift+r.
+
+[[keys.command]]
+key = "prefix+u"
+type = "plugin_action"
+command = "herdr-agent-quota.refresh"
+description = "refresh all agent quotas"
+
+[[keys.command]]
+key = "prefix+shift+q"
+type = "plugin_action"
+command = "herdr-agent-quota.open-settings"
+description = "open agent quota settings"

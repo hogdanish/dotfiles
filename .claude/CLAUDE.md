@@ -358,12 +358,12 @@ floors, not menus. The global always-on conventions carry the trigger, and
 costs a debugging cycle goes into the skill's `references/caveats.md` in the same turn, verified
 against the installed fish — never corrected from memory.
 
-`config.fish` is intentionally **empty**. Everything is nineteen one-concern snippets in `conf.d/`,
+`config.fish` is intentionally **empty**. Everything is twenty one-concern snippets in `conf.d/`,
 sourced before it, sorted digits → `_` → letters:
 
 `_init` · `_shell` · `abbrs` · `brew` · `bun` · `cloudflare` · `colours` · `fzf` · `ghostty` ·
-`git` · `gum` · `java` · `keybindings` · `localbin` · `op` · `orbstack` · `rust` · `tools` ·
-`xdg-apps`
+`git` · `gum` · `herdr` · `java` · `keybindings` · `localbin` · `op` · `orbstack` · `rust` ·
+`tools` · `xdg-apps`
 
 New tool config goes in its own `conf.d/<tool>.fish`, never `config.fish`. `functions/` is filed
 **by caller**: top level for commands a human types (`brewup` `cls` `extract` `fishprof` `funcfresh`

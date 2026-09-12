@@ -67,6 +67,27 @@
 # fish-managed universal state. must stay empty.
 /fish/fish_variables
 
+# Herdr stores runtime data beside configuration; allow only authored files.
+!/herdr/
+/herdr/*
+!/herdr/config.toml
+!/herdr/README.md
+!/herdr/plugins/
+/herdr/plugins/*
+!/herdr/plugins/config/
+/herdr/plugins/config/*
+!/herdr/plugins/config/herdr-agent-quota/
+/herdr/plugins/config/herdr-agent-quota/*
+!/herdr/plugins/config/herdr-agent-quota/agents
+!/herdr/plugins/config/herdr-agent-quota/watch-interval-seconds
+!/herdr/plugins/config/herdr-agent-quota/sidebar-layout
+!/herdr/plugins/config/herdr-agent-quota/row-gap
+!/herdr/plugins/config/herdr-agent-quota/quota-percent
+!/herdr/plugins/config/herdr-agent-quota/fields
+!/herdr/plugins/config/herdr-agent-quota/brand-colors
+!/herdr/plugins/config/herdr-agent-quota/agent-order
+!/herdr/plugins/config/herdr-agent-quota/low-quota-alert
+
 !/micro/
 # crash backups, incl. a stale entry from a prior machine, and scratch buffers
 /micro/backups/

@@ -7,6 +7,13 @@ time — this table is the decision.** Values are in `spec.md`; never inline a h
 
 ## Coverage
 
+Herdr uses `theme.name = "terminal"` in `herdr/config.toml` to inherit ANSI colors.
+Its selected row backgrounds use ANSI `black` (`surface.sunken`). Sidebar token
+`fg` accepts only hex, so quota severity uses `state.ok` (`#86c452`), `state.warn`
+(`#e0a332`), and `state.error` (`#fc8697`). Quota repair regenerates those rows with
+upstream colors; review the diff and restore these bindings afterward.
+Reload with `herdr server reload-config` after `herdr config check` succeeds.
+
 Fourteen files carry hexes. Five more consume colour but must stay on **ANSI names** (`SKILL.md`
 doctrine 3): `starship.toml`, `LS_COLORS`/`EZA_COLORS` and `LESS_TERMCAP_*` (both in `colours.fish`),
 `git/.gitconfig`'s `[pretty] lg` / `branches` formats, and `fastfetch/config.jsonc`. ⚠ Do not

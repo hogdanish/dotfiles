@@ -90,6 +90,7 @@ enabled = true
 enabled = true
 
 [features]
+hooks = true
 js_repl = false
 memories = true
 
@@ -255,6 +256,10 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [hooks.state]
+
+# Native Herdr SessionStart integration; reviewed local socket reporter.
+[hooks.state."/Users/ethan/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:95b5dc60af2ccf17765163b4120dd5c5abe7956cce31ee60b0c41e39b2419b08"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:0"]
 trusted_hash = "sha256:abc5d0f6282a43ea8f9e3b363a493e020df037bc248823bb9930cd27369a98dd"
