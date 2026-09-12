@@ -52,6 +52,7 @@ brew "ast-grep"         # rg: structural search and rewrite by syntax tree
 brew "age"              # gpg: file encryption; decrypts the commongrounds db backups
 brew "hyperfine"        # time: statistical benchmarking
 brew "tokei"            # wc: language and loc breakdown
+brew "cloc"             # tokei: wider language coverage, per-file counts
 brew "gh"               # git: github cli
 brew "act"              # gh: run github actions locally
 brew "lefthook"         # git: hook manager
@@ -157,6 +158,7 @@ cask "font-sf-pro"                 # apple system font
 cask "figma"       # design tool (stable)
 cask "figma@beta"  # design tool (beta channel)
 cask "blender"     # 3d creation suite
+cask "capcut"      # video editor
 
 ## productivity & utilities
 cask "1password@beta"      # password manager (beta channel); ships 1password-mcp
@@ -201,3 +203,4 @@ mas "SponsorBlock", id: 1573461917          # safari: skips youtube sponsor segm
 ## apps
 mas "Passepartout", id: 1433648537  # wireguard/openvpn client
 mas "Yoink", id: 457622435          # drag-and-drop file shelf
+mas "Xcode", id: 497799835          # apple sdks, simulators and toolchain
