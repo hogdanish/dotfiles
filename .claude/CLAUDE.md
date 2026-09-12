@@ -43,10 +43,20 @@ only the variable is gone. Two facts forced it, both verified against clauth v0.
   state/claude")[0:8]`, while clauth reads and writes the bare item. **So the variable had to be
   unset rather than repointed**: any value at all produces a namespaced item clauth cannot see.
 
-⚠ **`~/.claude.json` is a regular file in `$HOME` and cannot be symlinked back** — Claude Code
-rewrites it temp-file + rename (`.claude.json.tmp.<pid>.*`), which destroys a symlink. It is the one
-genuine XDG regression of the move, and it is unavoidable. It holds the user-scope MCP wiring, so
-it is state, untracked, exactly as it was under the old path.
+⚠ **`.claude.json` lives INSIDE the config dir — `$XDG_STATE_HOME/claude/.claude.json`, reached as
+`~/.claude/.claude.json`. It is NOT `~/.claude.json`, and it must never be deleted or moved.** It
+holds the user-scope MCP wiring, every project's trust and history, and the onboarding flags.
+Verified the hard way on 2026-09-12: it was moved to `$HOME` on a wrong reading of where Claude
+Code keeps it, Claude Code silently started again from a blank config, and deleting that blank one
+forced full re-onboarding and a fresh browser login. Claude Code's own error names the path
+outright — *"Claude configuration file not found at: …/.local/state/claude/.claude.json"* — and it
+keeps timestamped copies in `…/claude/backups/`, which is what the recovery was built from.
+⚠ It cannot be a symlink either: Claude Code rewrites it temp-file + rename
+(`.claude.json.tmp.<pid>.*`), which replaces a link with a regular file. So the move cost **no** XDG
+regression at all: the file never left `$XDG_STATE_HOME`.
+⚠ **`~/.claude.json` is inert on this layout and nothing reads it.** clauth writes there anyway —
+`plugin_probe::global_claude_json_path()` is a hardcoded `$HOME` join — so it reappears after any
+clauth MCP self-heal. Deleting *that* one is safe; deleting the real one is not.
 
 ⚠ **There is deliberately no `settings.json` in the Claude config dir**, and it must not be linked
 back. clauth rewrites that path on **every account switch**
@@ -147,11 +157,12 @@ copying substantive content.
 
 **`claude-code/mcp/`** — canonical MCP server declarations that Claude Code will not read from a
 tracked file. ⚠ There is **no `mcpServers` key in `settings.json`** (verified against the settings
-reference, 2026-09-01): Claude Code takes server definitions only from `~/.claude.json` (untracked
-state) or a project's `.mcp.json`. So a declaration here is a *copy-source*, and the global,
-tracked half of the wiring is `enabledMcpjsonServers` in `claude-code/settings.json` — a
-user-level pre-approval of the server **name**, which means the server connects with no trust
-prompt in any project whose `.mcp.json` declares it, and in no project that does not.
+reference, 2026-09-01): Claude Code takes server definitions only from the config dir's
+`.claude.json` (untracked state) or a project's `.mcp.json`. So a declaration here is a
+*copy-source*, and the global, tracked half of the wiring is `enabledMcpjsonServers` in
+`claude-code/settings.json` — a user-level pre-approval of the server **name**, which means the
+server connects with no trust prompt in any project whose `.mcp.json` declares it, and in no project
+that does not.
 
 **Website Spec MCP: declared globally for both agents, switched on per project** (2026-09-01).
 `https://mcp.specification.website/mcp` — Streamable HTTP, **no auth**, read-only, six tools plus
@@ -173,13 +184,12 @@ wired at *user* scope rather than per project, so it loads in every session on t
 claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/MacOS/1password-mcp
 ```
 
-⚠ **The live entry is `~/.claude.json` — untracked state**, which is the same constraint the
-paragraph above describes; the difference is that user scope has no `enabledMcpjsonServers` half to
-track, so `claude-code/mcp/1password.json` is a *mirror* rather than a copy-source and
-`audit-config.fish` asserts the two still agree. ⚠ That path **is** the live file as of 2026-09-12:
-the 82 KB state file moved there from the config dir when `$CLAUDE_CONFIG_DIR` was retired, over the
-1 KB pre-relocation leftover that used to sit there. An older note calling `~/.claude.json` a
-leftover is stale — the leftover is gone and this is the file Claude Code reads.
+⚠ **The live entry is the config dir's `.claude.json` — untracked state**, which is the same
+constraint the paragraph above describes; the difference is that user scope has no
+`enabledMcpjsonServers` half to track, so `claude-code/mcp/1password.json` is a *mirror* rather than
+a copy-source and `audit-config.fish` asserts the two still agree. ⚠ **Not `~/.claude.json`** — that
+spelling is wrong on this machine and an earlier note here claiming otherwise cost a re-onboarding;
+see the `.claude.json` warning at the top of this file.
 
 ⚠ **It manages Environments, and nothing else** — `authenticate`, `list_environments`,
 `list_variables` (names only), `list_local_env_files`, `create_environment`, `rename_environment`,

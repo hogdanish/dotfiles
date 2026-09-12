@@ -152,17 +152,22 @@ function __check_claude_links --description 'authored claude config is still sym
         __fail '$CLAUDE_CONFIG_DIR is exported — it namespaces the keychain item away from clauth'
     end
 
-    # ⚠ the global state file cannot be a symlink: claude code rewrites it temp-file + rename,
-    # which would destroy one. it lives in $HOME and is untracked, by necessity.
-    if test -L $HOME/.claude.json
-        __fail '~/.claude.json is a symlink — claude code will replace it on the next write'
-    else if not test -f $HOME/.claude.json
-        __fail '~/.claude.json is missing — claude code global state'
+    # ⚠ .claude.json lives INSIDE the claude config dir, NOT at ~/.claude.json. Verified the hard
+    # way on 2026-09-12: deleting this file made claude code re-run onboarding and demand a fresh
+    # browser login, and its own error names this exact path. It holds the user-scope MCP wiring,
+    # every project's trust and history, and the onboarding flags. NEVER delete it.
+    # ⚠ It cannot be a symlink either: claude code rewrites it temp-file + rename, which replaces
+    # a link with a regular file.
+    if test -L $state/.claude.json
+        __fail "$state/.claude.json is a symlink — claude code will replace it on the next write"
+    else if not test -f $state/.claude.json
+        __fail "$state/.claude.json is MISSING — claude code will re-onboard and demand a re-login; restore it from $state/backups/"
     end
-    # a session that was already running when the variable was retired keeps writing the old
-    # path, and a stale copy there is invisible but confusing. claude code no longer reads it.
-    if test -e $state/.claude.json
-        __say warn "$state/.claude.json is stale (a pre-cutover session wrote it) — claude code reads ~/.claude.json now; delete it"
+    # ⚠ ~/.claude.json is NOT read by claude code on this layout. clauth writes there anyway
+    # (plugin_probe::global_claude_json_path is a hardcoded $HOME join), so it reappears; it is
+    # inert, and deleting it is safe where deleting the real one above is not.
+    if test -e $HOME/.claude.json
+        __say warn '~/.claude.json exists but claude code does not read it (clauth writes it) — the live file is the one in the config dir'
     end
 
     # ⚠ there must be NO settings.json here. clauth rewrites that path on every account switch
@@ -665,9 +670,10 @@ function __check_onepassword_mcp --description '1Password MCP is wired at user s
 
     # the live wiring is untracked state, so the declaration is only worth keeping if it still
     # describes reality. a 1Password app update that moved the binary would show up here.
-    # ⚠ ~/.claude.json, not the config dir: with $CLAUDE_CONFIG_DIR retired (2026-09-12) claude
-    # code keeps its global state in $HOME again, and it cannot be symlinked back.
-    set -l live $HOME/.claude.json
+    set -l state $XDG_STATE_HOME/claude
+    # ⚠ the config dir's .claude.json, NOT ~/.claude.json. claude code keeps its global state
+    # inside the config dir; ~/.claude.json is an inert file clauth writes and nothing reads.
+    set -l live $state/.claude.json
     if not test -r $live
         __fail "cannot read $live to verify the 1Password MCP user-scope entry"
         return

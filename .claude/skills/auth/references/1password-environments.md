@@ -203,11 +203,12 @@ the transcript) is enforced by the server rather than by our restraint. Reading 
 `op run`/`op inject` at the point of consumption, and writing an item is still the app or `op item`.
 
 The tracked declaration is `claude-code/mcp/1password.json`; the live wiring is user scope in
-`~/.claude.json`, which is untracked state, so `scripts/audit-config.fish` asserts the two still
-agree and that the declared binary is present. ⚠ That path moved out of the Claude config dir on
-2026-09-12, when `$CLAUDE_CONFIG_DIR` was retired for clauth — Claude Code reads `~/.claude.json`
-when the variable is unset, and it cannot be symlinked back because Claude Code rewrites it
-temp-file + rename.
+the Claude config dir's `.claude.json`, which is untracked state, so `scripts/audit-config.fish`
+asserts the two still agree and that the declared binary is present. ⚠ **The file is
+`$XDG_STATE_HOME/claude/.claude.json`, reached as `~/.claude/.claude.json` — not `~/.claude.json`.**
+It stayed inside the config dir when `$CLAUDE_CONFIG_DIR` was retired on 2026-09-12; a note here
+briefly claimed it had moved to `$HOME`, and acting on that forced a full Claude Code re-onboarding.
+It cannot be symlinked either — Claude Code rewrites it temp-file + rename.
 
 ## 8. Caveats
 
