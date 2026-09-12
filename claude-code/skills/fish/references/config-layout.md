@@ -24,7 +24,7 @@ Order from process start to first prompt:
 
 | # | What | Notes |
 | --- | --- | --- |
-| 1 | **embedded `config.fish`** (`status get-file config.fish`) | sets `IFS`, computes `$__fish_vendor_*dirs` from `$__fish_user_data_dir` + `$XDG_DATA_DIRS`, seeds `$fish_function_path`/`$fish_complete_path`, registers `__fish_reconstruct_path` (`--on-variable fish_user_paths`), `fish_sigtrap_handler`, `__fish_on_interactive` |
+| 1 | **embedded `config.fish`** (`status get-file config.fish`) — ⚠ **skipped by `--no-config`**, which is why that flag costs you steps 2 and 3 as well | sets `IFS`, computes `$__fish_vendor_*dirs` from `$__fish_user_data_dir` + `$XDG_DATA_DIRS`, seeds `$fish_function_path`/`$fish_complete_path`, registers `__fish_reconstruct_path` (`--on-variable fish_user_paths`), `fish_sigtrap_handler`, `__fish_on_interactive` |
 | 2 | *login only* — macOS `path_helper` equivalent | `if status is-login && command -sq /usr/libexec/path_helper` → `__fish_macos_set_env PATH /etc/paths /etc/paths.d` |
 | 3 | `__fish_reconstruct_path` | applies `$fish_user_paths` on top of `$PATH` |
 | 4 | *interactive only* — `__fish_theme_migrate`, `fish_config theme choose default --no-override` | |
@@ -75,14 +75,17 @@ itself. Works on vendor/sysconf snippets only; you cannot mask your own file thi
 
 | Invocation | What changes |
 | --- | --- |
-| `fish --login` / `-l` | adds step 2 only. **No separate profile file exists** — there is no fish equivalent of `.profile`. Test with `status is-login`. Measured effect here: a login shell gains `/usr/local/bin`, `/System/Cryptexes/App/usr/bin`, the `cryptexd` bootstrap paths and `/pkg/env/global/bin` from `/etc/paths` + `/etc/paths.d`; a non-login shell in a clean env gets only `/bin /sbin /opt/homebrew/{bin,sbin} /usr/bin /usr/sbin` |
+| `fish --login` / `-l` | adds step 2 only. ⚠ The flag is **not** how a terminal gets a login shell — macOS prefixes `argv[0]` with `-`, and fish honours that, so every Ghostty/Terminal.app fish is a login shell with no flag in sight (verified 2026-09-12). **No separate profile file exists** — there is no fish equivalent of `.profile`. Test with `status is-login`. Measured effect here: a login shell gains `/usr/local/bin`, `/System/Cryptexes/App/usr/bin`, the `cryptexd` bootstrap paths and `/pkg/env/global/bin` from `/etc/paths` + `/etc/paths.d`; a non-login shell in a clean env gets only `/bin /sbin /opt/homebrew/{bin,sbin} /usr/bin /usr/sbin` |
 | `fish -c '…'` (non-interactive) | **reads every config file anyway.** Only step 4 is skipped (`status is-interactive` is false); 5–9 all run. This is why an unguarded `conf.d` line makes every script slower and noisier |
-| `fish --no-config` / `-N` | skips **all** of 5–9 (user + sysconf + vendor `conf.d`, both `config.fish` files). Embedded init still runs, so builtins and shipped functions work |
+| `fish --no-config` / `-N` | skips **all** of 5–9 (user + sysconf + vendor `conf.d`, both `config.fish` files) **and fish's own embedded `config.fish`**. Builtins and shipped functions still work — they live in the binary — but step 2 and step 3 do not run, so there is no `path_helper` `$PATH`, no `$fish_function_path`, no `$fish_complete_path` and no `$__fish_vendor_*dirs`. ⚠ `status is-login` still reports true, so the shell *looks* like a login shell while having none of one's `$PATH` ([caveats.md](caveats.md)) |
 
-⚠ `--no-config` also leaves `$fish_function_path` and `$fish_complete_path` **unset** (verified:
-`count $fish_function_path` → `0`). So `fish --no-config -c 'reload'` fails with
-`Unknown command: reload` — your own functions do not autoload. `--no-config` is for testing a file in
-isolation (`--no-config -c 'source <file>'`), not for testing autoloading.
+⚠ All of that follows from one fact: **`--no-config` skips step 1**, and step 1 is what sets those
+variables. So `fish --no-config -c 'reload'` fails with `Unknown command: reload` — your own functions
+do not autoload — and `$PATH` is missing everything `/etc/paths` would have contributed.
+`--no-config` is for proving a file is **self-contained and quiet**
+(`--no-config -c 'source <file>'`), never for measuring `$PATH`, autoloading or vendor directories.
+For those, isolate with an empty throwaway `XDG_CONFIG_HOME` instead — that suppresses *your* config
+while leaving fish's own embedded init intact.
 
 ## 2. ⚠ conf.d sort order — verified facts
 

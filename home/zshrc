@@ -1,11 +1,16 @@
 export PATH="/opt/homebrew/bin:$PATH"
 
-# zsh is deliberately not configured on this machine — fish is the interactive shell and
-# Ghostty launches it directly (see ~/.config/.claude/CLAUDE.md). the only thing
-# below is state relocation, not configuration: zsh's own history file, moved out of $HOME
-# onto the XDG base dirs like every other tool here. nothing here changes how zsh behaves.
+# zsh is deliberately not configured on this machine — fish is the login shell as of
+# 2026-09-12 (see ~/.config/.claude/CLAUDE.md). the only thing below is state relocation,
+# not configuration: zsh's own history file, moved out of $HOME onto the XDG base dirs like
+# every other tool here. nothing here changes how zsh behaves.
 #
-# ⚠ this file is read by INTERACTIVE zsh only. Claude Code's Bash tool is a non-interactive
+# ⚠ do NOT delete these zsh files now that nothing logs in through zsh. Claude Code and Codex
+# both force /bin/zsh for their own tool shells regardless of $SHELL (verified 2026-09-12), so
+# ~/.zshenv, ~/.zprofile and this file are the only reason an agent session has a sane PATH and
+# the `cf` / `linode-cli` broker functions.
+#
+# ⚠ this file is read by INTERACTIVE zsh only. an agent's Bash tool is a non-interactive
 # login zsh, so it reads ~/.zprofile and never this — which is fine, because non-interactive
 # shells do not write history either.
 # ⚠ /etc/zshrc sets HISTFILE=$HOME/.zsh_history and is sourced BEFORE this file, so this

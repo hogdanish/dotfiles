@@ -27,6 +27,22 @@ file too** and note it here. Keep entries under ~6 lines.
 These were each asserted confidently during this skill's authoring and then disproved. Assume a model
 will get them wrong again.
 
+### `--no-config` also skips fish's **embedded** `config.fish`, so a login shell gets no `path_helper`
+
+`2026-09-12` · proving Ghostty would still build `$PATH` correctly after the login shell became fish
+
+- **Cause** — `config-layout.md` said `--no-config` skips "all of 5–9" and that "embedded init still
+  runs". Only the second half is wrong in an important way: the embedded **`config.fish`** is skipped
+  too, and that file is what sets `$fish_function_path`, `$fish_complete_path`, `$__fish_vendor_*dirs`
+  *and* runs the macOS `/etc/paths` + `/etc/paths.d` block. `status is-login` still reports `yes`, so
+  the shell looks like a login shell while having none of a login shell's `$PATH`. Shipped functions
+  still resolve — they are embedded in the binary, not autoloaded from those paths.
+- **Do** — never measure `$PATH`, autoloading or vendor directories under `--no-config`. Use an empty
+  throwaway `XDG_CONFIG_HOME` instead: that isolates *your* config while leaving fish's own intact.
+- **Verified** — `env -i HOME=/tmp/nh TERM=dumb fish --login -c 'count $PATH'` → **12**;
+  add `--no-config` → **4**, with `count $fish_function_path` going 6 → 0 and `status is-login` still
+  true. Reproduced twice.
+
 ### a successful `set` does not reset `$status` — it preserves the previous command's
 
 `2026-08-06` · writing `conf.d/cloudflare.fish`; `fish --no-config -c 'source <file>'` exited 1 with no output
@@ -541,7 +557,8 @@ Tracked here only while unfixed; the current-state inventory is
 
 `2026-07-28` · `$PATH` order was non-deterministic; **fixed 2026-07-28**
 
-- **Cause** — Ghostty launches fish directly with no zsh, so the variable was unset and
+- **Cause** — no zsh runs ahead of fish (Ghostty launched it directly then; fish is the login
+  shell now), so the variable was unset and
   `"$HOMEBREW_PREFIX/bin"` expanded to literal `/bin`. `fish_add_path -m` then moved `/bin` and
   `/sbin` to the front of `$PATH` **and persisted it to `fish_variables`**.
 - **Outcome** — the prefix is now set first, `set -g fish_user_paths` precedes `fish_add_path -g -m`,

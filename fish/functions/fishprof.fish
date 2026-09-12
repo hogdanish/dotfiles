@@ -7,8 +7,9 @@ function fishprof --description 'profile fish startup and print the slowest line
     set -l prof (command mktemp -t fishprof)
 
     # -i so the interactive-only snippets (tools, colours, ghostty) are included; --login
-    # because that is how ghostty launches fish, and step 2 of fish's init (the /etc/paths
-    # path_helper equivalent, ~0.9 ms) runs for a login shell only. the redirect keeps it from
+    # because fish is the login shell, and step 2 of fish's init (the /etc/paths path_helper
+    # equivalent, ~0.9 ms) runs for a login shell only. a real terminal reaches that same step
+    # via argv[0], not the flag, but the measured cost is identical. the redirect keeps it from
     # trying to read the terminal.
     # ⚠ startup varies run to run by a few ms, and outliers of 3x the median do occur. treat a
     # single number as indicative and compare medians over several runs before claiming a win.

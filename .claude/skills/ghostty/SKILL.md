@@ -19,7 +19,7 @@ auto-updating), installed at `/Applications/Ghostty.app`, renderer Metal, font e
 | --- | --- |
 | Config | `~/.config/ghostty/config.ghostty` — **edited in place**, this repo holds no mirror |
 | Theme | `~/.config/ghostty/themes/laramie` — user-authored, not a built-in |
-| Shell | `command = /opt/homebrew/bin/fish --login --interactive`, `shell-integration = fish` |
+| Shell | **no `command`** — fish is the login shell (2026-09-12), so Ghostty's default `$SHELL`/passwd lookup finds it; `shell-integration = fish` |
 | Look | `theme = laramie`, `background-opacity = 0.92`, `background-blur = macos-glass-regular`, `alpha-blending = linear-corrected`, `window-colorspace = display-p3`, `minimum-contrast = 1.1`, `macos-titlebar-style = transparent` |
 | Font | CommitMono Nerd Font Mono with `ss01`–`ss04` + `cv02` |
 | Updates | `auto-update = download`, `auto-update-channel = tip` |
@@ -29,8 +29,12 @@ so are two more paths under `~/Library/Application Support/com.mitchellh.ghostty
 the XDG ones and would silently win. One of those (`config.ghostty`) exists and is empty; leave it that
 way.
 
-⚠ Ghostty is why `/bin/zsh` is still the login shell — it launches fish explicitly. Changing `command`
-changes which shell every new surface gets.
+⚠ **`command` is deliberately unset, and must stay unset.** Until 2026-09-12 this config pinned
+`command = /opt/homebrew/bin/fish --login --interactive`; fish is now the login shell instead, so the
+default lookup (`$SHELL`, then the passwd entry) already resolves to it. macOS starts every terminal
+shell as a login shell by prefixing `argv[0]` with `-`, and fish honours that, so the
+`/usr/libexec/path_helper` step still runs — verified byte-identical to the old explicit `--login`.
+`scripts/audit-config.fish` fails if a `command` line reappears.
 
 ## Five things that are counter-intuitive
 

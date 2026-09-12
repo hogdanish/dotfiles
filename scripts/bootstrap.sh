@@ -216,9 +216,15 @@ have bat && bat cache --build >/dev/null 2>&1 && say info 'bat theme cache built
 have fish && fish -c 'fish_update_completions' >/dev/null 2>&1 && say info 'fish completions generated' || true
 have duti && [ -f "$CONFIG/duti/defaults.duti" ] && duti "$CONFIG/duti/defaults.duti" 2>/dev/null && say info 'file associations applied' || true
 
-# ── 9. fish as the interactive shell ────────────────────────────────────────────
-# ⚠ The login shell is deliberately left as /bin/zsh — Ghostty launches fish explicitly.
-#   fish still needs to be in /etc/shells for `chsh` to be an option later.
+# ── 9. fish as the login shell ──────────────────────────────────────────────────
+# ⚠ fish is the LOGIN shell as of 2026-09-12, which is what lets Ghostty, Herdr and VS Code
+#   resolve it from $SHELL/passwd instead of each pinning it in their own config.
+# ⚠ /etc/shells is what `chsh` validates against, so registration has to come first. A macOS
+#   update can rewrite /etc/shells; that does not revert a shell already set, it only affects
+#   the next chsh, which is why this step is idempotent rather than conditional on it.
+# ⚠ Set a lifeboat before this runs on a fresh machine: Terminal.app > Settings > General >
+#   "Shells open with" = /bin/zsh. A broken or mid-upgrade Homebrew fish otherwise leaves no
+#   working terminal. macOS GUI login is unaffected — loginwindow never uses the login shell.
 step 'Shell registration'
 FISH_BIN="$BREW_PREFIX/bin/fish"
 if [ -x "$FISH_BIN" ]; then
@@ -227,6 +233,22 @@ if [ -x "$FISH_BIN" ]; then
     elif ask "Add $FISH_BIN to /etc/shells? (needs sudo)"; then
         echo "$FISH_BIN" | sudo tee -a /etc/shells >/dev/null
         say info 'registered'
+    fi
+
+    CURRENT_SHELL=$(dscl . -read "$HOME" UserShell 2>/dev/null | sed 's/^UserShell: //' || true)
+    if [ "$CURRENT_SHELL" = "$FISH_BIN" ]; then
+        say info 'fish is already the login shell'
+    elif ! grep -qxF "$FISH_BIN" /etc/shells 2>/dev/null; then
+        say warn 'fish is not in /etc/shells — skipping the login-shell change'
+    elif ask "Make $FISH_BIN the login shell? (needs sudo)"; then
+        # ⚠ `sudo chsh`, not a bare `chsh`: macOS ships no /etc/pam.d/chsh, so the unprivileged
+        #   form falls through to /etc/pam.d/other and prompts for the account password, while
+        #   sudo is covered by the Touch ID drop-in configured in step 10.
+        if sudo chsh -s "$FISH_BIN" "$(id -un)"; then
+            say info 'login shell set to fish — open a new terminal to pick it up'
+        else
+            say warn 'chsh failed — set it by hand'
+        fi
     fi
 else
     say warn 'fish not installed'

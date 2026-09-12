@@ -1,15 +1,19 @@
 ---
 name: fish
-description: "Fish 4.8.x on this machine: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work."
+description: "Fish 4.9.x on this machine — the login shell: house style, language, builtins, config layout, startup cost, and verified caveats. Load before any .fish work."
 ---
 
 # Fish shell
 
-fish **4.8.x** (`/opt/homebrew/bin/fish`) is the interactive shell on this machine and the default for
+fish **4.9.x** (`/opt/homebrew/bin/fish`) is the **login** shell on this machine and the default for
 any script a human runs. This skill covers **all** fish work in **any** directory — a script in a
 project, a one-off function, a port from bash, a debugging session — not only `~/.config/fish`.
 
-`/bin/zsh` remains the login shell and is deliberately unconfigured; Ghostty launches fish explicitly.
+⚠ fish became the login shell on **2026-09-12** (`chsh`), replacing `/bin/zsh`. Nothing pins it per
+tool any more — Ghostty, Herdr and VS Code resolve it from `$SHELL` then the passwd entry. `/bin/zsh`
+is still installed and still deliberately unconfigured, but it is no longer inert: Claude Code and
+Codex both force `/bin/zsh` for their own tool shells regardless of `$SHELL`, so `~/.zshenv`,
+`~/.zshrc` and `~/.zprofile` must stay exactly where they are.
 
 **Do not ration your reading.** [style-guide.md](references/style-guide.md) is mandatory for every
 `.fish` file. Then read **every file in the Required-reading row matching your task** — the rows are

@@ -5,7 +5,13 @@ auto-update = download
 auto-update-channel = tip
 
 # shell
-command = /opt/homebrew/bin/fish --login --interactive
+## no `command` on purpose. fish is the login shell as of 2026-09-12, and ghostty's default
+## lookup is $SHELL then the passwd entry, so it already resolves to fish. macos starts every
+## terminal shell as a login shell (argv[0] prefixed with `-`), and fish honours that
+## convention, so its /usr/libexec/path_helper block over /etc/paths + /etc/paths.d still runs
+## — verified byte-identical to the old explicit `--login --interactive`.
+## ⚠ do not reintroduce `command`: pinning the shell per tool is what the login-shell change
+## exists to delete, and scripts/audit-config.fish fails if this line comes back.
 shell-integration = fish
 ## ssh-env/ssh-terminfo define a fish `ssh` function wrapping `ghostty +ssh`, which installs the
 ## xterm-ghostty terminfo entry on a remote host via tic on first connect and forwards COLORTERM.

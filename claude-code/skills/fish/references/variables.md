@@ -320,8 +320,10 @@ echo $p # /a /b /c
 ```
 
 fish composes `$PATH` as **`$fish_user_paths` followed by the inherited/system path**. On macOS a
-**login** shell builds that system part from `/etc/paths` and `/etc/paths.d/*`. Ghostty launches
-`fish --login --interactive`, so that parsing applies here.
+**login** shell builds that system part from `/etc/paths` and `/etc/paths.d/*`. fish is the login
+shell here (2026-09-12), and macOS marks a terminal's shell as login by prefixing `argv[0]` with `-`
+rather than by passing `--login`, so that parsing applies to every terminal fish.
+⚠ `status is-login` is the only reliable test — the absence of a `--login` flag proves nothing.
 
 **Rule: touch `PATH` only through `fish_add_path`.** `set -gx PATH …` is forbidden
 ([style-guide.md](style-guide.md) §3) — it drops the deduplication, ignores `$fish_user_paths`, and

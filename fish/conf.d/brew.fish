@@ -2,9 +2,10 @@
 # this is the only file that establishes the base path, so it must stay the first conf.d
 # snippet to touch it.
 
-# prefix, before anything expands it. ghostty launches fish directly (`command =
-# /opt/homebrew/bin/fish --login --interactive`), so no `brew shellenv` is ever inherited
-# and an unset prefix would make the path lines below expand to a bare /bin and /sbin.
+# prefix, before anything expands it. fish is the login shell (2026-09-12), so no zsh ever
+# runs ahead of it and no `brew shellenv` is inherited from anywhere — an unset prefix would
+# make the path lines below expand to a bare /bin and /sbin, which is exactly the bug that
+# once pinned those two into fish_variables.
 # `test -n` rather than `set -q`: an exported-but-empty value must also be repaired.
 test -n "$HOMEBREW_PREFIX"; or set -gx HOMEBREW_PREFIX /opt/homebrew
 

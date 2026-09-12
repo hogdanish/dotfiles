@@ -318,21 +318,36 @@ matters.
 |---|---|
 | macOS | 27.x Golden Gate (public beta), Apple Silicon (arm64) |
 | Homebrew prefix | `/opt/homebrew` |
-| Login shell | `/bin/zsh` — but see below |
-| Interactive shell | **fish 4.8.x** (`/opt/homebrew/bin/fish`) |
+| Login shell | **fish** (`/opt/homebrew/bin/fish`) — changed 2026-09-12, see below |
+| Interactive shell | the same fish — `/bin/zsh` now runs only for agent tool shells |
 | Terminal | **Ghostty 1.3.x-main** (channel `tip`) — the `ghostty` skill |
 | Editor | VS Code Insiders (`code-insiders`); `micro` for terminal edits |
 | Git identity | `hogdanish`, commits SSH-signed via the 1Password agent |
 
-**zsh is not configured and is not meant to be.** `~/.zshrc` and `~/.zprofile` hold Homebrew's
-`shellenv` plus state relocation — `HISTFILE` → `$XDG_STATE_HOME/zsh/history` and
-`SHELL_SESSIONS_DISABLE=1`. The one conditional exception is `~/.zshenv`: while an agent broker
-socket exists it defines `linode-cli` and `cf` functions reaching the session-local shims.
-⚠ `HISTFILE` must stay in `~/.zshrc` (`/etc/zshrc` sets it and runs first); `SHELL_SESSIONS_DISABLE`
-must stay in `~/.zprofile` (runs after `/etc/zshrc_Apple_Terminal`). All real shell configuration
-lives in fish; Ghostty launches fish explicitly, which is why the login shell was never changed. Do
-not port fish config to zsh. ⚠ Bash tool calls run under **zsh** — fish abbreviations and functions
-are not available to you.
+**fish is the login shell as of 2026-09-12** (`chsh -s /opt/homebrew/bin/fish`). The point was to
+stop pinning the shell per tool: Ghostty, Herdr and VS Code all resolve it from `$SHELL` then the
+passwd entry, so a newly installed terminal-shaped tool is now correct without being configured.
+`ghostty/config.ghostty` no longer sets `command`, `herdr/config.toml` no longer sets
+`default_shell`, and `scripts/audit-config.fish` fails if either pin returns. ⚠ macOS starts every
+terminal shell as a login shell by prefixing `argv[0]` with `-`; fish honours that, so its
+`/usr/libexec/path_helper` block over `/etc/paths` + `/etc/paths.d` still builds `$PATH` exactly as
+the old explicit `--login` did. ⚠ Homebrew now owns the login shell binary, so never remove or
+break `fish` without a fallback — Terminal.app is set to `/bin/zsh` as the lifeboat.
+
+**zsh is still not configured, and is still not meant to be — but it is no longer dead weight.**
+`~/.zshrc` and `~/.zprofile` hold Homebrew's `shellenv` plus state relocation — `HISTFILE` →
+`$XDG_STATE_HOME/zsh/history` and `SHELL_SESSIONS_DISABLE=1`. The one conditional exception is
+`~/.zshenv`: while an agent broker socket exists it defines `linode-cli` and `cf` functions reaching
+the session-local shims. ⚠ `HISTFILE` must stay in `~/.zshrc` (`/etc/zshrc` sets it and runs first);
+`SHELL_SESSIONS_DISABLE` must stay in `~/.zprofile` (runs after `/etc/zshrc_Apple_Terminal`). Do not
+port fish config to zsh.
+
+⚠ **Bash tool calls still run under zsh, and that is now load-bearing rather than incidental.**
+Verified 2026-09-12 by launching both agents with `SHELL=/opt/homebrew/bin/fish`: Claude Code
+overrides `$SHELL` back to `/bin/zsh` for its Bash tool, and Codex runs `/bin/zsh -lc` regardless of
+`$SHELL` — both as **login** shells, and the `~/.zshenv` broker functions survive in both. So those
+three zsh files must stay exactly where they are; they are the only reason `cf` and `linode-cli`
+resolve inside an agent session. Fish abbreviations and functions are still not available to you.
 
 ## The fish config
 
@@ -447,6 +462,9 @@ GIT_CONFIG_GLOBAL=~/.config/git/.gitconfig GIT_CONFIG_SYSTEM=/dev/null git confi
 fish -n <f>.fish; fish_indent --check <f>.fish            # parses, and is canonically formatted
 fish -c 'set -U --names'                                  # must print nothing — zero universals
 script -q /dev/null fish --login --interactive -c exit    # a real startup, on a tty
+dscl . -read ~/ UserShell                                 # ⚠ must be /opt/homebrew/bin/fish
+rg '^\s*command\s*=' ghostty/config.ghostty              # ⚠ must print NOTHING — no per-tool pin
+ghostty +show-config | rg '^command'                      # ...and this RESOLVES to fish anyway
 fish -c fishprof                                          # startup cost, attributed line by line
 git config --file ~/.config/git/.gitconfig --list         # gitconfig parses
 ghostty +validate-config                                  # ghostty config is valid

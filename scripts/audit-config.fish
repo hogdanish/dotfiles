@@ -88,6 +88,42 @@ function __check_home_links --description 'home/ files are still symlinks into t
     __say info 'home/ symlinks intact'
 end
 
+function __check_login_shell --description 'fish is the login shell, and no tool pins it separately'
+    # ⚠ changed 2026-09-12. the value of the change is that NOTHING pins the shell per tool any
+    # more — ghostty, herdr and vs code all resolve it from $SHELL then the passwd entry, so a
+    # newly installed terminal-shaped tool is correct without being configured. a pin that comes
+    # back is drift, not a fix, which is why the two known ones are asserted away below.
+    # ⚠ this does NOT make the zsh files removable: claude code and codex both force /bin/zsh for
+    # their own tool shells regardless of $SHELL, so ~/.zshenv still carries the broker functions.
+    set -l want /opt/homebrew/bin/fish
+
+    test -x $want
+    or __fail "the login shell $want is missing or not executable — every new terminal will fail"
+
+    set -l actual (dscl . -read $HOME UserShell 2>/dev/null | string replace -r '^UserShell:\s*' '')
+    if test "$actual" = "$want"
+        __say info 'fish is the login shell'
+    else
+        __fail "login shell is '$actual', not $want — sudo chsh -s $want $USER"
+    end
+
+    # chsh validates against /etc/shells, and a macos update can rewrite that file. it does not
+    # revert a shell already set, so this is a warning about the NEXT chsh, not a live breakage.
+    string match -q -- $want </etc/shells
+    or __say warn "$want is not in /etc/shells — a future chsh would refuse it"
+
+    # the two per-tool pins this change exists to delete.
+    if string match -qr '^\s*command\s*=' <$REPO/ghostty/config.ghostty
+        __fail 'ghostty/config.ghostty pins `command` again — the login shell is what selects fish'
+    end
+    if test -r $REPO/herdr/config.toml
+        and string match -qr '^\s*default_shell\s*=' <$REPO/herdr/config.toml
+        __fail 'herdr/config.toml pins default_shell again — $SHELL already resolves to fish'
+    end
+
+    __say info 'no per-tool shell pins'
+end
+
 function __check_claude_links --description 'authored claude config is still symlinked, not detached'
     set -l state $XDG_STATE_HOME/claude
     if not test -d $state
@@ -552,6 +588,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_new_arrivals
     __check_secrets
     __check_home_links
+    __check_login_shell
     __check_claude_links
     __check_claude_install
     __check_browser_mcp
