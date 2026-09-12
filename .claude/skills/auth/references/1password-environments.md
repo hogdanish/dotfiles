@@ -1,7 +1,8 @@
 # 1Password Environments (beta)
 
-Distilled from www.1password.dev/environments (2026-07-28). Beta on Mac/Linux only; requires the
-desktop app, and the CLI paths need `op` ≥ 2.33.0-beta.02 (this machine runs 2.38.1-beta.01).
+Distilled from <https://www.1password.dev/environments> (2026-07-28). Beta on Mac/Linux only;
+requires the desktop app, and the CLI paths need `op` ≥ 2.33.0-beta.02 (this machine runs
+2.38.1-beta.01).
 
 Environments hold a project's environment variables *outside* the normal vault item model: a named
 bag of `KEY=VALUE` pairs, versioned and shareable, that can be projected into a project without ever
@@ -34,12 +35,12 @@ Get the ID — needed by every programmatic path: **Manage environment** → **C
 
 Each Environment has a **Destinations** tab:
 
-| Destination | What it does |
-| --- | --- |
-| **Local `.env` file** | mounts a `.env` at a chosen path on this device |
-| **Agent hook** | validates mounted `.env` files before an AI agent runs shell commands |
-| **Programmatic** | `op environment read` / `op run --environment` / SDKs |
-| **AWS Secrets Manager** | syncs secrets outward |
+| Destination             | What it does                                                          |
+| ----------------------- | --------------------------------------------------------------------- |
+| **Local `.env` file**   | mounts a `.env` at a chosen path on this device                       |
+| **Agent hook**          | validates mounted `.env` files before an AI agent runs shell commands |
+| **Programmatic**        | `op environment read` / `op run --environment` / SDKs                 |
+| **AWS Secrets Manager** | syncs secrets outward                                                 |
 
 ## 3. Local mounted `.env`
 
@@ -118,8 +119,8 @@ Authentication is either the desktop app (Touch ID, human-in-the-loop) or a serv
 scoped to the Environment (`OP_SERVICE_ACCOUNT_TOKEN`) for headless use.
 
 **SDKs** (Go / JavaScript / Python, beta builds) expose `environments.getVariables(environmentId)`
-returning `{name, value, masked}` triples. Use when a service reads secrets natively; use the CLI for
-shell, CI, IaC and task runners.
+returning `{name, value, masked}` triples. Use when a service reads secrets natively; use the CLI
+for shell, CI, IaC and task runners.
 
 ## 6. The MCP-server pattern
 
@@ -151,8 +152,8 @@ That is the Linode arrangement here: `conf.d/op.fish` stores the PAT's `op://` r
 the Claude Code and Codex launch wrappers export it as `LINODE_CLI_TOKEN` before the single parent
 `op run`. The wrappers start a session-scoped credential broker inside that parent process, then
 remove the resolved token from the agent environment. Agent CLI shims use the broker's mode-0600
-socket, while resolved tokens stay only in broker memory. The third-party Linode MCP and its separate
-`LINODE_API_TOKEN` path were removed.
+socket, while resolved tokens stay only in broker memory. The third-party Linode MCP and its
+separate `LINODE_API_TOKEN` path were removed.
 
 ## 7. The 1Password MCP Server
 
@@ -166,11 +167,11 @@ claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/Ma
 
 ⚠ **One toggle, not two.** 1Password's docs tell you to turn on **Settings > Labs > MCP Server**
 first, but on app 8.12.36-32.BETA that experiment is gone — Labs lists only *Secure snippets*
-(checked 2026-09-04). The feature graduated out of Labs, so **Settings > Developer > Integrate with
-MCP clients** is the only switch. Enterprise tenants can additionally gate it under
-Policies > Agentic permissions. Verified end to end the same day: with only that Developer toggle
-set, an `authenticate` tool call returns the account id and `isError: false`, so the missing Labs row
-is genuinely absent rather than a broken setup.
+(checked 2026-09-04). The feature graduated out of Labs, so
+**Settings > Developer > Integrate with MCP clients** is the only switch. Enterprise tenants can
+additionally gate it under Policies > Agentic permissions. Verified end to end the same day: with
+only that Developer toggle set, an `authenticate` tool call returns the account id and
+`isError: false`, so the missing Labs row is genuinely absent rather than a broken setup.
 
 ⚠ **The binary is not on `PATH`.** 1Password's docs give `command: "1password-mcp"`, but the
 `1password@beta` cask ships it only inside the bundle at
@@ -183,15 +184,15 @@ you unlock 1Password.
 Eight tools, verified against app 8.12.36-32.BETA on 2026-09-04 (`rmcp 1.1.0`, protocol
 `2025-06-18`):
 
-| Tool | Effect |
-| --- | --- |
-| `authenticate` | Establish the desktop-app connection |
-| `list_environments` | Read-only — Environments in an account |
-| `list_variables` | Read-only — variable **names** only |
-| `list_local_env_files` | Read-only — currently mounted `.env` files |
-| `create_environment` | New Environment |
-| `rename_environment` | Rename one |
-| `append_variables` | Add or update variables |
+| Tool                    | Effect                                         |
+| ----------------------- | ---------------------------------------------- |
+| `authenticate`          | Establish the desktop-app connection           |
+| `list_environments`     | Read-only — Environments in an account         |
+| `list_variables`        | Read-only — variable **names** only            |
+| `list_local_env_files`  | Read-only — currently mounted `.env` files     |
+| `create_environment`    | New Environment                                |
+| `rename_environment`    | Rename one                                     |
+| `append_variables`      | Add or update variables                        |
 | `create_local_env_file` | Mount a `.env` (the FIFO of §3, never on disk) |
 
 ⚠ **This is an Environments server, not a vault client.** There is no item read, no vault browse,
@@ -202,8 +203,11 @@ the transcript) is enforced by the server rather than by our restraint. Reading 
 `op run`/`op inject` at the point of consumption, and writing an item is still the app or `op item`.
 
 The tracked declaration is `claude-code/mcp/1password.json`; the live wiring is user scope in
-`$CLAUDE_CONFIG_DIR/.claude.json`, which is untracked state, so `scripts/audit-config.fish` asserts
-the two still agree and that the declared binary is present.
+`~/.claude.json`, which is untracked state, so `scripts/audit-config.fish` asserts the two still
+agree and that the declared binary is present. ⚠ That path moved out of the Claude config dir on
+2026-09-12, when `$CLAUDE_CONFIG_DIR` was retired for clauth — Claude Code reads `~/.claude.json`
+when the variable is unset, and it cannot be symlinked back because Claude Code rewrites it
+temp-file + rename.
 
 ## 8. Caveats
 

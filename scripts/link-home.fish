@@ -24,12 +24,15 @@ set -g FORCE 0
 set -g DRY_RUN 0
 
 # source (relative to home/) → destination under $HOME
+# ⚠ the launchd agent is here for the same reason as the rest: launchd reads
+# ~/Library/LaunchAgents and has no XDG support. clauth ships no plist of its own.
 set -g LINKS \
     zshenv:.zshenv \
     zshrc:.zshrc \
     zprofile:.zprofile \
     ssh/config:.ssh/config \
-    gnupg/gpg-agent.conf:.gnupg/gpg-agent.conf
+    gnupg/gpg-agent.conf:.gnupg/gpg-agent.conf \
+    launchd/dev.uwuclxdy.clauth.plist:Library/LaunchAgents/dev.uwuclxdy.clauth.plist
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]

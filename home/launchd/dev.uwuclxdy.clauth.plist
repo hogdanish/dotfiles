@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  clauth daemon — the refresh + auto-switch loop, running with no TUI open.
+
+  clauth ships no plist; this one is authored here and symlinked to
+  ~/Library/LaunchAgents/ by scripts/link-home.fish.
+
+  Without it the fallback chain only runs while the clauth TUI is open, which defeats the
+  point of having a chain at all.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>dev.uwuclxdy.clauth</string>
+
+    <!-- Absolute path: launchd resolves no PATH of its own for the program itself.
+         cargo-installed, per the Brewfile entry. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ethan/.local/share/cargo/bin/clauth</string>
+        <string>daemon</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart on a crash, but NOT on a clean exit. clauth's own docs name this shape: a
+         second `clauth daemon` exits 0 rather than piling up, so SuccessfulExit=false is what
+         keeps a manual run and this agent from fighting. Deliberately no --standby: a
+         supervisor that is the sole starter wins the lock race alone and standby buys nothing. -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <!-- ⚠ APPEND MODE IS REQUIRED. clauth size-caps this file by trimming it IN PLACE, which is
+         only sound for an append-mode fd — launchd's StandardErrorPath is exactly that. Do not
+         redirect this through a shell with `>`. Every daemon-mode line carries an ISO-8601 UTC
+         prefix, so the file is readable as a timeline. -->
+    <key>StandardErrorPath</key>
+    <string>/Users/ethan/.clauth/daemon.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <!-- ⚠ launchd agents inherit nothing from fish, so conf.d/clauth.fish cannot reach this
+             process. The REST listener is pinned shut here as well as there. -->
+        <key>CLAUTH_NO_API</key>
+        <string>1</string>
+        <!-- The daemon shells out: `claude` for the Claude Code plugin self-heal, `git` for the
+             herdr-plugin release check, `herdr` to publish pane metadata. A bare launchd PATH
+             (/usr/bin:/bin:/usr/sbin:/sbin) finds none of the first three. -->
+        <key>PATH</key>
+        <string>/Users/ethan/.local/share/cargo/bin:/Users/ethan/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- No ProcessType: Background would subject a 90-second poll loop to CPU throttling for no
+         benefit. No --listen anywhere; the daemon's only surfaces are ~/.clauth and the files it
+         publishes there. -->
+</dict>
+</plist>

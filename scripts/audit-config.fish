@@ -135,17 +135,52 @@ end
 function __check_claude_links --description 'authored claude config is still symlinked, not detached'
     set -l state $XDG_STATE_HOME/claude
     if not test -d $state
-        __fail "\$CLAUDE_CONFIG_DIR is missing: $state"
+        __fail "the claude config dir is missing: $state"
         return
     end
-    # claude code rewrites settings.json when you use /config. if it replaces the symlink
-    # with a regular file, edits silently stop being tracked — this is the check for that.
-    for f in CLAUDE.md settings.json
-        if not test -L $state/$f
-            __fail "$state/$f is not a symlink — edits to it are NOT tracked"
-        else if not test -e $state/$f
-            __fail "$state/$f is a broken symlink"
-        end
+
+    # ⚠ clauth and every other claude account manager hardcode ~/.claude, and claude code
+    # namespaces its keychain item by the hash of $CLAUDE_CONFIG_DIR — so the variable must be
+    # UNSET (not repointed) and ~/.claude must be the symlink that reaches the state dir.
+    # both halves are load-bearing; see .claude/CLAUDE.md.
+    if not test -L $HOME/.claude
+        __fail "~/.claude is not a symlink — clauth resolves the wrong claude config dir"
+    else if test (path resolve $HOME/.claude) != (path resolve $state)
+        __fail "~/.claude resolves to "(path resolve $HOME/.claude)", not $state"
+    end
+    if set -q CLAUDE_CONFIG_DIR
+        __fail '$CLAUDE_CONFIG_DIR is exported — it namespaces the keychain item away from clauth'
+    end
+
+    # ⚠ the global state file cannot be a symlink: claude code rewrites it temp-file + rename,
+    # which would destroy one. it lives in $HOME and is untracked, by necessity.
+    if test -L $HOME/.claude.json
+        __fail '~/.claude.json is a symlink — claude code will replace it on the next write'
+    else if not test -f $HOME/.claude.json
+        __fail '~/.claude.json is missing — claude code global state'
+    end
+    # a session that was already running when the variable was retired keeps writing the old
+    # path, and a stale copy there is invisible but confusing. claude code no longer reads it.
+    if test -e $state/.claude.json
+        __say warn "$state/.claude.json is stale (a pre-cutover session wrote it) — claude code reads ~/.claude.json now; delete it"
+    end
+
+    # ⚠ there must be NO settings.json here. clauth rewrites that path on every account switch
+    # (temp file + rename, no content-equality guard), so a symlink would be replaced by a
+    # regular file and silently detach from git. the authored file is delivered per session with
+    # `claude --settings` instead — fish/functions/wrappers/claude.fish.
+    # claude code recreates it whenever /config writes a user setting; that is harmless but it
+    # must never be re-linked, and it should not sit here unnoticed.
+    if test -L $state/settings.json
+        __fail "$state/settings.json is a symlink again — clauth will replace it; unlink it"
+    else if test -e $state/settings.json
+        __say warn "$state/settings.json exists (untracked; /config wrote it). the authored file still wins via --settings, but delete it to keep clauth off that path"
+    end
+
+    if not test -L $state/CLAUDE.md
+        __fail "$state/CLAUDE.md is not a symlink — edits to it are NOT tracked"
+    else if not test -e $state/CLAUDE.md
+        __fail "$state/CLAUDE.md is a broken symlink"
     end
 
     if test -L $state/rules
@@ -457,8 +492,8 @@ function __check_claude_install --description 'claude code is the self-updating 
         __say warn 'reinstall: curl -fsSL https://claude.ai/install.sh | bash -s latest'
         return
     end
-    # ⚠ never `brew uninstall --zap` this cask: its zap list includes ~/.local/state/claude, i.e.
-    # $CLAUDE_CONFIG_DIR — transcripts, memory, plugins — plus ~/.config/claude and ~/.claude.json.
+    # ⚠ never `brew uninstall --zap` this cask: its zap list includes ~/.local/state/claude — the
+    # claude config dir: transcripts, memory, plugins — plus ~/.config/claude and ~/.claude.json.
     if test -e /opt/homebrew/bin/claude
         __fail 'the claude-code cask is back and shadows the native build — brew uninstall --cask claude-code@latest (WITHOUT --zap)'
     end
@@ -467,6 +502,66 @@ function __check_claude_install --description 'claude code is the self-updating 
         __fail "claude on PATH is $resolved, not the native $launcher"
     end
     __say info 'claude code is the native self-updating build'
+end
+
+function __check_clauth --description 'clauth is installed, supervised, and merged into herdr'
+    # clauth has no formula and cargo is outside the Brewfile's tracked set, so this is the only
+    # thing that notices it has gone missing.
+    set -l bin $CARGO_HOME/bin/clauth
+    if not test -x $bin
+        __fail "clauth is not installed — expected $bin (cargo install clauth)"
+        return
+    end
+    set -l resolved (command -s clauth)
+    if test -n "$resolved"; and test (path resolve $resolved) != (path resolve $bin)
+        __fail "clauth on PATH is $resolved, not the cargo build $bin"
+    end
+
+    # the chain only runs while something runs it. with no TUI open that is the launchd agent.
+    set -l agent $HOME/Library/LaunchAgents/dev.uwuclxdy.clauth.plist
+    if not test -L $agent
+        __fail "clauth launchd agent is not linked — run scripts/link-home.fish"
+    else if not test -e $agent
+        __fail "clauth launchd agent is a broken symlink"
+    end
+
+    # ⚠ MONEY. pay-as-you-go fallback is off by default and stays off unless deliberately armed;
+    # an armed account with no last_resort chain member can spend without a stop.
+    set -l profiles $HOME/.clauth/profiles.toml
+    if test -r $profiles
+        if string match -qr '^\s*spend_budget_switching\s*=\s*true' <$profiles
+            __say warn 'clauth spend_budget_switching is ON — pay-as-you-go fallback can spend real money'
+        end
+    end
+
+    # ⚠ rows_by_agent REPLACES the generic rows for claude panes, so the hand-merged template has
+    # to carry every herdr-agent-quota token as well as $clauth. an agent-quota update that adds a
+    # token rewrites only `rows` and silently leaves this one short.
+    set -l herdr_config $REPO/herdr/config.toml
+    if test -r $herdr_config
+        set -l report (python3 -c '
+import sys, tomllib
+d = tomllib.load(open(sys.argv[1], "rb"))
+a = d.get("ui", {}).get("sidebar", {}).get("agents", {})
+c = a.get("rows_by_agent", {}).get("claude")
+if c is None:
+    print("MISSING"); raise SystemExit
+def toks(rows):
+    return [t["token"] if isinstance(t, dict) else t for r in rows for t in r]
+ct = toks(c)
+missing = [t for t in toks(a.get("rows", [])) if t not in ct]
+if "$clauth" not in ct:
+    missing.append("$clauth")
+print(" ".join(missing) if missing else "OK")
+' $herdr_config 2>/dev/null)
+        if test "$report" = MISSING
+            __fail 'herdr rows_by_agent.claude is gone — claude panes lost the $clauth account tag'
+        else if test "$report" != OK; and test -n "$report"
+            __fail "herdr rows_by_agent.claude is missing tokens: $report — re-merge it from `rows`"
+        end
+    end
+
+    __say info 'clauth installed, supervised, and merged into the herdr sidebar'
 end
 
 function __check_browser_mcp --description 'browser control stays opt-in, never always-on'
@@ -570,7 +665,9 @@ function __check_onepassword_mcp --description '1Password MCP is wired at user s
 
     # the live wiring is untracked state, so the declaration is only worth keeping if it still
     # describes reality. a 1Password app update that moved the binary would show up here.
-    set -l live $XDG_STATE_HOME/claude/.claude.json
+    # ⚠ ~/.claude.json, not the config dir: with $CLAUDE_CONFIG_DIR retired (2026-09-12) claude
+    # code keeps its global state in $HOME again, and it cannot be symlinked back.
+    set -l live $HOME/.claude.json
     if not test -r $live
         __fail "cannot read $live to verify the 1Password MCP user-scope entry"
         return
@@ -599,6 +696,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_login_shell
     __check_claude_links
     __check_claude_install
+    __check_clauth
     __check_browser_mcp
     __check_onepassword_mcp
     __check_simple_english

@@ -1,11 +1,21 @@
 #!/usr/bin/env fish
 #
-# link-claude.fish — symlink the authored Claude Code config into $CLAUDE_CONFIG_DIR.
+# link-claude.fish — symlink the authored Claude Code config into the Claude config dir.
 #
-# $CLAUDE_CONFIG_DIR is $XDG_STATE_HOME/claude, not ~/.config/claude: transcripts, prompt
-# history and vendored plugins are state, and ~48 mb of them must not sit inside a public
-# repo's working tree. so the authored half lives here as claude-code/… and is linked back
-# in, one entry at a time — never the whole directory, or the state would follow it.
+# That dir is $XDG_STATE_HOME/claude, not ~/.config/claude: transcripts, prompt history and
+# vendored plugins are state, and ~48 mb of them must not sit inside a public repo's working
+# tree. So the authored half lives here as claude-code/… and is linked back in, one entry at a
+# time — never the whole directory, or the state would follow it.
+#
+# ⚠ $CLAUDE_CONFIG_DIR is no longer exported (2026-09-12). ~/.claude is a symlink to the same
+# directory instead, because clauth and every other account-manager hardcode ~/.claude and
+# Claude Code namespaces its Keychain item by the hash of whatever CLAUDE_CONFIG_DIR holds.
+# $DEST stays the real path rather than ~/.claude so this script never depends on that symlink.
+#
+# ⚠ settings.json is deliberately NOT linked. clauth rewrites it on every account switch with a
+# temp file + rename, which would replace the symlink with a regular file and detach it from
+# this repo; clauth only writes the path when it already exists, so the file stays absent and
+# `claude --settings` delivers it per session instead (functions/wrappers/claude.fish).
 #
 # ⚠ the per-skill loop is the point. claude code merges every directory under
 # $CLAUDE_CONFIG_DIR/skills/, ours and any a tool installs, so the repo can only own the
@@ -35,7 +45,8 @@ set -g DRY_RUN 0
 # the fixed entries. skills are discovered instead, below.
 # ⚠ themes/ is linked as a whole directory, unlike skills/: it is a user-only namespace (plugin
 # themes ship inside the plugin, not here), so nothing else writes into it.
-set -g LINKS CLAUDE.md settings.json themes
+# ⚠ settings.json is absent on purpose — see the header.
+set -g LINKS CLAUDE.md themes
 
 function __say --description 'status line — gum when available, stderr otherwise'
     set -l level $argv[1]

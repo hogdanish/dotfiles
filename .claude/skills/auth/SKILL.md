@@ -55,35 +55,35 @@ Three independent chains, in descending order of how much of the machine they ca
 
 ## Verified state of this machine (2026-08-08)
 
-| Piece | State |
-| --- | --- |
-| 1Password app | `1password@beta` cask; one account, `my.1password.com` |
-| `op` | 2.38.1-beta.01, `/opt/homebrew/bin/op`; config at `~/.config/op` |
-| `op` sign-in | ✅ working interactively. ⚠ `op whoami` **always fails from a Claude Code Bash call** — see below; that is not a misconfiguration |
-| 1Password MCP | ✅ on (2026-09-04). Claude Code **user scope**, so every project; `/Applications/1Password.app/Contents/MacOS/1password-mcp`. ⚠ Environments only — eight tools, none of which returns a secret *value*. Not a vault client |
-| Shell plugins | `gh` and `linode-cli`, as fish functions under `functions/wrappers/` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
-| SSH agent | on; `~/.ssh/config` sets `IdentityAgent`, and `conf.d/op.fish` exports `SSH_AUTH_SOCK` |
-| Keys served | **six** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant, Linode. ⚠ exactly at the common `MaxAuthTries 6` limit |
-| `agent.toml` | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only. ⚠ A 2026-08-08 named-item ordering attempt served only its first item in this app build, so do not repeat it without a fail-safe `ssh-add -l` check |
-| SSH bookmarks | `~/.ssh/1Password/config` generated but holds only `Match all`; not yet included |
-| Commit signing | `gpg.format=ssh`, `op-ssh-sign`, `commit.gpgsign=true`, `tag.gpgsign=true`; key fingerprint matches the agent's *Git SSH* entry |
-| Local verification | `gpg.ssh.allowedSignersFile = ~/.config/git/allowed_signers` ✅ (file created) |
-| GnuPG | 2.5.21; `~/.gnupg` created (0700) with `gpg-agent.conf` → `pinentry-touchid`, agent running. **No key exists**, so the Touch ID path is untested |
-| pinentry | ⚠ `gpgconf` resolves to `/opt/homebrew/opt/pinentry/bin/pinentry`, a **symlink to `pinentry-curses`** — a TTY prompt. Bypassed by the explicit `pinentry-program` |
-| Touch ID for sudo | ✅ **on** (2026-07-30). `/etc/pam.d/sudo_local` = `pam_reattach` optional, then `pam_tid.so` sufficient. ⚠ Interactive `sudo` only — see `touchid-system-auth.md` §3.1 |
-| `pam-reattach` | **installed** (1.3, `/opt/homebrew/lib/pam/pam_reattach.so`) — it is a PAM module, so `command -v` finds nothing |
-| Plaintext secrets | ✅ `conf.d/secrets.fish` was retired; development tokens come from the 1Password Environment or direct `op://` references at agent launch. The plaintext token written by `linode-cli` browser setup was removed from `~/.config/linode-cli` on 2026-08-08 |
+| Piece              | State                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1Password app      | `1password@beta` cask; one account, `my.1password.com`                                                                                                                                                                                                                                                                                                                           |
+| `op`               | 2.38.1-beta.01, `/opt/homebrew/bin/op`; config at `~/.config/op`                                                                                                                                                                                                                                                                                                                 |
+| `op` sign-in       | ✅ working interactively. ⚠ `op whoami` **always fails from a Claude Code Bash call** — see below; that is not a misconfiguration                                                                                                                                                                                                                                                |
+| 1Password MCP      | ✅ on (2026-09-04). Claude Code **user scope**, so every project; `/Applications/1Password.app/Contents/MacOS/1password-mcp`. ⚠ Environments only — eight tools, none of which returns a secret *value*. Not a vault client                                                                                                                                                      |
+| Shell plugins      | `gh` and `linode-cli`, as fish functions under `functions/wrappers/` — **not** `plugins.sh`. ⚠ The `brew` wrapper was **removed 2026-07-30**: `HOMEBREW_GITHUB_API_TOKEN` buys nothing since Homebrew 4 moved metadata to the JSON API, and it cost a 1Password prompt on the most-used command here. `~/.config/op/plugins/brew.json` is orphaned state; `op plugin clear brew` |
+| SSH agent          | on; `~/.ssh/config` sets `IdentityAgent`, and `conf.d/op.fish` exports `SSH_AUTH_SOCK`                                                                                                                                                                                                                                                                                           |
+| Keys served        | **six** — DigitalOcean, UniFi, Proxmox, Git, Home Assistant, Linode. ⚠ exactly at the common `MaxAuthTries 6` limit                                                                                                                                                                                                                                                              |
+| `agent.toml`       | `~/.config/1Password/ssh/agent.toml` → `vault = "Development"` only. ⚠ A 2026-08-08 named-item ordering attempt served only its first item in this app build, so do not repeat it without a fail-safe `ssh-add -l` check                                                                                                                                                         |
+| SSH bookmarks      | `~/.ssh/1Password/config` generated but holds only `Match all`; not yet included                                                                                                                                                                                                                                                                                                 |
+| Commit signing     | `gpg.format=ssh`, `op-ssh-sign`, `commit.gpgsign=true`, `tag.gpgsign=true`; key fingerprint matches the agent's *Git SSH* entry                                                                                                                                                                                                                                                  |
+| Local verification | `gpg.ssh.allowedSignersFile = ~/.config/git/allowed_signers` ✅ (file created)                                                                                                                                                                                                                                                                                                   |
+| GnuPG              | 2.5.21; `~/.gnupg` created (0700) with `gpg-agent.conf` → `pinentry-touchid`, agent running. **No key exists**, so the Touch ID path is untested                                                                                                                                                                                                                                 |
+| pinentry           | ⚠ `gpgconf` resolves to `/opt/homebrew/opt/pinentry/bin/pinentry`, a **symlink to `pinentry-curses`** — a TTY prompt. Bypassed by the explicit `pinentry-program`                                                                                                                                                                                                                |
+| Touch ID for sudo  | ✅ **on** (2026-07-30). `/etc/pam.d/sudo_local` = `pam_reattach` optional, then `pam_tid.so` sufficient. ⚠ Interactive `sudo` only — see `touchid-system-auth.md` §3.1                                                                                                                                                                                                           |
+| `pam-reattach`     | **installed** (1.3, `/opt/homebrew/lib/pam/pam_reattach.so`) — it is a PAM module, so `command -v` finds nothing                                                                                                                                                                                                                                                                 |
+| Plaintext secrets  | ✅ `conf.d/secrets.fish` was retired; development tokens come from the 1Password Environment or direct `op://` references at agent launch. The plaintext token written by `linode-cli` browser setup was removed from `~/.config/linode-cli` on 2026-08-08                                                                                                                       |
 
 ⏳ = outstanding. Re-verify before relying on any row — this table is a snapshot, not a live check.
 
 ## Agent development credentials
 
 ⚠ **Per-MCP-server `op run` wrapping is impossible for plugin-bundled servers.** The `github` plugin
-ships an **HTTP** MCP server whose config interpolates `Authorization: Bearer
-${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *Claude process environment*. Codex's direct Context7 MCP
-server reads `CONTEXT7_API_KEY` from the Codex process environment. Claude's Context7 connector is
-authenticated server-side and needs no local token. The agent process must carry any locally consumed
-values because the relevant server config is not ours to wrap.
+ships an **HTTP** MCP server whose config interpolates
+`Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}` from the *Claude process environment*.
+Codex's direct Context7 MCP server reads `CONTEXT7_API_KEY` from the Codex process environment.
+Claude's Context7 connector is authenticated server-side and needs no local token. The agent process
+must carry any locally consumed values because the relevant server config is not ours to wrap.
 
 The mechanism is a **1Password Environment** resolved at launch by a fish wrapper:
 
@@ -108,8 +108,8 @@ op run --no-masking --environment $__op_codex_env -- \
 
 The Linode PAT remains one 1Password item rather than being copied into that Environment.
 `conf.d/op.fish` stores only its `op://` reference. Both launch wrappers export it as
-`LINODE_CLI_TOKEN`. Humans use `functions/wrappers/linode-cli.fish`, which delegates to the installed
-1Password shell plugin.
+`LINODE_CLI_TOKEN`. Humans use `functions/wrappers/linode-cli.fish`, which delegates to the
+installed 1Password shell plugin.
 
 ⚠ **Agent CLI authentication, verified with Codex CLI 0.147.0 and Claude Code 2.1.232 on
 2026-08-14.** The launch wrappers start `scripts/internal/agent-credential-broker.mjs` inside the
@@ -148,43 +148,45 @@ read succeed. Test the intended read operation instead of treating `whoami` as a
 
 ⚠ Fish functions and `plugins.sh` aliases **cannot** reach Claude Code — its Bash tool is a
 non-interactive login zsh (`~/.zprofile` yes, `~/.zshrc` no, aliases never expand). Conversely,
-`GIT_CONFIG_GLOBAL`/`CLAUDE_CONFIG_DIR` *are* visible there, inherited from the fish process that
-launched `claude`.
+`GIT_CONFIG_GLOBAL` and any other `-gx` from `conf.d/` *are* visible there, inherited from the fish
+process that launched `claude`. ⚠ `CLAUDE_CONFIG_DIR` is no longer among them — it was retired
+2026-09-12 so that clauth and Claude Code agree on one config dir; `~/.claude` is a symlink instead.
 
 ### ⚠ Two traps that both look like a broken 1Password setup
 
 **`op whoami` fails from any agent Bash call, always.** Desktop-app integration authenticates by
 raising a biometric prompt; a Claude Code Bash call has **no tty on fd 0, 1 or 2**, so `op` cannot
-prompt and reports `[ERROR] account is not signed in`. This is indistinguishable from *Integrate with
-1Password CLI* being disabled, and it cost a wrong diagnosis on 2026-07-28. **Never conclude `op` is
-unconfigured from an agent-side check** — ask the user to run `op whoami` in their own terminal.
+prompt and reports `[ERROR] account is not signed in`. This is indistinguishable from
+*Integrate with 1Password CLI* being disabled, and it cost a wrong diagnosis on 2026-07-28.
+**Never conclude `op` is unconfigured from an agent-side check** — ask the user to run `op whoami`
+in their own terminal.
 
 **`op run` masking breaks any TUI child, including `claude` and `codex`.** Masking scans the child's
-stdout/stderr for secret values, which means replacing those fds with pipes. Claude Code probes for a
-tty to decide whether it can draw a TUI; with a piped stdout it silently switches to `--print` mode
-and exits with:
+stdout/stderr for secret values, which means replacing those fds with pipes. Claude Code probes for
+a tty to decide whether it can draw a TUI; with a piped stdout it silently switches to `--print`
+mode and exits with:
 
 ```text
 Error: Input must be provided either through stdin or as a prompt argument when using --print
 ```
 
-⚠ **`op run -- /usr/bin/tty` does not detect this** — `tty` reports on *stdin*, which `op run` leaves
-alone, so the test passes while stdout is still a pipe. Use `--no-masking` for any interactive or
-full-screen child. Masking is still worth keeping for ordinary CLIs (`firecrawl`), where output could
-plausibly contain a secret.
+⚠ **`op run -- /usr/bin/tty` does not detect this** — `tty` reports on *stdin*, which `op run`
+leaves alone, so the test passes while stdout is still a pipe. Use `--no-masking` for any
+interactive or full-screen child. Masking is still worth keeping for ordinary CLIs (`firecrawl`),
+where output could plausibly contain a secret.
 
 ## Where does a secret go?
 
-| Kind of secret | Storage | Consumption |
-| --- | --- | --- |
-| SSH private key | 1Password `SSH Key` item | SSH agent socket; never exported to disk |
-| Git commit signature | same SSH key | `op-ssh-sign` (`gpg.format = ssh`) |
-| Project env var (`.env`) | 1Password **Environment** | mounted `.env`, or `op run --environment` |
-| One-off API token for a script | 1Password item | `op read op://…` or `op run` with `op://` refs |
-| Token an interactive shell needs | 1Password item | `op run --` wrapper, **not** a `-gx` export |
-| Credential for a supported CLI | 1Password item | shell plugin (`op plugin init <cli>`) |
-| GPG passphrase | macOS login keychain | pinentry-touchid, guarded by Touch ID |
-| Anything at all | — | **never** a literal in a dotfile, script or config |
+| Kind of secret                   | Storage                   | Consumption                                        |
+| -------------------------------- | ------------------------- | -------------------------------------------------- |
+| SSH private key                  | 1Password `SSH Key` item  | SSH agent socket; never exported to disk           |
+| Git commit signature             | same SSH key              | `op-ssh-sign` (`gpg.format = ssh`)                 |
+| Project env var (`.env`)         | 1Password **Environment** | mounted `.env`, or `op run --environment`          |
+| One-off API token for a script   | 1Password item            | `op read op://…` or `op run` with `op://` refs     |
+| Token an interactive shell needs | 1Password item            | `op run --` wrapper, **not** a `-gx` export        |
+| Credential for a supported CLI   | 1Password item            | shell plugin (`op plugin init <cli>`)              |
+| GPG passphrase                   | macOS login keychain      | pinentry-touchid, guarded by Touch ID              |
+| Anything at all                  | —                         | **never** a literal in a dotfile, script or config |
 
 Prefer the option higher in that table when two would work: a mounted Environment beats `op run`
 beats `op read` in a subshell, because each step down widens the window in which the plaintext
@@ -197,10 +199,11 @@ exists.
 1. **Never write a credential literal** into any file — use an `op://` reference, `op run`, or a
    mounted Environment. This includes "temporary" values and test fixtures.
 2. **Never read, print, copy or `cat`** `~/.config/fish/conf.d/secrets.fish` or
-   `~/.config/yt-dlp/cookies.txt`. Their *existence* and *names* are in scope; their contents are not.
-3. **Never run a command that prints a resolved secret to the terminal** (`op read`, `op run
-   --no-masking`, `gpg --export-secret-keys`, `security find-generic-password -w`) — the output lands
-   in the transcript. Redirect to a consumer, or ask the user to run it.
+   `~/.config/yt-dlp/cookies.txt`. Their *existence* and *names* are in scope; their contents are
+   not.
+3. **Never run a command that prints a resolved secret to the terminal** (`op read`,
+   `op run --no-masking`, `gpg --export-secret-keys`, `security find-generic-password -w`) — the
+   output lands in the transcript. Redirect to a consumer, or ask the user to run it.
 4. **Never export a private key** from 1Password to disk to "make something work". Fix the client
    config instead — [1password-ssh-git.md](references/1password-ssh-git.md) lists what each client
    supports.
@@ -252,4 +255,5 @@ GIT_CONFIG_SYSTEM=/dev/null` — those are exported by fish, and Bash tool calls
 ---
 
 *Source of truth for authentication, secrets and credential management on this machine — update it
-when the stack changes, and add newly discovered behaviour to the matching reference in the same turn.*
+when the stack changes, and add newly discovered behaviour to the matching reference in the same
+turn.*

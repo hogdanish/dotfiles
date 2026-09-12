@@ -57,6 +57,21 @@ function claude --wraps claude --description 'claude code with 1password secrets
             return 1
         end
     end
+    # ⚠ the authored settings are DELIVERED HERE rather than read from the claude config dir, and
+    # that is load-bearing. clauth rewrites $HOME/.claude/settings.json on every account switch
+    # (claude.rs::apply_profile_to_claude_settings_inner, a temp file + rename with no
+    # content-equality guard), and a rename replaces a symlink with a regular file — which would
+    # silently detach the tracked file from this repo. clauth only writes that path when it
+    # ALREADY EXISTS, so leaving it absent is what keeps clauth off it entirely.
+    # --settings merges key by key at precedence 2, above user settings; see claude-code/CLAUDE.md.
+    # ⚠ it must precede --mcp-config below, which is variadic and would swallow the path.
+    set -l settings $XDG_CONFIG_HOME/claude-code/settings.json
+    if test -r $settings
+        set -a args --settings $settings
+    else
+        echo >&2 "claude: $settings is unreadable — starting with NO authored settings"
+    end
+
     # appended, never prepended: --mcp-config is variadic, so anything following it on the command
     # line would be swallowed as another config path.
     test (count $mcp) -gt 0; and set -a args --mcp-config $mcp

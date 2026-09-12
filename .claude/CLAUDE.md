@@ -17,17 +17,52 @@ which rule decided. Two traps that have each cost a cycle:
 
 - A bare `*` instead of `/*` matches at every depth, and git never descends into an excluded
   directory — every `!foo/**` beneath it silently never fires.
-- **No trailing comments.** `#` opens a comment only at line start, so `/fish/fish_variables  # note`
-  is one literal pattern matching nothing.
+- **No trailing comments.** `#` opens a comment only at line start, so
+  `/fish/fish_variables  # note` is one literal pattern matching nothing.
 
 Untracked on purpose (`README.md` explains each): `raycast/`, `op/`, `homebrew/`,
 `yt-dlp/cookies.txt`, `fish/fish_variables`, `claude/`.
 
-⚠ **`$CLAUDE_CONFIG_DIR` is `$XDG_STATE_HOME/claude`, not `~/.config/claude`** — transcripts,
+⚠ **The Claude config dir is `$XDG_STATE_HOME/claude`, reached as `~/.claude`** — transcripts,
 history and vendored plugins are state, deliberately outside this repo. Authored config lives in
 `claude-code/` and is symlinked back by `scripts/link-claude.fish`; `~/.config/claude` is only a
-compatibility symlink. ⚠ A `/config` rewrite of `settings.json` can replace that symlink with a real
-file and silently detach it from version control — `scripts/audit-config.fish` checks for this.
+compatibility symlink.
+
+⚠ **`$CLAUDE_CONFIG_DIR` is no longer exported (2026-09-12), and must not come back.** `~/.claude`
+is a **symlink** to `$XDG_STATE_HOME/claude` instead, so the storage is unchanged and still XDG —
+only the variable is gone. Two facts forced it, both verified against clauth v0.15.1:
+
+- **Every Claude account manager hardcodes `~/.claude`.** clauth's `profile::claude_dir()` is
+  `$HOME/.claude` and `plugin_probe::global_claude_json_path()` is `$HOME/.claude.json`, with no
+  override — `env::var` over its whole source lists neither a `CLAUTH_HOME` nor a settings path.
+  It honours `CLAUDE_CONFIG_DIR` only for `clauth start`/`which`. Pointed at a config dir Claude
+  Code never opens, its global switch, `capture`, `sessions`/`resume` and MCP wiring all no-op.
+- **Claude Code namespaces its macOS Keychain item by the hash of `$CLAUDE_CONFIG_DIR`** —
+  `Claude Code-credentials-<sha256(dir)[0:8]>`, and the bare `Claude Code-credentials` only when
+  the variable is unset. This machine's login sat in `-6017688f` = `sha256("/Users/ethan/.local/
+  state/claude")[0:8]`, while clauth reads and writes the bare item. **So the variable had to be
+  unset rather than repointed**: any value at all produces a namespaced item clauth cannot see.
+
+⚠ **`~/.claude.json` is a regular file in `$HOME` and cannot be symlinked back** — Claude Code
+rewrites it temp-file + rename (`.claude.json.tmp.<pid>.*`), which destroys a symlink. It is the one
+genuine XDG regression of the move, and it is unavoidable. It holds the user-scope MCP wiring, so
+it is state, untracked, exactly as it was under the old path.
+
+⚠ **There is deliberately no `settings.json` in the Claude config dir**, and it must not be linked
+back. clauth rewrites that path on **every account switch**
+(`claude.rs::apply_profile_to_claude_settings_inner`: temp file + rename, no content-equality
+guard), and a rename replaces a symlink with a regular file — the exact silent detachment from
+version control that a `/config` rewrite used to threaten. clauth writes the path
+**only when it already exists**, so leaving it absent keeps clauth off it entirely. The authored
+file is delivered per session by `claude --settings` from `fish/functions/wrappers/claude.fish`, and
+to a `clauth start` session by `fish/functions/wrappers/clauth.fish`. ⚠
+**`--settings` is precedence 2, above project files**, where user settings were the lowest level —
+so a key in a project's `.claude/settings.json` no longer outranks ours. The four keys that overlap
+today (`permissions`, `hooks`, `enabledPlugins`, `enabledMcpjsonServers`) are all merge-style, so
+project files still contribute; a scalar key added to both would not. ⚠ Claude Code may still
+**create** that file itself (a `/config` change writes user settings). That is harmless — it is then
+untracked machine state that clauth may rewrite, while the authored file still wins at precedence 2
+— but `scripts/audit-config.fish` reports it so the drift is never silent.
 
 ## The claude-code/ layout
 
@@ -37,9 +72,10 @@ tool and update it with every install/removal. Never write, print or inspect res
 `auth` for credential paths. The repo is public and its `.gitignore` is an allowlist.
 
 **`hooks/`** — user-level, wired from `claude-code/settings.json` by absolute path, so they fire in
-every project. `fish-validate.sh` fires on every `.fish` write anywhere. ⚠ It is not symlinked and
-must not be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`. ⚠ A `caffeinate.sh`
-`SessionStart`/`SessionEnd` keep-awake hook was **deleted 2026-08-27** — do not reintroduce it.
+every project. `fish-validate.sh` fires on every `.fish` write anywhere, and `markdown-format.sh` on
+every `.md` write. ⚠ Neither is symlinked and neither must be. `brewfile-validate.sh` stays
+project-scoped in `.claude/hooks/`. ⚠ A `caffeinate.sh` `SessionStart`/`SessionEnd` keep-awake hook
+was **deleted 2026-08-27** — do not reintroduce it.
 
 **`skills/`** — user-level, loaded everywhere (unlike `.claude/skills/`, which loads only inside
 this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `simple-english`, `website-spec`.
@@ -57,24 +93,29 @@ Deleted: `prose` (2026-08-16) and `toolbox` (2026-08-17), skill and rule each.
   `scripts/website-spec-sync.sh` re-fetches both, diffs them, and checks the sha256 the site
   publishes in `/.well-known/agent-skills/index.json`. Never hand-edit the two vendored files —
   run the script with `--write` and commit the refresh on its own.
-- ⚠ Symlinked **one directory at a time**: `$CLAUDE_CONFIG_DIR/skills/` is a namespace any installer
+- ⚠ Symlinked **one directory at a time**: the config dir's `skills/` is a namespace any installer
   may write into, and linking it wholesale would drag foreign output into a public repo.
 - ⚠ Symlinked skills **do** load (verified against Claude Code 2.1.220); one that fails to appear
   has a broken link. `audit-config.fish` fails on a dangling skill link.
 - ⚠ **Vendor skills belong in a plugin, not here** — a third party's skills are its to version. The
-  payload sits in `$CLAUDE_CONFIG_DIR/plugins/` (untracked state) and only the enable flag lands in
-  the tracked `settings.json`, which `claude plugin install` writes through the symlink, so the
-  declaration version-controls itself. A hand-authored copy goes stale (the brief `firecrawl` one
-  proved it).
+  payload sits in the config dir's `plugins/` (untracked state) and only the enable flag lands in
+  the tracked `settings.json`, so the declaration version-controls itself. A hand-authored copy of
+  the skills themselves goes stale (the brief `firecrawl` one proved it).
+  ⚠ **The wiring step changed on 2026-09-12**: `settings.json` is no longer symlinked into the
+  config dir, so `claude plugin install` writes its own copy *there* rather than through a link.
+  Add the `extraKnownMarketplaces` and `enabledPlugins` entries to the tracked file by hand, run
+  the installer for the payload, then **delete the copy it left in the config dir** — otherwise
+  clauth has a `settings.json` to rewrite on every switch. That is exactly how `clauth@clauth`
+  was wired, and `audit-config.fish` warns if that file reappears.
 
 **Simple English: vendored, not installed, and opt-in on purpose** (2026-09-06).
 [github.com/AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) **v2.0.0**, MIT — a
 writing register modelled on ASD-STE100 Simplified Technical English. It is the **second**
 deliberate exception to the vendor-skills rule above, and the reason is the upstream plugin itself:
-its `.claude-plugin/plugin.json` wires a `SessionStart` hook that injects the register into **every**
-session, a `PostToolUse` lint on every `Write|Edit`, and a `Stop` hook on every turn. Claude Code
-takes plugin hooks or leaves the plugin — there is no per-hook switch — so installing it means
-always-on, which is exactly what was not wanted. `claude plugin install simple-english`,
+its `.claude-plugin/plugin.json` wires a `SessionStart` hook that injects the register into
+**every** session, a `PostToolUse` lint on every `Write|Edit`, and a `Stop` hook on every turn.
+Claude Code takes plugin hooks or leaves the plugin — there is no per-hook switch — so installing it
+means always-on, which is exactly what was not wanted. `claude plugin install simple-english`,
 `codex plugin add`, and `npx skills add AminBlg/SimpleEnglish` are therefore all **wrong** here.
 
 What is tracked instead is the skill body and the output style, and nothing that fires by itself:
@@ -100,9 +141,9 @@ What is tracked instead is the skill body and the output style, and nothing that
 `codex/`, `hooks.json` into the same directory, `AGENTS.md` into `claude-code/CLAUDE.md`, and each
 `~/.agents/skills/<name>` into `claude-code/skills/`. Run `scripts/link-codex.fish` after adding a
 global skill or hook adapter. Codex's base config exposes Context7; project-specific MCPs belong in
-each trusted repository's `.codex/config.toml`. Symmetrically, Claude Code owns project instructions,
-skills and hook implementations; tracked Codex files adapt their protocols without copying
-substantive content.
+each trusted repository's `.codex/config.toml`. Symmetrically, Claude Code owns project
+instructions, skills and hook implementations; tracked Codex files adapt their protocols without
+copying substantive content.
 
 **`claude-code/mcp/`** — canonical MCP server declarations that Claude Code will not read from a
 tracked file. ⚠ There is **no `mcpServers` key in `settings.json`** (verified against the settings
@@ -132,11 +173,13 @@ wired at *user* scope rather than per project, so it loads in every session on t
 claude mcp add --scope user 1password -- /Applications/1Password.app/Contents/MacOS/1password-mcp
 ```
 
-⚠ **The live entry is `$CLAUDE_CONFIG_DIR/.claude.json` — untracked state**, which is the same
-constraint the paragraph above describes; the difference is that user scope has no
-`enabledMcpjsonServers` half to track, so `claude-code/mcp/1password.json` is a *mirror* rather than
-a copy-source and `audit-config.fish` asserts the two still agree. ⚠ `~/.claude.json` is **not** that
-file — it is a 1 KB leftover from before `$CLAUDE_CONFIG_DIR` was relocated.
+⚠ **The live entry is `~/.claude.json` — untracked state**, which is the same constraint the
+paragraph above describes; the difference is that user scope has no `enabledMcpjsonServers` half to
+track, so `claude-code/mcp/1password.json` is a *mirror* rather than a copy-source and
+`audit-config.fish` asserts the two still agree. ⚠ That path **is** the live file as of 2026-09-12:
+the 82 KB state file moved there from the config dir when `$CLAUDE_CONFIG_DIR` was retired, over the
+1 KB pre-relocation leftover that used to sit there. An older note calling `~/.claude.json` a
+leftover is stale — the leftover is gone and this is the file Claude Code reads.
 
 ⚠ **It manages Environments, and nothing else** — `authenticate`, `list_environments`,
 `list_variables` (names only), `list_local_env_files`, `create_environment`, `rename_environment`,
@@ -168,8 +211,8 @@ the next natural break.
 **Cloudflare tooling: on by default for Claude Code and Codex.** It was gated for both agents
 2026-08-16, ungated for Claude Code 2026-08-28, and brought to parity in Codex 2026-09-04.
 `settings.json` enables `cloudflare@cloudflare`; `codex/config.toml` enables
-`cloudflare@openai-curated-remote`. The skills and `cloudflare-api` MCP server therefore load in every
-project, `~/Projects/commongrounds` included. ⚠ Claude's context weight is trimmed by
+`cloudflare@openai-curated-remote`. The skills and `cloudflare-api` MCP server therefore load in
+every project, `~/Projects/commongrounds` included. ⚠ Claude's context weight is trimmed by
 `deniedMcpServers`, which blocks the plugin's other four servers (`cloudflare-docs`, `-bindings`,
 `-builds`, `-observability`) — remove an entry there to gain one back. Both launch wrappers swallow
 `--infra` as a no-op so old muscle memory never reaches either CLI as an unknown option. There is
@@ -205,12 +248,12 @@ turn-ended notification; do not install an unmaintained bridge merely for invent
 agents can drive a real browser — spawn windows, read the console and network, evaluate scripts,
 screenshot, profile — and **neither costs an ordinary session anything**, which is the whole design.
 
-| | Firefox | Safari |
-|---|---|---|
-| Server | `@mozilla/firefox-devtools-mcp`, pinned `0.10.1` | `safaridriver --mcp`, shipped in macOS |
-| Transport | WebDriver BiDi (Selenium + `geckodriver`) | stdio, first-party |
-| Tools | 45 on `--tool-preset developer` | 17 |
-| Enable | `claude --firefox` / `codex --firefox` | `claude --safari` / `codex --safari` |
+|           | Firefox                                          | Safari                                 |
+| --------- | ------------------------------------------------ | -------------------------------------- |
+| Server    | `@mozilla/firefox-devtools-mcp`, pinned `0.10.1` | `safaridriver --mcp`, shipped in macOS |
+| Transport | WebDriver BiDi (Selenium + `geckodriver`)        | stdio, first-party                     |
+| Tools     | 45 on `--tool-preset developer`                  | 17                                     |
+| Enable    | `claude --firefox` / `codex --firefox`           | `claude --safari` / `codex --safari`   |
 
 The enable path is the wrapper flag and nothing else. Claude Code gets `--mcp-config` pointing at
 `claude-code/mcp/{firefox-devtools,safari}.json` for that launch only; Codex declares both in
@@ -250,11 +293,11 @@ harness, not a second measurement arm — a number for the record still comes fr
 **Deferred tools are pinned on** — `wrappers/claude.fish` exports `ENABLE_TOOL_SEARCH=true`, so tool
 *names* go into context up front and a schema is fetched only when it is first needed, rather than
 every MCP and plugin schema being inlined every turn. ⚠ This is already Claude Code's default (unset
-=> mode `tst` in 2.1.250); the pin exists so the default cannot flip under us. `false`/`0`/`no`/`off`
-turns it off, as does `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS`. It is process-wide and endpoint-wide,
-not per-project — there is no per-repo setting and none is needed. Skills are separate and already
-lazy by construction: only each `SKILL.md`'s name and description sit in context until the skill is
-invoked.
+=> mode `tst` in 2.1.250); the pin exists so the default cannot flip under us.
+`false`/`0`/`no`/`off` turns it off, as does `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS`. It is
+process-wide and endpoint-wide, not per-project — there is no per-repo setting and none is needed.
+Skills are separate and already lazy by construction: only each `SKILL.md`'s name and description
+sit in context until the skill is invoked.
 
 ⚠ **claude-swap (`cswap`) was installed and fully removed on 2026-09-02 — do not reinstall it.**
 The `uv` tool, its `[menubar]` launchd agent, `~/.claude-swap-backup/`, its Keychain items and every
@@ -263,7 +306,43 @@ strip) are gone; nothing about it was ever committed. It swaps accounts by rewri
 `.claude.json` and the `Claude Code-credentials-<hash>` Keychain item under the running profile,
 which desynced them: its own `list` reported both slots holding one account while `/status` showed
 the config's identity beside the *other* account's token and billing. Two accounts belong in two
-`CLAUDE_CONFIG_DIR`s, not one profile with a mutating credential.
+profile stores with one credential each, not one profile with a mutating credential — which is
+exactly the shape `clauth` gives them.
+
+**clauth: the account switcher that replaced it** (2026-09-12).
+[uwuclxdy/clauth](https://github.com/uwuclxdy/clauth) v0.15.1, MIT, Rust. Multi-account switching,
+live 5h/7d usage, an auto-switch fallback chain, an MCP plugin and a herdr plugin. Installed with
+`cargo install clauth` — the language-specific tier of the install hierarchy, since there is no
+formula. ⚠ **It is stock, and deliberately unpatched**: a fork carrying path fixes was designed and
+rejected, because a permanent rebase is a worse tax than the two config changes that avoid it. Both
+of those changes are documented at the top of this file — the `~/.claude` symlink with
+`$CLAUDE_CONFIG_DIR` unset, and the absent `settings.json`. **Do not undo either to "tidy up"; each
+one is what keeps clauth working.**
+
+- **Thresholds** are clauth's defaults and deliberately so: 5h `fallback_threshold = 95`, weekly
+  `weekly_switch_threshold = 98`. The weekly line sits below 100 because topping out a week bricks
+  an account for days rather than hours.
+- ⚠ **`auto_start` and `burn_aware_switching` are both OFF.** `auto_start` sends a **real billed**
+  1-token ping to open an account's 5h window early, and burn-aware switching can only ever switch
+  *earlier* than the static threshold — a tightening knob, not a safety one, and not worth setting
+  before there is usage history to judge it against. Turn either on deliberately, not by default.
+- ⚠ **`spend_budget_switching` is off and must stay off** unless real money is intended: it is the
+  master switch for pay-as-you-go fallback, and an armed account with no `last_resort` member can
+  spend without a stop.
+- **The daemon** runs under launchd (`launchd/dev.uwuclxdy.clauth.plist`, symlinked into
+  `~/Library/LaunchAgents/`) — it is what runs the chain when no TUI is open. ⚠ Its
+  `StandardErrorPath` must stay an **append** target: clauth trims `daemon.log` in place, which is
+  only sound for an append fd. ⚠ No `--listen`: `conf.d/clauth.fish` pins `CLAUTH_NO_API=1`, so the
+  REST surface cannot be opened by a stray flag.
+- ⚠ **`~/.clauth/` is not XDG and has no override** — verified by enumerating every `env::var` in
+  its source. A known, accepted gap, not an oversight to go fixing.
+- ⚠ **The MCP plugin's `PostToolUse` hook carries no matcher**, so
+  `clauth hook-profile-changed-note` runs after *every* tool call. Accepted knowingly for the
+  account-change notes and the delegate-finished wake; the fallback if it ever costs anything
+  measurable is a hand-written `mcpServers` entry, which keeps the four tools and loses both.
+- **The herdr plugin complements `herdr-agent-quota`; it does not duplicate it.** agent-quota
+  renders model/ttl/context/5h/7d, clauth renders *which account* a pane spends. See
+  `herdr/README.md` for the merged sidebar row and the maintenance that merge costs.
 
 **`scripts/`** — `bootstrap.sh` (POSIX sh; fish and gum may not exist when it runs),
 `link-home.fish`, `link-claude.fish`, `link-codex.fish`, `audit-config.fish`, and the agent session
@@ -300,7 +379,8 @@ trailed the channel by days (pinned to 2.1.252 while `latest` served 2.1.257) an
 could close the gap; `claude doctor` now reports install method native, auto-updates enabled,
 channel `latest`. Reinstall with `curl -fsSL https://claude.ai/install.sh | bash -s latest`.
 ⚠ **Never `brew uninstall --zap` that cask** — its zap list includes `~/.local/state/claude`
-(`$CLAUDE_CONFIG_DIR`: transcripts, memory, plugins), `~/.config/claude` and `~/.claude.json`.
+(the Claude config dir: transcripts, memory, plugins), `~/.config/claude` and `~/.claude.json`
+— the last of which is now the live global state file, not a leftover.
 This is the *second* documented gap in the Brewfile-as-inventory rule, alongside VS Code
 extensions and `bun`/`npm` globals; `audit-config.fish` asserts the native build is what `$PATH`
 resolves, and `conf.d/localbin.fish` is what puts `~/.local/bin` there.
@@ -314,15 +394,15 @@ version-controlled — `lefthook install` once per clone or none of that exists.
 ⚠ Homebrew auto-updates, so never pin a claim to a patch version — check the live one when it
 matters.
 
-| | |
-|---|---|
-| macOS | 27.x Golden Gate (public beta), Apple Silicon (arm64) |
-| Homebrew prefix | `/opt/homebrew` |
-| Login shell | **fish** (`/opt/homebrew/bin/fish`) — changed 2026-09-12, see below |
-| Interactive shell | the same fish — `/bin/zsh` now runs only for agent tool shells |
-| Terminal | **Ghostty 1.3.x-main** (channel `tip`) — the `ghostty` skill |
-| Editor | VS Code Insiders (`code-insiders`); `micro` for terminal edits |
-| Git identity | `hogdanish`, commits SSH-signed via the 1Password agent |
+|                   |                                                                     |
+| ----------------- | ------------------------------------------------------------------- |
+| macOS             | 27.x Golden Gate (public beta), Apple Silicon (arm64)               |
+| Homebrew prefix   | `/opt/homebrew`                                                     |
+| Login shell       | **fish** (`/opt/homebrew/bin/fish`) — changed 2026-09-12, see below |
+| Interactive shell | the same fish — `/bin/zsh` now runs only for agent tool shells      |
+| Terminal          | **Ghostty 1.3.x-main** (channel `tip`) — the `ghostty` skill        |
+| Editor            | VS Code Insiders (`code-insiders`); `micro` for terminal edits      |
+| Git identity      | `hogdanish`, commits SSH-signed via the 1Password agent             |
 
 **fish is the login shell as of 2026-09-12** (`chsh -s /opt/homebrew/bin/fish`). The point was to
 stop pinning the shell per tool: Ghostty, Herdr and VS Code all resolve it from `$SHELL` then the
@@ -421,7 +501,7 @@ live in the `Claude Code` 1Password Environment, and it must **never** be recrea
 
 ⚠ **"No plaintext secrets on this machine" was false and was corrected.** A 2026-07-29 audit found
 the retired `secrets.fish` contents captured verbatim in transcripts under
-`$CLAUDE_CONFIG_DIR/projects/`; four credentials were rotated. The lesson is structural:
+the config dir's `projects/`; four credentials were rotated. The lesson is structural:
 **transcripts are append-only and hostile** — anything `cat`-ed into a session persists after the
 file is deleted. Never design a guardrail that assumes that directory is clean; that is why it is
 untracked and why `betterleaks` runs on content, not paths. ⚠ Its built-in rules do **not** cover
@@ -439,9 +519,9 @@ a token, `HOMEBREW_VERIFY_ATTESTATIONS`, is not set and would break the autoupda
 
 `git/.gitconfig` carries **aliases** (`lg` `lga` `ll` `branches` `staged` `unstage` `amend` `undo`
 `last` `root` `aliases`); `conf.d/abbrs.fish` carries ~40 **abbreviations**. The overlap is
-deliberate: an alias works from zsh, scripts and Bash tool calls; an abbr only expands in fish's line
-editor — so abbrs expand to *raw git* (portable buffer/history) and aliases exist only where the
-payload is a format string (`glg` → `git lg`). ⚠ `gs` and `gcp` are deliberately **not**
+deliberate: an alias works from zsh, scripts and Bash tool calls; an abbr only expands in fish's
+line editor — so abbrs expand to *raw git* (portable buffer/history) and aliases exist only where
+the payload is a format string (`glg` → `git lg`). ⚠ `gs` and `gcp` are deliberately **not**
 abbreviations — they are ghostscript and coreutils' `cp`.
 
 ⚠ Three traps: **git word-splits an alias body with shell rules** (a `--format=…` with spaces needs
@@ -468,6 +548,70 @@ conditional agent functions in `~/.zshenv` can. When correctness must not depend
 GIT_CONFIG_GLOBAL=~/.config/git/.gitconfig GIT_CONFIG_SYSTEM=/dev/null git config --list --show-origin
 ```
 
+## Markdown: formatted, never nagged about
+
+`rumdl` (Rust, in the Brewfile) owns every `.md` file on this machine. The whole design goal is that
+**nobody — human or agent — ever thinks about markdown formatting**, so every surface *fixes* and
+none of them *reports*.
+
+**Two config files, one style.** `rumdl/rumdl.toml` is the style: a strict rule set, every choice
+commented with the measurement behind it. That path is also `$XDG_CONFIG_HOME/rumdl/`, which is
+rumdl's **user-level fallback**, so the same file governs stray markdown anywhere on this machine.
+`.rumdl.toml` at the repo root pulls it in with `extends` and adds nothing but excludes. ⚠ The root
+file is not optional: the user-level config is consulted **only** when no project config is found,
+and a repo counts as a project — without it this repo would lint against rumdl's stock defaults.
+
+**Three places it runs, none of which can block you:**
+
+| Surface | Mechanism                                                              | Behaviour                                                                               |
+| ------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| VS Code | `[markdown]` → `rvben.rumdl` + `formatOnSave`                          | Takes markdown away from Prettier, which is still the global default formatter          |
+| Agents  | `claude-code/hooks/markdown-format.sh`, `PostToolUse` on `Write\|Edit` | Formats the file, then reports via `additionalContext` **only if it changed something** |
+| Commits | `lefthook.yml` job `markdown-format`                                   | `rumdl fmt` + `stage_fixed` — reformats and re-stages, never rejects                    |
+
+⚠ **The agent hook must keep telling the agent when it rewrote a file.** Silence was the first
+design and it is wrong: the file on disk stops matching what the agent believes it wrote, so the
+next `Edit`'s `old_string` misses and the turn derails. It stays quiet when the write was already
+clean. ⚠ `additionalContext` on exit 0 is the only channel that reaches the model without erroring —
+exit 2 **blocks** the write, and plain stdout reaches the debug log and nothing else.
+
+⚠ **`rumdl fmt`, never `rumdl check --fix`,** in all three. `fmt` exits 0 even when something is
+left unfixable; `check` exits 1 and would turn every surface into a blocker.
+
+Settings whose reasons are not guessable, and which a future edit should not "tidy":
+
+- **`MD013 reflow = true` at 100 columns** is what makes agent-written walls of text wrap
+  themselves. Paragraph-level diffs are the accepted cost, the same trade Prettier's prose-wrap
+  makes.
+- **`MD060 style = "aligned"`** is the reason this exists at all — it pads agent-written `|a|b|`
+  tables into readable columns. It is **opt-in**; rumdl ships it off.
+- **`MD040 style = "disabled"` means "don't enforce one language per file", not "rule off"** — it
+  still demands a tag. ⚠ Never set it to `"consistent"`: a dry run of that relabelled 26 blocks
+  across 13 files, turning ` ```fish ` into ` ```sh ` in the `auth` skill and the reverse in `fish`.
+- **`MD049 style = "consistent"`** is per-*file*, not one winner repo-wide, so
+  `claude-code/CLAUDE.md` stays all-underscore. Asterisk leads 467 to 15 overall; forcing it would
+  silently revert that choice.
+- **`MD038` is disabled** because `` `$ ` ``, `` `\ ` `` and `` `export ` `` carry a **meaningful**
+  trailing space, and its fix strips them.
+- **`MD056` is `unfixable`** — its fix truncates over-wide rows, which deletes prose.
+- **`cache = false`** so the hook never drops a `.rumdl_cache/` into an unrelated repo.
+
+⚠ **The excludes in `.rumdl.toml` are load-bearing, not cosmetic.** Every path there is re-fetched
+and diffed line-for-line by `simple-english-sync.sh` or `website-spec-sync.sh`; formatting one would
+surface as upstream drift that never happened.
+
+⚠ **Symlinked markdown is skipped** — `AGENTS.md` → `.claude/CLAUDE.md`. Formatting through a link
+rewrites the file it points at.
+
+⚠ **Deliberately not `rumdl-pre-commit`.** The official hooks target the `pre-commit` framework,
+which this repo rejected for its own reasons (python + a venv per hook, in the repo whose job is to
+bootstrap the machine), and its primary hook *blocks* on violations. `lefthook` does the same work
+by formatting.
+
+⚠ Codex records hook approval as a `trusted_hash` under `[hooks.state]` in `codex/config.toml`.
+That entry is **Ethan's approval, written by Codex** — never hand-compute one to silence
+`audit-config.fish`.
+
 ## Verifying a change
 
 ```sh
@@ -490,6 +634,10 @@ fastfetch --list-config-paths                             # ⚠ confirms which s
 brew bundle check --file=Brewfile                         # everything declared is installed
 .claude/skills/brewfile/scripts/brewfile-audit.sh         # ...and everything installed is declared
 scripts/link-claude.fish --dry-run                        # authored claude config is linked in
+rumdl check .                                             # every tracked .md is formatted
+rumdl config file                                         # ⚠ proves the extends chain resolved:
+                                                          #   must print BOTH rumdl/rumdl.toml and
+                                                          #   .rumdl.toml, innermost last
 brew config | rg HOMEBREW_                                # ⚠ what brew ACTUALLY has set, not the file
 env -u XDG_CONFIG_HOME brew trust                         # taps resolve outside fish (launchd, cron)
 brew autoupdate status                                    # the unattended-update agent is running

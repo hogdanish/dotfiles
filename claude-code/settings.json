@@ -63,13 +63,20 @@
     "superpowers@claude-plugins-official": false,
     "cloudflare@cloudflare": true,
     "clangd-lsp@claude-plugins-official": false,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "clauth@clauth": true
   },
   "extraKnownMarketplaces": {
     "cloudflare": {
       "source": {
         "source": "github",
         "repo": "cloudflare/skills"
+      }
+    },
+    "clauth": {
+      "source": {
+        "source": "github",
+        "repo": "uwuclxdy/clauth"
       }
     }
   },

@@ -46,8 +46,30 @@ enabled = false
 
 [ui.sidebar.agents]
 row_gap = 0 # herdr-agent-quota
-# Sidebar fg accepts only hex: Laramie state.ok / state.warn / state.error.
-rows = [["state_icon", "machine", "workspace", "tab"], [{ token = "$quota_provider_model", bold = true, dim = false }], [{ token = "$quota_error", fg = "#e0a332", bold = false, dim = false }], [{ token = "$quota_context", bold = false, dim = false }, { token = "$quota_week_inline_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_inline_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_inline_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_inline_unknown", bold = false, dim = false }], [{ token = "$quota_5h_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_5h_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_5h_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_5h_unknown", bold = false, dim = false }, { token = "$quota_week_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_unknown", bold = false, dim = false }]] # herdr-agent-quota-row
+# ⚠ Sidebar token `fg` accepts only hex, never an ANSI name, so the severity colours are
+# spelled out: laramie state.ok / state.warn / state.error. Running the quota plugin's
+# configure or repair action regenerates this line with the plugin's own palette - review
+# `git diff -- herdr/config.toml` afterward and restore these three values.
+rows = [["state_icon", "machine", "workspace", "tab"], [{ token = "$quota_provider_model", bold = true, dim = false }], [{ token = "$quota_cache_ttl", bold = false, dim = false }, { token = "$quota_error", fg = "#e0a332", bold = false, dim = false }], [{ token = "$quota_context", bold = false, dim = false }, { token = "$quota_week_inline_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_inline_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_inline_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_inline_unknown", bold = false, dim = false }], [{ token = "$quota_5h_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_5h_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_5h_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_5h_unknown", bold = false, dim = false }, { token = "$quota_week_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_unknown", bold = false, dim = false }]] # herdr-agent-quota-row
+# clauth: `$clauth` renders WHICH ACCOUNT each Claude Code pane is spending. It is invisible
+# until a row template names it, which is why this table exists at all.
+#
+# ⚠ HAND-MERGED, and it has to be. `clauth herdr install` writes a rows_by_agent.claude of its
+# own - ["state_icon","workspace","tab"], ["terminal_title_stripped"], ["agent","$clauth"] - and
+# rows_by_agent REPLACES the generic `rows` for that agent. Taking it verbatim would silently drop
+# every herdr-agent-quota token from Claude panes, which is the half that shows usage. So this is
+# the generic `rows` above, verbatim, with `$clauth` added to the model row.
+#
+# ⚠ MAINTENANCE: agent-quota's `configure --apply` rewrites only the line it marks
+# `# herdr-agent-quota-row`, and clauth only rewrites blocks it marked itself. Neither will ever
+# touch this one. After a quota-plugin update that renames or adds a token, re-copy `rows` here
+# and re-add `$clauth`. scripts/audit-config.fish fails if the two drift apart.
+#
+# Codex panes are not listed, so they keep the generic `rows` - clauth has no account to report
+# for them.
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "machine", "workspace", "tab"], [{ token = "$quota_provider_model", bold = true, dim = false }, { token = "$clauth", bold = false, dim = true }], [{ token = "$quota_cache_ttl", bold = false, dim = false }, { token = "$quota_error", fg = "#e0a332", bold = false, dim = false }], [{ token = "$quota_context", bold = false, dim = false }, { token = "$quota_week_inline_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_inline_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_inline_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_inline_unknown", bold = false, dim = false }], [{ token = "$quota_5h_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_5h_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_5h_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_5h_unknown", bold = false, dim = false }, { token = "$quota_week_normal", fg = "#86c452", bold = false, dim = false }, { token = "$quota_week_warning", fg = "#e0a332", bold = false, dim = false }, { token = "$quota_week_danger", fg = "#fc8697", bold = false, dim = false }, { token = "$quota_week_unknown", bold = false, dim = false }]]
+
 
 [session]
 resume_agents_on_restore = true
@@ -72,3 +94,9 @@ key = "prefix+shift+q"
 type = "plugin_action"
 command = "herdr-agent-quota.open-settings"
 description = "open agent quota settings"
+
+[[keys.command]]
+key = "prefix+a"
+type = "plugin_action"
+command = "clauth.open"
+description = "clauth accounts"

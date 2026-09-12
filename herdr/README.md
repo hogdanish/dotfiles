@@ -59,9 +59,45 @@ supported agent conversations through its installed integrations.
 It reads Claude's status line and Codex's app-server usage report, without sending
 model prompts. Available figures depend on what each agent reports.
 
-Clauth is not installed. Its account switching writes credential copies and changes
-Claude's login state. That conflicts with the current credential arrangement and
-adds no benefit unless multiple Claude accounts need management.
+Clauth is installed as of 2026-09-12, and its herdr plugin runs alongside the quota
+plugin rather than replacing it. The earlier note here said clauth was not installed
+because its credential handling conflicted with the config-dir arrangement; that
+conflict was real and was resolved by retiring `$CLAUDE_CONFIG_DIR` in favour of a
+`~/.claude` symlink, which is what let both tools agree on one config dir and one
+Keychain item. See `.claude/CLAUDE.md`. The two plugins report different things:
+agent-quota renders model, TTL, context and the 5h/7d windows; clauth renders which
+account the pane is spending, plus delegate state.
+
+## Theme
+
+`[theme.custom]` in `config.toml` sets all 19 Herdr palette tokens to Laramie values.
+The `laramie` skill's `references/bindings.md` holds the table and the reasons.
+Two facts decide the rest, and both come from Herdr 0.9.0's own source:
+
+**Text on a coloured button comes from `panel_bg`.** Herdr draws the focused tab,
+the active settings section, a selected choice, the `apply` button, and selected
+worktree rows with `accent` behind and `panel_bg` in front. If `panel_bg` is
+`reset`, it uses `surface_dim` instead. Herdr does not calculate that colour.
+Before this change both resolved to terminal defaults, which put grey text on a
+light blue button at 1.59:1. That is why buttons were unreadable. `surface_dim` is
+now `#161925`, which gives 8.09:1.
+
+**`panel_bg` stays `reset` on purpose.** Ghostty uses 0.92 opacity and glass blur.
+A hex value here would make the sidebar, the tab bar, and every modal an opaque
+block on that glass. `reset` keeps Herdr's own surfaces as clear as the panes.
+
+The four text tokens step down by lightness: `text` at 10.48:1, `subtext0` at
+7.37:1, `overlay1` at 5.54:1, `overlay0` at 4.53:1. All four pass WCAG AA.
+Row backgrounds rise instead of sink: the active row is `surface.raised` and the
+navigate cursor row is `surface.overlay`. They were both ANSI black before, so the
+cursor row was invisible and the active row looked disabled.
+
+Herdr's own theme tests require five things of any palette. They skip the
+`terminal` theme, so they never covered this file. Check all five after a change:
+
+- `text` against `active_row_bg`, and `text` against `selection_bg`: 3.0 or more.
+- `panel_bg` against `active_row_bg`, and against `selection_bg`: 1.05 or more.
+- `selection_bg` and `active_row_bg` must differ.
 
 ## Maintenance
 
@@ -84,15 +120,45 @@ herdr plugin action invoke herdr-agent-quota.configure
 ```
 
 Repair requires a running Herdr server started from a fresh fish shell.
-`fish/conf.d/herdr.fish` exports the real Claude settings path because the plugin
-ignores `CLAUDE_CONFIG_DIR` and replaces its target file atomically.
+`fish/conf.d/herdr.fish` exports `CLAUDE_SETTINGS_FILE` because the plugin reads
+neither `CLAUDE_CONFIG_DIR` nor Claude's own `--settings`, and it replaces its
+target file atomically. Since 2026-09-12 that variable points straight at the
+tracked `claude-code/settings.json`: there is no `settings.json` in the Claude
+config dir any more, because clauth rewrites that path on every account switch.
 Native integration scripts live in the agents' runtime directories; tracked Claude
 settings and Codex hooks contain their declarations.
 
-Quota repair and layout changes restore upstream quota colors. Review
-`git diff -- herdr/config.toml` afterward and restore the Laramie severity colors:
-green `#86c452`, yellow `#e0a332`, red `#fc8697`.
+Quota repair and layout changes restore the plugin's own quota colors. Sidebar
+token `fg` accepts hex only, never an ANSI name, so the Laramie severity colors are
+written out. Review `git diff -- herdr/config.toml` afterward and restore them:
+green `#86c452`, yellow `#e0a332`, red `#fc8697`. This happened once already, on
+2026-09-12.
 The custom `prefix+u` refresh binding survives repair and leaves native reload free.
+
+To reproduce the clauth plugin installation:
+
+```fish
+clauth herdr install --no-config --yes
+```
+
+⚠ `--no-config` is not optional here. Without it clauth appends its own
+`[ui.sidebar.agents.rows_by_agent]` with `claude = [["state_icon", "workspace",
+"tab"], ["terminal_title_stripped"], ["agent", "$clauth"]]`, and `rows_by_agent`
+*replaces* the generic `rows` for that agent — so every herdr-agent-quota token
+would silently vanish from Claude panes, which is the half that shows usage. The
+two plugins complement each other: agent-quota renders model/TTL/context/5h/7d,
+clauth renders which account the pane is spending.
+
+Both config blocks are therefore hand-written in `herdr/config.toml`: the
+`prefix+a` binding for `clauth.open`, and a `rows_by_agent.claude` template that
+is the generic `rows` verbatim plus `$clauth` on the model row. Codex panes are
+deliberately absent from `rows_by_agent`, so they keep the generic `rows`.
+
+⚠ Maintenance: agent-quota's `configure --apply` rewrites only the line it marks
+`# herdr-agent-quota-row`, and clauth only rewrites blocks it marked itself.
+Neither will ever update the merged template. After a quota-plugin update that
+renames or adds a token, re-copy `rows` into `rows_by_agent.claude` and re-add
+`$clauth`. `scripts/audit-config.fish` fails if the two drift apart.
 
 Run `herdr config check` and `herdr server reload-config` after manual changes.
 Run `scripts/audit-config.fish` after an installation change.
