@@ -340,10 +340,24 @@ Check `clauth --help` against the installed binary before trusting a wiki page.
 - **Thresholds** are clauth's defaults and deliberately so: 5h `fallback_threshold = 95`, weekly
   `weekly_switch_threshold = 98`. The weekly line sits below 100 because topping out a week bricks
   an account for days rather than hours.
-- ⚠ **`auto_start` and `burn_aware_switching` are both OFF.** `auto_start` sends a **real billed**
-  1-token ping to open an account's 5h window early, and burn-aware switching can only ever switch
-  *earlier* than the static threshold — a tightening knob, not a safety one, and not worth setting
-  before there is usage history to judge it against. Turn either on deliberately, not by default.
+- **`auto_start` is ON for both accounts, with `auto_start_queue`** (2026-09-12). It sends a
+  **real billed** 1-token Haiku ping to open an account's 5h window early, so a chain hop lands on
+  an account that is already cycling rather than starting a cold five-hour clock at the moment you
+  need it. ⚠ **The queue is not optional with more than one account.** Without it every window
+  reopens the instant it lapses, so both accounts stay in phase and reset *together* — everything
+  at once, then nothing for five hours. The queue lets a member open a window only when no other
+  opened one in the last `5h / N`, which is 2h30m here. It is self-organising and keeps no state
+  file: the spacing is derived from each profile's `usage_history.jsonl`, so a fresh install or a
+  restart can open one window late and re-spaces itself over the next cycle.
+- **`burn_aware_switching` is OFF, and is the knob to reach for if a fast-burning model ever
+  overshoots the line.** Static switching compares utilization to the 95% threshold, so a model
+  that consumes a large slice between two polls can cross it and keep going. Burn-aware instead
+  projects the recent rate forward and switches once the projection would pass 100% before the
+  next refresh. It can only ever fire *earlier* than static, never later, and no earlier than
+  `burn_switch_floor_pct` (98). It needs three samples in the last hour to compute anything and
+  falls back to the static threshold without them. `refresh_interval_ms` was lowered 90s → **30s**
+  on 2026-09-12 for the same reason — it bounds how long a spend can run past the line unnoticed,
+  and it also caps burn-aware's projection horizon.
 - ⚠ **`spend_budget_switching` is off and must stay off** unless real money is intended: it is the
   master switch for pay-as-you-go fallback, and an armed account with no `last_resort` member can
   spend without a stop.
