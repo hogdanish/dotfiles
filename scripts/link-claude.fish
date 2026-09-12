@@ -125,6 +125,14 @@ function main --description 'link authored Claude config and skills'
         end
     end
 
+    # one link per authored output style, for the same reason as skills: a plugin may add its own
+    # into $DEST/output-styles/, so the repo owns only the files it wrote. ⚠ an output style here
+    # is inert until it is selected with /output-style — nothing in settings.json names one.
+    for style in (path filter -f $SRC/output-styles/*.md)
+        set -l name (path basename $style)
+        __link_one $style $DEST/output-styles/$name output-styles/$name
+    end
+
     __prune_broken_skills
 
     test $FAILED -eq 0; or return 1

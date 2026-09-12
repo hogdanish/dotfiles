@@ -118,6 +118,16 @@ function __check_claude_links --description 'authored claude config is still sym
         end
     end
 
+    # same for every authored output style. an unlinked one is simply not offered by /output-style.
+    for style in (path filter -f $REPO/claude-code/output-styles/*.md)
+        set -l name (path basename $style)
+        if not test -L $state/output-styles/$name
+            __fail "output-styles/$name is authored but not linked — run scripts/link-claude.fish"
+        else if not test -e $state/output-styles/$name
+            __fail "$state/output-styles/$name is a broken symlink"
+        end
+    end
+
     # ...and the reverse: a dangling link loads nothing while looking installed. this is the
     # exact failure `firecrawl setup skills` produced 31 times, undetected for two days.
     for entry in $state/skills/*
@@ -465,6 +475,37 @@ function __check_browser_mcp --description 'browser control stays opt-in, never 
     __say info 'browser MCPs are declared, opt-in, and headed'
 end
 
+function __check_simple_english --description 'Simple English stays vendored and opt-in, never the plugin'
+    # ⚠ upstream ships a claude code plugin, and installing it is the one thing this must not do:
+    # its plugin.json wires a SessionStart hook that injects the register into EVERY session, a
+    # PostToolUse lint on every Write|Edit, and a Stop hook on every turn. the skill is wanted, the
+    # always-on part is not, so the skill and the output style are vendored here instead.
+    set -l settings $REPO/claude-code/settings.json
+    if jq -e '.enabledPlugins // {} | keys[] | select(startswith("simple-english"))' \
+            $settings >/dev/null 2>&1
+        __fail 'the simple-english plugin is enabled — it ships SessionStart/PostToolUse/Stop hooks'
+    end
+    if jq -e '.outputStyle // "" | test("simple-english")' $settings >/dev/null 2>&1
+        __fail 'settings.json pins the simple-english output style — it is per-session, via /output-style'
+    end
+
+    # the marketplace entry alone is harmless, but it is how the plugin gets installed by accident.
+    set -l known $XDG_STATE_HOME/claude/plugins/known_marketplaces.json
+    if test -r $known; and jq -e 'has("simple-english")' $known >/dev/null 2>&1
+        __fail "the simple-english marketplace is registered in $known — remove it"
+    end
+
+    # the vendored copies must still match the upstream release they claim.
+    set -l sync $REPO/claude-code/skills/simple-english/scripts/simple-english-sync.sh
+    if not test -x $sync
+        __fail "missing $sync"
+    else if not $sync >/dev/null 2>&1
+        __fail 'vendored Simple English has drifted from upstream — run simple-english-sync.sh'
+    end
+
+    __say info 'Simple English is vendored, opt-in, and matches upstream'
+end
+
 function __check_onepassword_mcp --description '1Password MCP is wired at user scope and matches its declaration'
     # ⚠ the inverse of the browser MCPs above: this one is deliberately always-on. eight tools, and
     # by construction none of them can return a secret VALUE — list_variables returns names only.
@@ -515,6 +556,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_claude_install
     __check_browser_mcp
     __check_onepassword_mcp
+    __check_simple_english
     __check_codex_links
     __check_project_agent_links
     __check_commongrounds_codex

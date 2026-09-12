@@ -20,6 +20,10 @@ My simple macOS config. No GNU Stow, chezmoi, or anything else. This repo is `~/
   project-only MCPs stay in each project's tracked `.codex/config.toml`
 - The Website Spec MCP is declared globally for both agents but switched on per project
   (`hogdot`, `commongrounds`); the `website-spec` skill vendors the whole checklist so audits work without it
+- The `simple-english` skill and output style are vendored from
+  [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) rather than installed as its
+  plugin, whose hooks would apply the register to every session; both agents load the skill only
+  when it is asked for by name
 - All secrets are managed via 1Password and resolved at use time via `op run`, never stored on disk.
 
 ## New machine

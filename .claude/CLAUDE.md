@@ -42,16 +42,17 @@ must not be. `brewfile-validate.sh` stays project-scoped in `.claude/hooks/`. �
 `SessionStart`/`SessionEnd` keep-awake hook was **deleted 2026-08-27** — do not reintroduce it.
 
 **`skills/`** — user-level, loaded everywhere (unlike `.claude/skills/`, which loads only inside
-this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `website-spec`. `fish` and `gum` live
-here rather than in `.claude/` because neither is repo-specific. All six are listed and
-model-invocable — `disable-model-invocation: true` was dropped **2026-08-27**, because hiding them
-meant relying on always-on CLAUDE.md pointers to get them read at all. Deleted: `prose`
-(2026-08-16) and `toolbox` (2026-08-17), skill and rule each.
+this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `simple-english`, `website-spec`.
+`fish` and `gum` live here rather than in `.claude/` because neither is repo-specific. All seven
+are listed and model-invocable — `disable-model-invocation: true` was dropped **2026-08-27**,
+because hiding them meant relying on always-on CLAUDE.md pointers to get them read at all.
+Deleted: `prose` (2026-08-16) and `toolbox` (2026-08-17), skill and rule each.
 
 - ⚠ **`website-spec` (added 2026-09-01) vendors a third party's living documents** — the full
   168-item checklist from `specification.website/checklist.md` and the spec author's own
-  `SKILL.md`, both verbatim. That is the one deliberate exception to the vendor-skills rule below,
-  and it is only safe because the exception is *content*, not a skill body we pretend to own: our
+  `SKILL.md`, both verbatim. That is the first of two deliberate exceptions to the vendor-skills
+  rule below (Simple English is the other), and it is only safe because the exception is *content*,
+  not a skill body we pretend to own: our
   `SKILL.md` is authored here, upstream's is kept whole beside it as a reference, and
   `scripts/website-spec-sync.sh` re-fetches both, diffs them, and checks the sha256 the site
   publishes in `/.well-known/agent-skills/index.json`. Never hand-edit the two vendored files —
@@ -65,6 +66,34 @@ meant relying on always-on CLAUDE.md pointers to get them read at all. Deleted: 
   the tracked `settings.json`, which `claude plugin install` writes through the symlink, so the
   declaration version-controls itself. A hand-authored copy goes stale (the brief `firecrawl` one
   proved it).
+
+**Simple English: vendored, not installed, and opt-in on purpose** (2026-09-06).
+[github.com/AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) **v2.0.0**, MIT — a
+writing register modelled on ASD-STE100 Simplified Technical English. It is the **second**
+deliberate exception to the vendor-skills rule above, and the reason is the upstream plugin itself:
+its `.claude-plugin/plugin.json` wires a `SessionStart` hook that injects the register into **every**
+session, a `PostToolUse` lint on every `Write|Edit`, and a `Stop` hook on every turn. Claude Code
+takes plugin hooks or leaves the plugin — there is no per-hook switch — so installing it means
+always-on, which is exactly what was not wanted. `claude plugin install simple-english`,
+`codex plugin add`, and `npx skills add AminBlg/SimpleEnglish` are therefore all **wrong** here.
+
+What is tracked instead is the skill body and the output style, and nothing that fires by itself:
+
+- `claude-code/skills/simple-english/` — upstream's `SKILL.md` body and all four `references/`,
+  verbatim. Both linkers already discover it, so Claude Code and Codex (`~/.agents/skills/`) get it.
+- `claude-code/output-styles/simple-english.md` — upstream's output style, verbatim. Inert until
+  someone picks it in `/output-style`. ⚠ **Never set `"outputStyle"` in `settings.json`** — that is
+  the always-on path by another name, and `audit-config.fish` fails on it.
+- ⚠ Exactly **two** local edits, both fenced by `LOCAL OVERRIDE` markers so the sync diff ignores
+  them: the frontmatter `description`, rewritten so the skill loads only when the register is asked
+  for by name (upstream's fires on "documentation, READMEs, runbooks… release notes", i.e. on
+  ordinary work), and a **Plain mode always, never Strict** block. Strict is upstream's
+  dictionary-compliance mode and triggers on the words "STE" or "ASD-STE100" — the same words a
+  person uses to *invoke* the skill, which is the trap the override closes.
+- `scripts/simple-english-sync.sh` re-fetches the latest release, diffs every vendored file, and
+  fails when the pinned version marker no longer matches upstream's tag. `--write` refreshes the
+  upstream half and leaves the local half alone. ⚠ Read the release notes before refreshing: 2.0.0
+  itself moved the default from Strict STE to Plain.
 
 **`codex/`** — thin Codex protocol adapters only. Codex does not separate config from state, so live
 `~/.codex/` stays untracked and links back here: `config.toml` and `*.config.toml` profiles into
