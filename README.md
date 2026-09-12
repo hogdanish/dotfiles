@@ -31,7 +31,8 @@ My simple macOS config. No GNU Stow, chezmoi, or anything else. This repo is `~/
   variable's hash. `~/.claude/settings.json` is deliberately absent too — `clauth` would rewrite it
   on every account switch — so the tracked file is passed per session with `claude --settings`
 - `clauth` manages the Claude Code accounts: switching, live 5h/7d usage, and an auto-switch
-  fallback chain run by a launchd daemon. It has no Homebrew formula (`cargo install clauth`)
+  fallback chain run by a launchd daemon. No Homebrew formula, and installed from git rather than
+  crates.io — the released version corrupts the macOS Keychain login item on every switch
 - `rumdl` formats every markdown file, at three points that all fix rather than complain: VS Code
   on save, a `PostToolUse` hook on anything an agent writes, and a `lefthook` job that reformats and
   re-stages instead of rejecting the commit. The style is `rumdl/rumdl.toml`, which doubles as the

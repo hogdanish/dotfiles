@@ -24,7 +24,14 @@ brew "herdr"      # claude/codex: persistent terminal workspaces
 # ⚠ clauth (claude code account switcher, usage monitor, auto-switch chain) is NOT here and has
 # no formula. it is a cargo install, and cargo is deliberately outside this file's tracked set —
 # the third documented gap, with vs code extensions and bun/npm globals. to install or upgrade:
-#   cargo install clauth
+#   cargo install --git https://github.com/uwuclxdy/clauth --locked
+# ⚠ FROM GIT, NOT CRATES.IO, AND NOT `cargo install clauth`. the only release, v0.15.1, writes the
+# macos keychain item through `security -i`, whose command line truncates at 4096 bytes, with no
+# size guard at all. claude code stores every mcp server's oauth login beside the claude login in
+# that one item, which is ~10 kb here, so EVERY account switch truncated it and corrupted the
+# login. it did exactly that on 2026-09-12. upstream fixed it with an argv fallback
+# (keychain.rs::put_transport) that is committed but unreleased. re-check on the next release.
+# ⚠ a git install does not self-update; re-run the command above to upgrade.
 # it lands in $CARGO_HOME/bin, already on $PATH via fish/conf.d/rust.fish. see .claude/CLAUDE.md
 # for the two config invariants it depends on; audit-config.fish asserts the binary resolves.
 brew "starship"   # prompt

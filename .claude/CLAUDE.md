@@ -312,12 +312,30 @@ exactly the shape `clauth` gives them.
 **clauth: the account switcher that replaced it** (2026-09-12).
 [uwuclxdy/clauth](https://github.com/uwuclxdy/clauth) v0.15.1, MIT, Rust. Multi-account switching,
 live 5h/7d usage, an auto-switch fallback chain, an MCP plugin and a herdr plugin. Installed with
-`cargo install clauth` — the language-specific tier of the install hierarchy, since there is no
-formula. ⚠ **It is stock, and deliberately unpatched**: a fork carrying path fixes was designed and
-rejected, because a permanent rebase is a worse tax than the two config changes that avoid it. Both
-of those changes are documented at the top of this file — the `~/.claude` symlink with
-`$CLAUDE_CONFIG_DIR` unset, and the absent `settings.json`. **Do not undo either to "tidy up"; each
-one is what keeps clauth working.**
+`cargo install --git https://github.com/uwuclxdy/clauth --locked` — the language-specific tier of
+the install hierarchy, since there is no formula. ⚠ **It is stock, and deliberately unpatched**: a
+fork carrying path fixes was designed and rejected, because a permanent rebase is a worse tax than
+the two config changes that avoid it. Both of those changes are documented at the top of this file
+— the `~/.claude` symlink with `$CLAUDE_CONFIG_DIR` unset, and the absent `settings.json`. **Do not
+undo either to "tidy up"; each one is what keeps clauth working.**
+
+⚠ **Never `cargo install clauth` from crates.io.** The only release, v0.15.1, writes the macOS
+Keychain item through `security -i`, whose command line truncates at 4096 bytes — with **no size
+guard whatsoever** in that build. Claude Code keeps every MCP server's OAuth login as a sibling key
+inside that one item, which is **~10 KB on this machine**, so the write silently truncated it and
+left the login as cut-off JSON. It did exactly that on 2026-09-12 and signed Claude Code out. The
+symptom is `security: unknown command "<fragment>"` on stderr, the fragment being whatever text
+followed the cut. **Every** switch would have done it, not just the first, and the daemon does
+Keychain writes of its own on every auto-switch. Upstream fixed it with an argv fallback
+(`keychain.rs::put_transport`, which also refuses above 512 KB), committed to the default branch —
+named `mommy`, not `main` — but **unreleased**. Re-check the releases page before moving back to
+crates.io. ⚠ A git install does not self-update: re-run the command to upgrade, and
+`launchctl kickstart -k gui/$(id -u)/dev.uwuclxdy.clauth` afterwards, or the daemon keeps running
+the old code from memory.
+
+⚠ **The vendored wiki describes the default branch, not the release.** `clauth capture <name>` is
+documented there and does not exist in v0.15.1 — `clauth login <name>` is the working spelling.
+Check `clauth --help` against the installed binary before trusting a wiki page.
 
 - **Thresholds** are clauth's defaults and deliberately so: 5h `fallback_threshold = 95`, weekly
   `weekly_switch_threshold = 98`. The weekly line sits below 100 because topping out a week bricks
