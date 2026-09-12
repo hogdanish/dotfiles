@@ -7,8 +7,8 @@ personality = "pragmatic"
 model = "gpt-6-astra"
 # Compact at 75% of the current 272,000-token context window.
 model_auto_compact_token_limit = 204000
-model_reasoning_effort = "high"
-service_tier = "fast"
+model_reasoning_effort = "medium"
+service_tier = "default"
 developer_instructions = """
 When delegation is explicitly requested or applicable project instructions call for it, keep the
 agent tree at most two levels below the primary: a primary may spawn subagents, and a subagent may
@@ -97,9 +97,9 @@ memories = true
 # Keep large reviews capable but bounded. Prompts should normally use no more
 # than four workers at once; this ceiling leaves room for targeted follow-ups.
 [agents]
-max_concurrent_threads_per_session = 6
-default_subagent_model = "gpt-5.6-sol"
-default_subagent_reasoning_effort = "high"
+max_concurrent_threads_per_session = 12
+default_subagent_model = "gpt-6-astra"
+default_subagent_reasoning_effort = "medium"
 
 [mcp_servers.node_repl]
 args = []
@@ -118,8 +118,8 @@ NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = ""
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
-NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.901.31953/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+BROWSER_USE_CODEX_APP_VERSION = "26.908.40834"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.908.40834/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 SKY_CUA_SERVICE_PATH = "/Users/ethan/.codex/computer-use/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
@@ -255,6 +255,39 @@ trust_level = "trusted"
 [projects."/Users/ethan/Documents/Codex/2026-09-04/asdasd-4"]
 trust_level = "trusted"
 
+[projects."/Users/ethan/Documents/Codex/2026-09-05/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-05/asdasd-2"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-06/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-07/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-08/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-09/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-09/asdasd-2"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-10/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-10/asdasd-2"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-10/asdasd-3"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-11/asdasd"]
+trust_level = "trusted"
+
 [hooks.state]
 
 # Native Herdr SessionStart integration; reviewed local socket reporter.
@@ -262,16 +295,16 @@ trust_level = "trusted"
 trusted_hash = "sha256:95b5dc60af2ccf17765163b4120dd5c5abe7956cce31ee60b0c41e39b2419b08"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:0"]
-trusted_hash = "sha256:abc5d0f6282a43ea8f9e3b363a493e020df037bc248823bb9930cd27369a98dd"
+trusted_hash = "sha256:57a0c7f2e401c996d61bcce1c9c16e0701c0617cf48715caf5e56cad43fcc6f1"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:cfa5383b5b0905ada45a9be46edf0d188462c8f255ff17bc6ce66f27f9db990a"
+trusted_hash = "sha256:4842bd1b72ba9e52de6f5048a881c5d8f8b25a1e7126a955b3ef9fc6e0d65151"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:1"]
-trusted_hash = "sha256:597076289e605442477f79f111f0bf69c729a9792d7a09af7d5fa629604950bd"
+trusted_hash = "sha256:f67427deeab1df40af43f8dabe024a0b7cd8431e7bcefd6ab39a4518978a624c"
 
 [hooks.state."/Users/ethan/Projects/commongrounds/.codex/hooks.json:post_tool_use:0:2"]
-trusted_hash = "sha256:abef831ebbbf5c3e97be25af0e466a13b92f2bc84db596f0d49e1ae021c43111"
+trusted_hash = "sha256:993ae80a869549fdab4db10dc9aebf96f216f3a0c421f688cf9036c190ca255d"
 
 [hooks.state."/Users/ethan/.codex/hooks.json:pre_tool_use:0:0"]
 trusted_hash = "sha256:621af96a79bd80805cd902235300b2b00e30960359f49db53458a9a78f7956fd"
@@ -280,4 +313,4 @@ trusted_hash = "sha256:621af96a79bd80805cd902235300b2b00e30960359f49db53458a9a78
 trusted_hash = "sha256:14463f6b68a0d2bfa9faa4effee00476a146ed19b74662801e8ce29e7b730111"
 
 [tui.model_availability_nux]
-gpt-6-astra = 3
+gpt-6-astra = 4

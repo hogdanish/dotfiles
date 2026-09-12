@@ -79,10 +79,10 @@
       "effortLevel": "high"
     },
     "claude-opus-5": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
     },
     "claude-fable-5-1": {
-      "effortLevel": "xhigh"
+      "effortLevel": "medium"
     }
   },
   "showClearContextOnPlanAccept": true,
