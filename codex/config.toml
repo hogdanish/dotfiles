@@ -7,7 +7,7 @@ personality = "pragmatic"
 model = "gpt-6-astra"
 # Compact at 75% of the current 272,000-token context window.
 model_auto_compact_token_limit = 204000
-model_reasoning_effort = "medium"
+model_reasoning_effort = "xhigh"
 service_tier = "default"
 developer_instructions = """
 When delegation is explicitly requested or applicable project instructions call for it, keep the
@@ -43,7 +43,7 @@ enabled = true
 enabled = true
 
 [plugins."pdf@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."spreadsheets@openai-primary-runtime"]
 enabled = false
@@ -52,7 +52,7 @@ enabled = false
 enabled = false
 
 [plugins."template-creator@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."google-calendar@openai-curated"]
 enabled = true
@@ -62,11 +62,15 @@ enabled = true
 
 # cloudflare matches claude code: skills and the api mcp are available in every session.
 [plugins."cloudflare@openai-curated-remote"]
-enabled = true
+enabled = false
+
+[plugins."cloudflare@openai-curated-remote".mcp_servers]
 
 [plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api]
 enabled = true
 default_tools_approval_mode = "writes"
+
+[plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api.tools]
 
 [plugins."cloudflare@openai-curated-remote".mcp_servers.cloudflare-api.tools.search]
 approval_mode = "approve"
@@ -81,7 +85,7 @@ enabled = true
 enabled = true
 
 [plugins."firecrawl@firecrawl"]
-enabled = true
+enabled = false
 
 [plugins."unified-computer-use@openai-bundled"]
 enabled = true
@@ -288,6 +292,12 @@ trust_level = "trusted"
 [projects."/Users/ethan/Documents/Codex/2026-09-11/asdasd"]
 trust_level = "trusted"
 
+[projects."/Users/ethan/Documents/Codex/2026-09-12/asdasd"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-12/asdasd-2"]
+trust_level = "trusted"
+
 [hooks.state]
 
 # Native Herdr SessionStart integration; reviewed local socket reporter.
@@ -311,6 +321,9 @@ trusted_hash = "sha256:621af96a79bd80805cd902235300b2b00e30960359f49db53458a9a78
 
 [hooks.state."/Users/ethan/.codex/hooks.json:post_tool_use:0:0"]
 trusted_hash = "sha256:14463f6b68a0d2bfa9faa4effee00476a146ed19b74662801e8ce29e7b730111"
+
+[hooks.state."/Users/ethan/.codex/hooks.json:post_tool_use:0:1"]
+trusted_hash = "sha256:84721067fa2e726236114ce7d1e5453924401d858aad4b83b47ae06df703cc5f"
 
 [tui.model_availability_nux]
 gpt-6-astra = 4
