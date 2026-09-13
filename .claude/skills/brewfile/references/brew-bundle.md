@@ -2,8 +2,9 @@
 
 Distilled from <https://docs.brew.sh/Brew-Bundle-and-Brewfile> (upstream
 `docs/Brew-Bundle-and-Brewfile.md`, last upstream review 2026-07-18) and verified against
-**Homebrew 6.0.13** on this machine. Where the docs and the local `--help` disagreed, the local
-binary won.
+**Homebrew 6.0.13** on this machine, and re-checked for the flag and variable changes in **7.0.0**
+(2026-09-13, <https://brew.sh/7.0.0-migration-guide/>). Where the docs and the local `--help`
+disagreed, the local binary won.
 
 A `Brewfile` is a **declarative** manifest: you state the end state, not the commands.
 `brew bundle install` converges the machine toward it. It is evaluated as **Ruby**, so anything Ruby
@@ -197,10 +198,14 @@ cask "java" unless system "/usr/libexec/java_home", "--failfast"
 ### `install` / `upgrade` flags
 
 `--no-upgrade` (skip `brew upgrade`) · `--upgrade` (force, even if `HOMEBREW_BUNDLE_NO_UPGRADE` is
-set) · `--upgrade-formulae=a,b` (upgrade only these) · `--jobs=N|auto` (parallel installs; default
-1, `auto` caps at 4) · `--force` (`--force`/`--overwrite`) · `--force-cleanup` (cleanup afterwards
-without asking) · `--zap` (use `brew uninstall --zap` instead of plain uninstall when cleaning up
-casks).
+set) · `--upgrade-formulae=a,b` (upgrade only these) · `--force` (`--force`/`--overwrite`) ·
+`--force-cleanup` (cleanup afterwards without asking) · `--zap` (use `brew uninstall --zap` instead
+of plain uninstall when cleaning up casks).
+
+⚠ **7.0.0:** `--jobs` is deprecated and *ignored* — installs are batched by default and
+`HOMEBREW_DOWNLOAD_CONCURRENCY` is the only concurrency knob. `HOMEBREW_BUNDLE_JOBS` /
+`HOMEBREW_BUNDLE_NO_JOBS` and `install --cleanup` are disabled outright; run `brew bundle cleanup`
+as its own step.
 
 ### `dump` flags
 
@@ -209,7 +214,8 @@ Per-type opt-in: `--formula` `--cask` `--tap` `--mas` `--vscode` `--go` `--cargo
 
 Per-type opt-out: `--no-<type>` (alias `--no-dump-<type>`), e.g. `--no-vscode`.
 
-Also: `--describe` / `--no-describe` (description comments above each entry — **on by default**) ·
+Also: `--no-describe` (drop the description comments that are **on by default**; 7.0.0 disabled the
+positive `--describe`, `HOMEBREW_BUNDLE_DESCRIBE` and `HOMEBREW_BUNDLE_DUMP_DESCRIBE`) ·
 `--no-restart` (omit `restart_service:`) · `--install` (run `install` before dumping) · `--force`.
 
 ### `exec` / `sh` / `env` flags
@@ -229,7 +235,7 @@ Brewfile's services for the duration). Inside these environments `HOMEBREW_INSID
 | `HOMEBREW_BUNDLE_NO_DESCRIBE`           | `dump` behaves as `--no-describe`.                                                                                       |
 | `HOMEBREW_BUNDLE_DUMP_NO_<TYPE>`        | `dump` skips that type. `<TYPE>` ∈ `BREW` `CASK` `TAP` `MAS` `VSCODE` `GO` `CARGO` `UV` `FLATPAK` `WINGET` `KREW` `NPM`. |
 | `HOMEBREW_BUNDLE_<TYPE>_SKIP`           | Space-separated names for `install` to skip. `<TYPE>` ∈ `BREW` `CASK` `MAS` `TAP`.                                       |
-| `HOMEBREW_BUNDLE_FORCE_INSTALL_CLEANUP` | With `--global`, implies `--force-cleanup`.                                                                              |
+| `HOMEBREW_BUNDLE_FORCE_INSTALL_CLEANUP` | With `--global`, implies `--force-cleanup`. ⚠ Deprecated in 7.0.0, disabled 2027-12-11.                                  |
 | `HOMEBREW_INSIDE_BUNDLE`                | Set to `1` inside `exec`/`sh`/`env`. Detect-only.                                                                        |
 
 ---
@@ -254,8 +260,8 @@ Confirmed by dumping this machine (Homebrew 6.0.13):
 
 - **Order:** `tap` → `brew` → `cask` → `mas`. Alphabetical within each group; `mas` sorted by name.
 - **Quoting:** always `"double"`. Never single.
-- **Descriptions:** `--describe` is the default and covers **both formulae and casks**, as a
-  full-line `# comment` *above* the entry.
+- **Descriptions:** on by default (opt out with `--no-describe`) and cover
+  **both formulae and casks**, as a full-line `# comment` *above* the entry.
 - ⚠ **Font casks get no description at all** — `font-commit-mono`, `font-sf-pro` etc. dump bare.
 - ⚠ **Long descriptions wrap onto a second comment line**, e.g. `pinentry-touchid` produces two `#`
   lines. Anything parsing "one comment = one package" breaks on this.

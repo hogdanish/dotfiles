@@ -74,3 +74,18 @@ keep it.
 ⚠ `HOMEBREW_VERIFY_ATTESTATIONS` is deliberately **not** set: it needs a GitHub token and would
 break the unattended autoupdate job. See the `auth` skill for why `fish/functions/brew.fish` was
 removed and must not come back.
+
+## 6. Homebrew 7.0.0 (upgraded 2026-09-13)
+
+Checked against the migration guide (<https://brew.sh/7.0.0-migration-guide/>): none of the
+`HOMEBREW_*` settings in `fish/conf.d/brew.fish` or `brew.env` was disabled or deprecated, and the
+`domt4/autoupdate` command, the `jorgelbg/tap` trust and `brew bundle check` all worked unchanged.
+
+- ⚠ **`HOMEBREW_NO_AUTO_UPDATE` still exists.** A summarised read of the release notes claimed it
+  was removed; the notes themselves still recommend it. Read the page, not a summary.
+- `brew vulns` is built in (OSV.dev); `brew vulns --brewfile` scopes it to this file.
+- `brew services` labels new and restarted services `sh.brew.<formula>`, not `homebrew.mxcl.*`.
+  Per-service overrides go in `$HOMEBREW_USER_CONFIG_HOME/services/<formula>.env`.
+- `brew list --installed-as-dependency` is disabled; use `brew list --no-installed-on-request`.
+- `HOMEBREW_BAT_THEME` / `HOMEBREW_BAT_CONFIG_PATH` are deprecated — `HOMEBREW_BAT` reads bat's own
+  `BAT_THEME` / `BAT_CONFIG_PATH` instead.
