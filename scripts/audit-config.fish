@@ -650,6 +650,37 @@ function __check_simple_english --description 'Simple English stays vendored and
     __say info 'Simple English is vendored, opt-in, and matches upstream'
 end
 
+function __check_rust_skills --description 'rust-skills stays vendored, byte-exact and excluded from rumdl'
+    # ⚠ the THIRD deliberate exception to the vendor-skills-belong-in-a-plugin rule, and the only
+    # one forced rather than chosen: leonardomso/rust-skills ships no .claude-plugin manifest and
+    # no marketplace, so `claude plugin install` has nothing to install. upstream's own path is
+    # `npx add-skill`, which writes into ~/.claude/skills and ~/.agents/skills DIRECTLY — both
+    # untracked state, outside this repo. vendoring here and linking out is what keeps it tracked.
+    set -l skill $REPO/claude-code/skills/rust-skills
+
+    # 265 vendored rule files are excluded from rumdl on purpose: formatting one would read as
+    # upstream drift the sync script never saw. losing this line is silent until the next sync.
+    if not grep -q claude-code/skills/rust-skills $REPO/.rumdl.toml
+        __fail 'rust-skills is not excluded in .rumdl.toml — formatting it would fake upstream drift'
+    end
+
+    # a real directory in either agent's skill dir means `npx add-skill` ran and bypassed the repo.
+    for live in $XDG_STATE_HOME/claude/skills/rust-skills $HOME/.agents/skills/rust-skills
+        if test -e $live; and not test -L $live
+            __fail "$live is a real directory — `npx add-skill` bypassed the repo; remove it and run the linkers"
+        end
+    end
+
+    set -l sync $skill/scripts/rust-skills-sync.sh
+    if not test -x $sync
+        __fail "missing $sync"
+    else if not $sync >/dev/null 2>&1
+        __fail 'vendored rust-skills has drifted from upstream — run rust-skills-sync.sh'
+    end
+
+    __say info 'rust-skills is vendored, byte-exact and linked for both agents'
+end
+
 function __check_onepassword_mcp --description '1Password MCP is wired at user scope and matches its declaration'
     # ⚠ the inverse of the browser MCPs above: this one is deliberately always-on. eight tools, and
     # by construction none of them can return a secret VALUE — list_variables returns names only.
@@ -757,6 +788,7 @@ function main --description 'audit tracked config, links and Codex parity'
     __check_browser_mcp
     __check_onepassword_mcp
     __check_simple_english
+    __check_rust_skills
     __check_codex_links
     __check_project_agent_links
     __check_commongrounds_codex

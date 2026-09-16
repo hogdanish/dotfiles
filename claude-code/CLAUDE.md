@@ -36,6 +36,10 @@ VS Code Insiders; git + GitHub CLI through the 1Password shell plugin.
 
 - **GDScript** — load the `godot` skill; use strict static typing, modern idioms, canonical
   snake/Pascal/constant naming and formatter-owned layout. Treat every warning as a defect.
+- **Rust** — load the `rust-skills` skill before writing, reviewing or refactoring any Rust:
+  265 vendored rules covering ownership, error handling, async, `unsafe`, API design and
+  performance. It is a third party's opinion, so a project's own conventions and its clippy
+  configuration outrank it on a collision.
 - **Fish and human-facing shell** — load `fish` before any `.fish` work and read every required
   reference; use `gum` for human prompts/status, never for machine-readable output.
 - **Web development** — load the `website-spec` skill before writing, reviewing or shipping any

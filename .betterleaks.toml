@@ -48,6 +48,13 @@ regexes = [
   # an openpgp key FINGERPRINT in the auth skill's docs. a fingerprint is the public
   # identifier of a key — it is what you publish so others can verify it. not a secret.
   '''6A40D13BBB936F443084E8C9292E4F983136B860''',
+  # a rust STRUCT FIELD typed with the `secrecy` crate's `Secret`, in the vendored
+  # rust-skills rule that teaches redacting credentials from logs. `generic-password`
+  # reads `password: Secret` as an assignment; it is a type annotation, and the field
+  # holds no value at all. anchored so `password: Secretxyz` would still fire.
+  # ⚠ a rust-skills refresh may add another such example — widen this, never the paths
+  #   list, or the whole vendored tree stops being scanned.
+  '''^password:\s*&?Secret(<String>)?[,)}\s]*$''',
 ]
 paths = [
   # ssh PUBLIC keys and the git identity. github publishes the same key at

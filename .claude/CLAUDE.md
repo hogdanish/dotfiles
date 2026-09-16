@@ -88,16 +88,18 @@ project-scoped in `.claude/hooks/`. ⚠ A `caffeinate.sh` `SessionStart`/`Sessio
 was **deleted 2026-08-27** — do not reintroduce it.
 
 **`skills/`** — user-level, loaded everywhere (unlike `.claude/skills/`, which loads only inside
-this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `simple-english`, `website-spec`.
-`fish` and `gum` live here rather than in `.claude/` because neither is repo-specific. All seven
+this repo): `godot`, `fish`, `gum`, `linode-cli`, `orbstack`, `rust-skills`, `simple-english`,
+`website-spec`.
+`fish` and `gum` live here rather than in `.claude/` because neither is repo-specific. All eight
 are listed and model-invocable — `disable-model-invocation: true` was dropped **2026-08-27**,
 because hiding them meant relying on always-on CLAUDE.md pointers to get them read at all.
 Deleted: `prose` (2026-08-16) and `toolbox` (2026-08-17), skill and rule each.
 
 - ⚠ **`website-spec` (added 2026-09-01) vendors a third party's living documents** — the full
   168-item checklist from `specification.website/checklist.md` and the spec author's own
-  `SKILL.md`, both verbatim. That is the first of two deliberate exceptions to the vendor-skills
-  rule below (Simple English is the other), and it is only safe because the exception is *content*,
+  `SKILL.md`, both verbatim. That is the first of three deliberate exceptions to the vendor-skills
+  rule below (Simple English and rust-skills are the others), and it is only safe because the
+  exception is *content*,
   not a skill body we pretend to own: our
   `SKILL.md` is authored here, upstream's is kept whole beside it as a reference, and
   `scripts/website-spec-sync.sh` re-fetches both, diffs them, and checks the sha256 the site
@@ -145,6 +147,39 @@ What is tracked instead is the skill body and the output style, and nothing that
   fails when the pinned version marker no longer matches upstream's tag. `--write` refreshes the
   upstream half and leaves the local half alone. ⚠ Read the release notes before refreshing: 2.0.0
   itself moved the default from Strict STE to Plain.
+
+**rust-skills: vendored because upstream ships no plugin, and always-on for Rust** (2026-09-16).
+[github.com/leonardomso/rust-skills](https://github.com/leonardomso/rust-skills) **v1.5.1**, MIT —
+265 Rust rules across 26 categories, pinned at commit `fd2a861`. It is the **third** deliberate
+exception to the vendor-skills rule above, and the only one that is *forced* rather than chosen:
+upstream has **no `.claude-plugin/` manifest, no marketplace and no git tags**, so
+`claude plugin install` has nothing to install. Upstream's own path is `npx add-skill
+leonardomso/rust-skills`, which writes straight into `~/.claude/skills/` and `~/.agents/skills/` —
+both untracked state, outside this repo. ⚠ **Do not run it.** Vendoring under
+`claude-code/skills/rust-skills/` and letting `link-claude.fish` and `link-codex.fish` link it out
+is what keeps the thing version-controlled, and it serves both agents from one copy.
+
+- **What is vendored**: `SKILL.md` (the 38 kB index), `rules/` (265 files, 1.2 MB) and `LICENSE`,
+  byte-for-byte. Deliberately **not** vendored: `checks/` (a Python + Cargo validation harness),
+  `README.md`, and the `AGENTS.md`/`CLAUDE.md` copies — upstream ships those two as byte-identical
+  duplicates of `SKILL.md`, and a third copy of the same index buys nothing here.
+- **Zero local edits, unlike Simple English.** Upstream's frontmatter `description` already fires
+  on exactly the right trigger — "writing, reviewing, or refactoring Rust code" — so there is no
+  `LOCAL OVERRIDE` fence and the sync diff is a plain byte comparison. If a refresh ever makes the
+  description fire on non-Rust work, fence an override rather than editing in place.
+- ⚠ **The 265 rule files are excluded in `.rumdl.toml`, and that line is load-bearing.** Formatting
+  a vendored file would surface as upstream drift that never happened, which is the same trap the
+  website-spec and Simple English excludes close. `audit-config.fish` fails if the exclude is lost.
+- **Standing context cost is the `description` and nothing else** — progressive disclosure: the
+  index loads on invocation and a rule file only when the index points at it. ⚠ That index is
+  ~10k tokens, so it is a real cost *per Rust task*, not per session.
+- `scripts/rust-skills-sync.sh` shallow-clones upstream, diffs every vendored path, compares the
+  rule count, and reports both the pinned commit and the frontmatter `metadata.version`. `--write`
+  refreshes the tree **and re-pins itself**. ⚠ Upstream publishes no releases, so the frontmatter
+  version is the only release marker there is — read `CHANGELOG.md` before refreshing.
+- ⚠ It is a **third party's opinion**, not this machine's house style, and it is young (16 commits,
+  one author, no releases). Where a rule collides with a project's own conventions or its clippy
+  configuration, the project wins. The always-on pointer lives in `~/.claude/CLAUDE.md`.
 
 **`codex/`** — thin Codex protocol adapters only. Codex does not separate config from state, so live
 `~/.codex/` stays untracked and links back here: `config.toml` and `*.config.toml` profiles into

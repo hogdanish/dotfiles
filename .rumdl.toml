@@ -23,6 +23,7 @@ exclude = [
   "claude-code/output-styles/simple-english.md", # scripts/simple-english-sync.sh
   "claude-code/skills/website-spec/references/checklist.md", # scripts/website-spec-sync.sh
   "claude-code/skills/website-spec/references/upstream-skill.md", # scripts/website-spec-sync.sh
+  "claude-code/skills/rust-skills/**", # scripts/rust-skills-sync.sh
 
   # ── not ours ─────────────────────────────────────────────────────────────
   ".claude/worktrees/**", # transient agent checkouts of this same repo
