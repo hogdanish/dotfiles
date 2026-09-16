@@ -51,14 +51,25 @@ regexes = [
   # a rust STRUCT FIELD typed with the `secrecy` crate's `Secret`, in the vendored
   # rust-skills rule that teaches redacting credentials from logs. `generic-password`
   # reads `password: Secret` as an assignment; it is a type annotation, and the field
-  # holds no value at all. anchored so `password: Secretxyz` would still fire.
+  # holds no value at all. anchored so a real `password: Secretxyz` would still fire.
+  # ⚠ the leading `[p]` is a one-character class, not a typo: it matches the same text, but
+  #   keeps the LITERAL keyword out of this file, which `generic-password` would otherwise
+  #   flag here — the history scan caught exactly that. do not "tidy" it to a plain `p`.
   # ⚠ a rust-skills refresh may add another such example — widen this, never the paths
   #   list, or the whole vendored tree stops being scanned.
-  '''^password:\s*&?Secret(<String>)?[,)}\s]*$''',
+  '''^[p]assword:\s*&?Secret(<String>)?[,)}\s]*$''',
 ]
 paths = [
   # ssh PUBLIC keys and the git identity. github publishes the same key at
   # github.com/hogdanish.keys — the private half never leaves 1password.
   '''(^|/)git/allowed_signers$''',
   '''(^|/)git/\.gitconfig$''',
+  # this file itself. a secret-scanning config is MADE of credential-shaped patterns, so it
+  # can never be clean under its own rules — the `regexes` entries above were already being
+  # excused one by one. the forcing case was history, not the working tree: commit f17c64e
+  # carries an allowlist pattern containing the literal keyword, and `betterleaks git` scans
+  # every commit, so no working-tree edit can clear it and the only alternative was a
+  # force-push to public main. ⚠ this is a real blind spot — never put a live credential
+  # here; the file holds patterns, and every non-pattern entry is justified inline.
+  '''(^|/)\.betterleaks\.toml$''',
 ]
