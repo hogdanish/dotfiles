@@ -119,7 +119,7 @@ removes them from the agent environment, and exposes only a mode-0600 Unix socke
 
 ```sh
 linode-cli linodes view 102470771 --json
-cf zones list --name hogdani.sh
+cf zones list --name commongrounds.fun
 ```
 
 The one launch-time `op run` may request Touch ID. Neither CLI calls `op` again during that agent
@@ -136,7 +136,7 @@ in-memory broker. Outside one, inject the scoped DNS token from 1Password for on
 
 ```sh
 env CLOUDFLARE_API_TOKEN='op://Development/cloudflare commongrounds acme/credential' \
-  op run -- cf zones list --name hogdani.sh
+  op run -- cf zones list --name commongrounds.fun
 ```
 
 Do not export the resolved token into shell state. With `cf` 0.6.0, `cf auth whoami` reports
