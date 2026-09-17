@@ -486,27 +486,28 @@ function __check_universals --description 'fish universal variables must stay at
     __fail "fish universals present: $names — machine state escaping version control"
 end
 
-function __check_claude_install --description 'claude code is the self-updating native build, not a cask'
-    # ⚠ the cask was dropped 2026-09-01 — the Brewfile says why. it pins version+sha and trails the
-    # release channel by days, and `brew upgrade` cannot close that gap. the native installer keeps
-    # itself current instead, so what is worth asserting is that nothing has put a second, staler
-    # claude ahead of it: conf.d/localbin.fish *appends* ~/.local/bin, so any brew claude wins.
-    set -l launcher $HOME/.local/bin/claude
-    if not test -x $launcher
-        __fail "claude code is not natively installed — expected $launcher"
-        __say warn 'reinstall: curl -fsSL https://claude.ai/install.sh | bash -s latest'
+function __check_claude_install --description 'claude code is the claude-code@latest cask, not the native build'
+    # ⚠ back on a cask 2026-09-17, reversing the 2026-09-01 native switch — the Brewfile says why.
+    # the `@latest` token specifically: the plain `claude-code` token trails the release channel by
+    # days, same failure mode that justified dropping the cask the first time.
+    set -l brewed /opt/homebrew/bin/claude
+    if not test -x $brewed
+        __fail "claude code cask is not installed — expected $brewed"
+        __say warn 'reinstall: brew install --cask claude-code@latest'
         return
     end
-    # ⚠ never `brew uninstall --zap` this cask: its zap list includes ~/.local/state/claude — the
-    # claude config dir: transcripts, memory, plugins — plus ~/.config/claude and ~/.claude.json.
-    if test -e /opt/homebrew/bin/claude
-        __fail 'the claude-code cask is back and shadows the native build — brew uninstall --cask claude-code@latest (WITHOUT --zap)'
+    # ⚠ never `brew uninstall --cask claude-code@latest --zap`: its zap list includes
+    # ~/.local/state/claude — the claude config dir: transcripts, memory, plugins — plus ~/.claude
+    # and ~/.claude.json*, none of which this cask owns.
+    set -l stale_native $HOME/.local/bin/claude
+    if test -e $stale_native
+        __fail "the old native launcher is back at $stale_native — remove it, the cask owns claude now"
     end
     set -l resolved (command -s claude)
-    if test -n "$resolved"; and test (path resolve $resolved) != (path resolve $launcher)
-        __fail "claude on PATH is $resolved, not the native $launcher"
+    if test -n "$resolved"; and test (path resolve $resolved) != (path resolve $brewed)
+        __fail "claude on PATH is $resolved, not the brewed $brewed"
     end
-    __say info 'claude code is the native self-updating build'
+    __say info 'claude code is the claude-code@latest cask'
 end
 
 function __check_clauth --description 'clauth is installed, supervised, and merged into herdr'

@@ -149,12 +149,14 @@ uv "gdtoolkit"  # gdformat/gdlint: headless gdscript formatter and linter
 cask "visual-studio-code@insiders"  # main ide (insiders channel)
 cask "ghostty"                      # terminal emulator
 cask "godot"                        # game engine
-# ⚠ claude code is deliberately NOT a cask — do not add one back. the cask hardcodes a
-# `version` + sha256 that a bot must bump per release, so it trails the real channel by days
-# (it was pinned to 2.1.252 while `latest` served 2.1.257 on 2026-09-01) and no amount of
-# `brew upgrade` closes the gap. the native installer self-updates instead — `claude doctor`
-# reports install method native, auto-updates enabled, channel latest. to reinstall:
-#   curl -fsSL https://claude.ai/install.sh | bash -s latest
+# ⚠ back on a cask as of 2026-09-17, reversing the 2026-09-01 decision below it. use the `@latest`
+# token, never plain `claude-code` — plain trailed at 2.1.267 the same day `@latest` matched the
+# native build's 2.1.274 exactly. still slower than the native self-updater between homebrew's 12h
+# autoupdate runs; that lag is the accepted tradeoff of this move, not an oversight.
+# ⚠ never `brew uninstall --cask claude-code@latest --zap` — its zap list trashes
+# ~/.local/state/claude (the claude config dir: transcripts, memory, plugins), ~/.claude and
+# ~/.claude.json*, none of which this cask owns.
+cask "claude-code@latest"           # ai coding cli
 cask "codex"                        # openai terminal coding agent
 cask "temurin@25"                   # java runtime (prism launcher)
 cask "orbstack"                     # docker desktop: containers and linux vms

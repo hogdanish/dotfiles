@@ -1,17 +1,16 @@
 # ~/.local/bin on $PATH.
 #
-# not a tool's config, which is why it is not in one: this is the directory two unrelated
-# installers write into, and it must be on $PATH whether or not either of them is present.
-#   • `uv tool install` symlinks its shims here — verified with `uv tool dir --bin`, which
-#     resolves $XDG_DATA_HOME/../bin. gdtoolkit was installed 2026-07-29 and gdformat/gdlint
-#     were invisible to fish *and* zsh until that path landed on $PATH.
-#   • claude code's native installer puts its launcher here
-#     (~/.local/bin/claude -> ~/.local/share/claude/versions/<version>).
+# not a tool's config, which is why it is not in one: this is where `uv tool install` symlinks its
+# shims — verified with `uv tool dir --bin`, which resolves $XDG_DATA_HOME/../bin. gdtoolkit was
+# installed 2026-07-29 and gdformat/gdlint were invisible to fish *and* zsh until this path landed
+# on $PATH.
 #
-# ⚠ this lived in conf.d/uv.fish until 2026-09-01, behind that file's `type -q uv; or return`.
-# harmless while uv owned the directory; a latent outage once claude code left the Brewfile for
-# the self-updating native installer, because removing uv would have taken `claude` off $PATH
-# with it. one concern per file, for exactly the reason _shell.fish's header gives.
+# ⚠ this lived in conf.d/uv.fish until 2026-09-01, behind that file's `type -q uv; or return`, then
+# had to move here 2026-09-01..2026-09-17 while claude code's native installer also put its launcher
+# in this directory — removing uv would otherwise have taken `claude` off $PATH with it. claude code
+# moved back to a cask on 2026-09-17 (see .claude/CLAUDE.md), so this directory is uv's alone again,
+# but it stays its own file rather than folding back into uv.fish: one concern per file, for exactly
+# the reason _shell.fish's header gives.
 #
 # uv itself needs nothing here: it is already xdg-correct on macos, and its behaviour (as opposed
 # to location) lives in $XDG_CONFIG_HOME/uv/uv.toml — see that file's header.

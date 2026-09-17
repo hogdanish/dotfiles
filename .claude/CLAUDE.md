@@ -453,18 +453,22 @@ the autoupdate plist, `brew.env` and `/opt/homebrew/etc/npmrc` all live outside 
 "only fish exports it" failures and the `HOMEBREW_*` boolean trap:
 `brewfile` skill → `references/homebrew-runtime.md`.
 
-⚠ **Claude Code is deliberately not a cask** (dropped 2026-09-01) — it is the native
-self-updating build at `~/.local/bin/claude`, and the Brewfile carries a comment saying so where
-the cask used to be. The cask hardcodes `version` + sha256 that a bot bumps per release, so it
-trailed the channel by days (pinned to 2.1.252 while `latest` served 2.1.257) and no `brew upgrade`
-could close the gap; `claude doctor` now reports install method native, auto-updates enabled,
-channel `latest`. Reinstall with `curl -fsSL https://claude.ai/install.sh | bash -s latest`.
-⚠ **Never `brew uninstall --zap` that cask** — its zap list includes `~/.local/state/claude`
-(the Claude config dir: transcripts, memory, plugins), `~/.config/claude` and `~/.claude.json`
-— the last of which is now the live global state file, not a leftover.
-This is the *second* documented gap in the Brewfile-as-inventory rule, alongside VS Code
-extensions and `bun`/`npm` globals; `audit-config.fish` asserts the native build is what `$PATH`
-resolves, and `conf.d/localbin.fish` is what puts `~/.local/bin` there.
+⚠ **Claude Code is back on a Homebrew cask** (2026-09-17), reversing the 2026-09-01 native switch —
+`brew install --cask claude-code@latest` resolves at `/opt/homebrew/bin/claude`. The **`@latest`
+token specifically**: the plain `claude-code` token pins `version` + sha256 that a bot bumps per
+release and trails the channel by days (2.1.267 on 2026-09-17, while `@latest` and the then-current
+native build both sat at 2.1.274 the same day) — the exact failure mode that justified dropping the
+cask the first time. `@latest` is still slower than the native self-updater between Homebrew's 12 h
+autoupdate runs; that lag is the accepted tradeoff of moving back, not an oversight. The native
+build's own tree (`~/.local/bin/claude`, `~/.local/share/claude`) was uninstalled; the config dir
+(`~/.local/state/claude`, `~/.claude`, `~/.claude.json` inside it) was **not touched** and is
+unaffected either way — nothing about install method changes where Claude Code's config lives.
+⚠ **Never `brew uninstall --cask claude-code@latest --zap`** — its zap list includes
+`~/.local/state/claude` (the Claude config dir: transcripts, memory, plugins), `~/.claude` and
+`~/.claude.json*` — the last of which is the live global state file, not a leftover.
+`audit-config.fish` asserts the cask is what `$PATH` resolves and that the old native launcher has
+not come back; `conf.d/localbin.fish` no longer mentions Claude Code, since `~/.local/bin` is uv's
+alone again.
 
 **Commits are gated** by `lefthook.yml`: `betterleaks` on staged content, a force-add guard,
 `fish -n` + `fish_indent --check`, `ruby -c` on the Brewfile. ⚠ `.git/hooks` is never
