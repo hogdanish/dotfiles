@@ -7,7 +7,7 @@ personality = "pragmatic"
 model = "gpt-6-astra"
 # Compact at 75% of the current 272,000-token context window.
 model_auto_compact_token_limit = 204000
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 service_tier = "default"
 developer_instructions = """
 When delegation is explicitly requested or applicable project instructions call for it, keep the
@@ -34,9 +34,6 @@ ref = "cf966ed"
 enabled = true
 
 [plugins."visualize@openai-bundled"]
-enabled = true
-
-[plugins."sites@openai-bundled"]
 enabled = true
 
 [plugins."documents@openai-primary-runtime"]
@@ -122,8 +119,8 @@ NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = ""
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.908.40834"
-NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.908.40834/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+BROWSER_USE_CODEX_APP_VERSION = "26.911.61220"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/ethan/.codex/plugins/cache/openai-bundled/browser/26.911.61220/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 SKY_CUA_SERVICE_PATH = "/Users/ethan/.codex/computer-use/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
@@ -205,7 +202,7 @@ NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "7fe0e1c59da4bc68f9d6ab81ae8d349b53fe
 
 [desktop]
 external-agent-import-sync-enabled = true
-conversationDetailMode = "STEPS_COMMANDS"
+conversationDetailMode = "STEPS_PROSE"
 ambient-suggestions-enabled = true
 preventSleepWhileRunning = true
 show-context-window-usage = true
@@ -296,6 +293,9 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/ethan/Documents/Codex/2026-09-12/asdasd-2"]
+trust_level = "trusted"
+
+[projects."/Users/ethan/Documents/Codex/2026-09-14/asdasd"]
 trust_level = "trusted"
 
 [hooks.state]
